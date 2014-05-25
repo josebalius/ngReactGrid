@@ -37,19 +37,45 @@ angular.module("ngReactGrid", [])
 /**
  * @directive ngReactGrid
  */
-.directive("ngReactGrid", function() {
+.directive("ngReactGrid", ['ngReactGrid', function(ngReactGrid) {
     return {
         restrict: "E",
         link: function(scope, element, attrs) {
             new ngReactGrid(scope, element, attrs);
         }
     };
-})
+}])
 
 /**
  * @factory ngReactGrid
  */
 .factory("ngReactGrid", function() {
+
+    var getScrollbarWidth = function() {
+        var outer = document.createElement("div");
+        outer.style.visibility = "hidden";
+        outer.style.width = "100px";
+        outer.style.msOverflowStyle = "scrollbar"; // needed for WinJS apps
+
+        document.body.appendChild(outer);
+
+        var widthNoScroll = outer.offsetWidth;
+        // force scrollbars
+        outer.style.overflow = "scroll";
+
+        // add innerdiv
+        var inner = document.createElement("div");
+        inner.style.width = "100%";
+        outer.appendChild(inner);        
+
+        var widthWithScroll = inner.offsetWidth;
+
+        // remove divs
+        outer.parentNode.removeChild(outer);
+
+        return widthNoScroll - widthWithScroll;
+    };
+
     var ngReactGrid = function(scope, element, attrs) {
         var render = function(grid) {
             React.renderComponent(ngReactGridComponent({grid:grid}), element[0]);
@@ -59,6 +85,7 @@ angular.module("ngReactGrid", [])
             columnDefs: [],
             data: [],
             height: 500,
+            scrollbarWidth: getScrollbarWidth(),
             sort: function(field) {
 
             },
@@ -91,19 +118,74 @@ angular.module("ngReactGrid", [])
  * ngReactGrid React component
  */
 var ngReactGridComponent = (function() {
+
+    var windowInnerWidth = window.innerWidth, winderInnerHeight = window.innerHeight, scrollbarWidth;
+
+    var setCellWidth = function(cell, cellStyle, isLast) {
+
+        var originalWidth = false;
+
+        if(!cell.width)
+            cell.width = "10%";
+
+        var percentIndex = cell.width.indexOf("%");
+
+        if(percentIndex !== -1) {
+            var percentWidth = parseInt(cell.width.replace("%", ""));
+            var viewPortWidth = (windowInnerWidth);
+            var cellWidth = parseInt(((percentWidth * viewPortWidth) / 100) - 24);
+            cell.width = String(cellWidth);
+            cellStyle.width = cell.width + "px";
+        } else {
+            originalWidth = true;
+            cellStyle.width = cell.width;
+        }
+
+        if(isLast) {
+            if(originalWidth) {
+                cell.width = cell.width.replace("px", "");
+            }
+
+            cellStyle.width = (parseInt(cell.width) + 0) + "px";
+        }
+    };
+
     var ngReactGridHeader = (function() {
-        return React.createClass({
+
+        var ngGridHeaderCell = React.createClass({displayName: 'ngGridHeaderCell',
             render: function() {
+
+                var cellStyle = {};
+                setCellWidth(this.props.cell, cellStyle, this.props.last);
+
+                return (
+                    React.DOM.th( {title:this.props.cell.displayName, style:cellStyle}, 
+                        React.DOM.div(null, 
+                            this.props.cell.displayName
+                        )
+                    )
+                )
+            }
+        });
+
+        return React.createClass({
+
+            render: function() {
+
+                var columnsLength = this.props.grid.columnDefs.length;
+                var cells = this.props.grid.columnDefs.map(function(cell, key) {
+                    var last = (columnsLength - 1) === key;
+                    return (ngGridHeaderCell( {key:key, cell:cell, index:key, grid:this.props.grid, last:last} ))
+                }.bind(this));
+
                 return (
                     React.DOM.div( {className:"ngReactGridHeader"}, 
                         React.DOM.div(null),
                         React.DOM.div(null, 
                             React.DOM.table(null, 
-                                React.DOM.thead(null, 
+                                React.DOM.tbody(null, 
                                     React.DOM.tr(null, 
-                                        React.DOM.th(null, "Name"),
-                                        React.DOM.th(null, "Status"),
-                                        React.DOM.th(null, "Notes")
+                                        cells
                                     )
                                 )
                             )
@@ -115,29 +197,50 @@ var ngReactGridComponent = (function() {
     })();
 
     var ngReactGridBody = (function() {
+
+        var ngReactGridBodyRowCell = React.createClass({displayName: 'ngReactGridBodyRowCell',
+            render: function() {
+                var cellText = this.props.row[this.props.cell.field];
+                var cellStyle = {};
+                setCellWidth(this.props.cell, cellStyle);
+                return (
+                    React.DOM.td( {style:cellStyle, title:cellText}, cellText)
+                )
+            }
+        });
+
+        var ngReactGridBodyRow = React.createClass({displayName: 'ngReactGridBodyRow',
+            render: function() {
+
+                var columnsLength = this.props.grid.columnDefs.length;
+                var cells = this.props.grid.columnDefs.map(function(cell, key) {
+                    var last = (columnsLength - 1) === key;
+                    return ngReactGridBodyRowCell( {key:key, cell:cell, row:this.props.row, grid:this.props.grid, last:last} )
+                }.bind(this));
+
+                return (
+                    React.DOM.tr(null, 
+                        cells
+                    )
+                )
+            }
+        });
+
+
         return React.createClass({
             render: function() {
+
+                var rows = this.props.grid.data.slice(0, 100).map(function(row, index) {
+                    return ngReactGridBodyRow( {key:index, row:row, columns:this.props.columnDefs, grid:this.props.grid} )
+                }.bind(this));
+
                 return (
                     React.DOM.div( {className:"ngReactGridBody"}, 
                         React.DOM.div( {className:"ngReactGridViewPort"}, 
                             React.DOM.div( {className:"ngReactGridInnerViewPort"}, 
                                 React.DOM.table(null, 
                                     React.DOM.tbody(null,  
-                                        React.DOM.tr(null, 
-                                            React.DOM.td(null, "John"),
-                                            React.DOM.td(null, "Approved"),
-                                            React.DOM.td(null, "None")
-                                        ),
-                                        React.DOM.tr(null, 
-                                            React.DOM.td(null, "Jamie"),
-                                            React.DOM.td(null, "Approved"),
-                                            React.DOM.td(null, "Requires call")
-                                        ),
-                                        React.DOM.tr(null, 
-                                            React.DOM.td(null, "Jill"),
-                                            React.DOM.td(null, "Denied"),
-                                            React.DOM.td(null, "None")
-                                        )
+                                        rows
                                     )
                                 )
                             )
@@ -160,6 +263,7 @@ var ngReactGridComponent = (function() {
 
     var ngReactGrid = React.createClass({displayName: 'ngReactGrid',
         render: function() {
+            scrollbarWidth = this.props.grid.scrollbarWidth;
             return (
                 React.DOM.div( {className:"ngReactGrid"}, 
                     ngReactGridHeader( {grid:this.props.grid} ),

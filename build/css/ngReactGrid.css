@@ -1,23 +1,42 @@
 .ngReactGrid table {
-    width: 100%;
     border-collapse: collapse;
     position: relative;
+    table-layout: fixed;
     background-color: #FFF;
     margin: 0;
     padding: 0;
-    font-size: .8em;
+    font-size: 12px;
     font-family: "Open Sans", "Helvetica Neue", "Helvetica", "Arial", "Droid Arabic Kufi","Droid Sans";
     color: #555555;
     display: table;
     border: 1px solid #CCC;
+    width: 100%;
+    border-spacing: 0;
 }
+
+.ngReactGrid .ngReactGridViewPort {
+    overflow-y: scroll;
+    overflow-x: scroll;
+}
+
+.ngReactGrid .ngReactGridHeader {
+    overflow-x: hidden;
+    position: relative;
+    overflow-y: scroll;
+}
+
+.ngReactGrid .ngReactGridHeaderInner {
+    overflow-x: scroll;
+}
+
+
 
 .ngReactGrid .ngReactGridBody table {
     border-top: none;
     border-bottom: none;
 }
 
-.ngReactGrid table tr, .ngReactGrid table th, .ngReactGrid table td {
+.ngReactGrid table tr, .ngReactGrid table td, .ngReactGrid table th {
     border-collapse: collapse;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
@@ -33,13 +52,18 @@
     cursor: auto;
     text-align: left;
     color: rgba(0,0,0,.8);
-    padding: .5em .7em;
+    padding: 0px;
     vertical-align: middle;
+    padding: 5px;
+    display: table-cell;
 }
 
 .ngReactGrid table td {
-    padding: .5em .7em;
+    padding: 0px;
     vertical-align: middle;
+    text-align: left;
+    padding: 5px;
+    display: table-cell;
 }
 
 .ngReactGrid table tr:nth-child(odd) td {

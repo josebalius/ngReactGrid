@@ -11,6 +11,7 @@ gulp.task('css', function() {
 });
 
 gulp.task('build-grid', function() {
+    var jsxFilter = gulpFilter('**/*.jsx');
     return gulp.src(['./src/js/**.js', './src/jsx/**.jsx'])
             .pipe(jsxFilter)
             .pipe(react())
