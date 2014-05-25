@@ -1,24 +1,33 @@
 var gulp = require('gulp');
 var react = require('gulp-react');
-
-gulp.task('jsx', function() {
-    return gulp.src('./src/jsx/**.jsx')
-            .pipe(react())
-            .pipe(gulp.dest('./build/jsx'));
-});
-
-gulp.task('js', function() {
-    return gulp.src('./src/js/**.js')
-            .pipe(gulp.dest('./build/js'));
-});
+var concat = require('gulp-concat');
+var gulpFilter = require('gulp-filter');
+var uglify = require('gulp-uglify');
+var rename = require('gulp-rename');
 
 gulp.task('css', function() {
     return gulp.src('./src/css/**.css')
             .pipe(gulp.dest('./build/css'));
 });
 
-gulp.task('build', ['jsx', 'js', 'css']);
+gulp.task('build-grid', function() {
+    return gulp.src(['./src/js/**.js', './src/jsx/**.jsx'])
+            .pipe(jsxFilter)
+            .pipe(react())
+            .pipe(jsxFilter.restore())
+            .pipe(concat('ngReactGrid.js'))
+            .pipe(gulp.dest('./build/js/'))
+});
+
+gulp.task('uglify-build', ['build-grid'], function() {
+    return gulp.src(['./build/js/ngReactGrid.js'])
+            .pipe(uglify())
+            .pipe(rename("ngReactGrid.min.js"))
+            .pipe(gulp.dest('./build/js'))
+})
+
+gulp.task('build', ['build-grid', 'uglify-build', 'css']);
 
 gulp.task('default', ['build'], function() {
-    gulp.watch('./src/', ['build']);
+    gulp.watch('./src/**', ['build']);
 });

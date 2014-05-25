@@ -1,7 +1,7 @@
 {
   "name": "ngReactGrid",
   "version": "0.0.1",
-  "description": "An AngularJS table grid directive that uses ReactJS as the rendering engine.",
+  "description": "An AngularJS grid directive that uses ReactJS as the rendering engine. Based on ngGrid and jQuery DataTables.",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -17,7 +17,11 @@
   "homepage": "https://github.com/josebalius/ngReactGrid",
   "devDependencies": {
     "gulp": "~3.6.0",
-    "gulp-react": "0.3.3"
+    "gulp-react": "0.3.3",
+    "gulp-concat": "2.2.0",
+    "gulp-filter": "0.4.1",
+    "gulp-uglify": "0.3.0",
+    "gulp-rename": "1.2.0"
   }
 
 }

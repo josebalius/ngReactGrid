@@ -1,0 +1,63 @@
+.ngReactGrid table {
+    width: 100%;
+    border-collapse: collapse;
+    position: relative;
+    background-color: #FFF;
+    margin: 0;
+    padding: 0;
+    font-size: .8em;
+    font-family: "Open Sans", "Helvetica Neue", "Helvetica", "Arial", "Droid Arabic Kufi","Droid Sans";
+    color: #555555;
+    display: table;
+    border: 1px solid #CCC;
+}
+
+.ngReactGrid .ngReactGridBody table {
+    border-top: none;
+    border-bottom: none;
+}
+
+.ngReactGrid table tr, .ngReactGrid table th, .ngReactGrid table td {
+    border-collapse: collapse;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -ms-box-sizing: border-box;
+    box-sizing: border-box;
+    -webkit-transition: all .1s ease-out;
+    -moz-transition: all .1s ease-out;
+    transition: all .1s ease-out;
+    border-left: 1px solid #CCC;
+}
+
+.ngReactGrid table th {
+    cursor: auto;
+    text-align: left;
+    color: rgba(0,0,0,.8);
+    padding: .5em .7em;
+    vertical-align: middle;
+}
+
+.ngReactGrid table td {
+    padding: .5em .7em;
+    vertical-align: middle;
+}
+
+.ngReactGrid table tr:nth-child(odd) td {
+    background: #f5f5f5;
+}
+
+.ngReactGrid .ngReactGridFooter, .ngReactGrid table th {
+    background: #ffffff; /* Old browsers */
+    background: -moz-linear-gradient(top, #ffffff 0%, #eeeeee 100%, #7db9e8 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(100%,#eeeeee), color-stop(100%,#7db9e8)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top, #ffffff 0%,#eeeeee 100%,#7db9e8 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top, #ffffff 0%,#eeeeee 100%,#7db9e8 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top, #ffffff 0%,#eeeeee 100%,#7db9e8 100%); /* IE10+ */
+    background: linear-gradient(to bottom, #ffffff 0%,#eeeeee 100%,#7db9e8 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#7db9e8',GradientType=0 ); /* IE6-9 */
+}
+
+.ngReactGrid .ngReactGridFooter {
+    border: 1px solid #CCC;
+    padding: .3em;
+}
