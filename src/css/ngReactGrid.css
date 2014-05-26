@@ -120,6 +120,7 @@
     text-align: left;
     padding: 5px;
     display: table-cell;
+    word-wrap: break-word;
 }
 
 .ngReactGrid table tr:nth-child(odd) td {
