@@ -37,7 +37,7 @@ var ngReactGridComponent = (function() {
 
         var ngGridHeaderCell = React.createClass({
             handleClick: function() {
-                this.props.grid.core.setSortField(this.props.cell.field);
+                this.props.grid.react.setSortField(this.props.cell.field);
             },
             render: function() {
 
@@ -79,7 +79,7 @@ var ngReactGridComponent = (function() {
 
         var ngReactGridShowPerPage = React.createClass({
             handleChange: function() {
-                this.props.grid.core.setPageSize(this.refs.showPerPage.getDOMNode().value);
+                this.props.grid.react.setPageSize(this.refs.showPerPage.getDOMNode().value);
             },
             render: function() {
 
@@ -97,7 +97,7 @@ var ngReactGridComponent = (function() {
 
         var ngReactGridSearch = React.createClass({
             handleSearch: function() {
-                this.props.grid.core.setSearch(this.refs.searchField.getDOMNode().value);
+                this.props.grid.react.setSearch(this.refs.searchField.getDOMNode().value);
             },
             render: function() {
                 return (
@@ -199,7 +199,26 @@ var ngReactGridComponent = (function() {
                 var mapRows = function(row, index) {
                     return <ngReactGridBodyRow key={index} row={row} columns={this.props.columnDefs} grid={this.props.grid} />
                 }.bind(this);
-                var rows = this.props.grid.data.map(mapRows);
+
+                var rows;
+
+                if(this.props.grid.react.loading) {
+
+                    var loadingStyle = {
+                        textAlign: "center"
+                    };
+
+                    rows = (
+                        <tr>
+                            <td colSpan={this.props.grid.columnDefs.length} style={loadingStyle}>
+                                Loading...
+                            </td>
+                        </tr>
+                    )
+                } else {
+                    rows = this.props.grid.data.map(mapRows);
+                }
+                
                 
                 var ngReactGridViewPortStyle = {}, tableStyle = {};
 
@@ -209,7 +228,7 @@ var ngReactGridComponent = (function() {
                     tableStyle.width = "calc(100% - " + this.props.grid.scrollbarWidth + "px)";
                 }
 
-                if(this.props.grid.core.showingRecords === 0) {
+                if(this.props.grid.react.showingRecords === 0) {
                     var noDataStyle = {
                         textAlign: "center"
                     };
@@ -247,7 +266,7 @@ var ngReactGridComponent = (function() {
 
                 return (
                     <div className="ngReactGridStatus">
-                        <div>Showing <strong>{this.props.grid.core.startIndex+1}</strong> to <strong>{this.props.grid.core.endIndex}</strong> of <strong>{this.props.grid.totalCount}</strong> entries</div>
+                        <div>Showing <strong>{this.props.grid.react.startIndex+1}</strong> to <strong>{this.props.grid.react.endIndex}</strong> of <strong>{this.props.grid.totalCount}</strong> entries</div>
                     </div>
                 )
             }
@@ -255,7 +274,7 @@ var ngReactGridComponent = (function() {
 
         var ngReactGridPagination = React.createClass({
             goToPage: function(page) {
-                this.props.grid.core.goToPage(page);
+                this.props.grid.react.goToPage(page);
             },
             goToLastPage: function() {
                 this.goToPage(this.props.grid.totalPages);

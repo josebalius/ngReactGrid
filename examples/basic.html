@@ -15,7 +15,7 @@
         <script type="text/javascript">
 
             angular.module("example", ['ngReactGrid'])
-            .controller("BasicExampleController", function($scope) {
+            .controller("BasicExampleController", function($scope, $timeout) {
 
                 var data = [{
                     firstName: "Jose",
@@ -64,7 +64,133 @@
                         {
                             field: "lastName",
                             displayName: "Last Name"
-                        }]
+                        },
+                        {
+                            field: "navEffectiveDate",
+                            displayName: "Nav Effective Date"
+                        },
+                        {
+                            field: "navEffectiveDate2",
+                            displayName: "Nav Effective Date2"
+                        },
+                        {
+                            field: "navEffectiveDate3",
+                            displayName: "Nav Effective Date3"
+                        },
+                        {
+                            field: "navEffectiveDate4",
+                            displayName: "Nav Effective Date4"
+                        },
+                        {
+                            field: "navEffectiveDate5",
+                            displayName: "Nav Effective Date5"
+                        },
+                        {
+                            field: "navEffectiveDate6",
+                            displayName: "Nav Effective Date6"
+                        }],
+                        localMode: false,
+                        totalCount: 500,
+                        setPageSize: function(pageSize) {
+                            var data = [{
+                                firstName: "Jose",
+                                lastName: "Garcia",
+                                navEffectiveDate: "12/31/13",
+                                navEffectiveDate2: "12/31/13",
+                                navEffectiveDate3: "12/31/13",
+                                navEffectiveDate4: "12/31/13",
+                                navEffectiveDate5: "12/31/13",
+                                navEffectiveDate6: "12/31/13"
+                            }, {
+                                firstName: "Jose2",
+                                lastName: "Garcia2",
+                                navEffectiveDate: "12/31/13",
+                                navEffectiveDate2: "12/31/13",
+                                navEffectiveDate3: "12/31/13",
+                                navEffectiveDate4: "12/31/13",
+                                navEffectiveDate5: "12/31/13",
+                                navEffectiveDate6: "12/31/13"
+                            }];
+
+                            $timeout(function() {
+                                $scope.grid.data = data;
+                            }, 2000);
+                        },
+                        setSortField: function(sortInfo) {
+                            var data = [{
+                                firstName: "Jose",
+                                lastName: "Garcia",
+                                navEffectiveDate: "12/31/13",
+                                navEffectiveDate2: "12/31/13",
+                                navEffectiveDate3: "12/31/13",
+                                navEffectiveDate4: "12/31/13",
+                                navEffectiveDate5: "12/31/13",
+                                navEffectiveDate6: "12/31/13"
+                            }, {
+                                firstName: "Jose2",
+                                lastName: "Garcia2",
+                                navEffectiveDate: "12/31/13",
+                                navEffectiveDate2: "12/31/13",
+                                navEffectiveDate3: "12/31/13",
+                                navEffectiveDate4: "12/31/13",
+                                navEffectiveDate5: "12/31/13",
+                                navEffectiveDate6: "12/31/13"
+                            }];
+
+                            $timeout(function() {
+                                $scope.grid.data = data;
+                            }, 2000);
+                        },
+                        setSearch: function(query) {
+                            var data = [{
+                                firstName: "Jose",
+                                lastName: "Garcia",
+                                navEffectiveDate: "12/31/13",
+                                navEffectiveDate2: "12/31/13",
+                                navEffectiveDate3: "12/31/13",
+                                navEffectiveDate4: "12/31/13",
+                                navEffectiveDate5: "12/31/13",
+                                navEffectiveDate6: "12/31/13"
+                            }, {
+                                firstName: "Jose2",
+                                lastName: "Garcia2",
+                                navEffectiveDate: "12/31/13",
+                                navEffectiveDate2: "12/31/13",
+                                navEffectiveDate3: "12/31/13",
+                                navEffectiveDate4: "12/31/13",
+                                navEffectiveDate5: "12/31/13",
+                                navEffectiveDate6: "12/31/13"
+                            }];
+
+                            $timeout(function() {
+                                $scope.grid.data = data;
+                            }, 2000);
+                        },
+                        goToPage: function(page) {
+                            var data = [{
+                                firstName: "Jose",
+                                lastName: "Garcia",
+                                navEffectiveDate: "12/31/13",
+                                navEffectiveDate2: "12/31/13",
+                                navEffectiveDate3: "12/31/13",
+                                navEffectiveDate4: "12/31/13",
+                                navEffectiveDate5: "12/31/13",
+                                navEffectiveDate6: "12/31/13"
+                            }, {
+                                firstName: "Jose2",
+                                lastName: "Garcia2",
+                                navEffectiveDate: "12/31/13",
+                                navEffectiveDate2: "12/31/13",
+                                navEffectiveDate3: "12/31/13",
+                                navEffectiveDate4: "12/31/13",
+                                navEffectiveDate5: "12/31/13",
+                                navEffectiveDate6: "12/31/13"
+                            }];
+
+                            $timeout(function() {
+                                $scope.grid.data = data;
+                            }, 2000);
+                        }
                 };
             });
 
