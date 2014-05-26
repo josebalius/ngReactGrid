@@ -1,4 +1,4 @@
-ngReactGrid - v0.1.0
+ngReactGrid - v0.2.0
 ===========
 
 What is ngReactGrid?
