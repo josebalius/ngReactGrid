@@ -45,10 +45,14 @@ var ngReactGridComponent = (function() {
                 setCellWidth(this.props.grid, this.props.cell, cellStyle, this.props.last);
 
                 var sortStyle = {
-                    paddingTop: 2,
                     cursor: "pointer",
                     width: "10%",
-                    "float": "left"
+                    "float": "left",
+                    textAlign: "right"
+                };
+
+                var arrowStyle = {
+                    marginTop: 3
                 };
 
                 var sortClassName = "icon-arrows";
@@ -60,7 +64,7 @@ var ngReactGridComponent = (function() {
                         sortClassName += " icon-desc";
                     }
 
-                    sortStyle.paddingTop = 4;
+                    arrowStyle.marginTop = 5;
                 } else {
                     sortClassName += " icon-both";
                 }
@@ -70,7 +74,7 @@ var ngReactGridComponent = (function() {
                         <div className="ngGridHeaderCellText" onClick={this.handleClick}>
                             {this.props.cell.displayName}
                         </div>
-                        <div style={sortStyle}><i className={sortClassName}></i></div>
+                        <div style={sortStyle}><i className={sortClassName} style={arrowStyle}></i></div>
                         <div className="ngGridHeaderCellResize"></div>
                     </th>
                 )

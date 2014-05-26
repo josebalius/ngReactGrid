@@ -338,10 +338,14 @@ var ngReactGridComponent = (function() {
                 setCellWidth(this.props.grid, this.props.cell, cellStyle, this.props.last);
 
                 var sortStyle = {
-                    paddingTop: 2,
                     cursor: "pointer",
                     width: "10%",
-                    "float": "left"
+                    "float": "left",
+                    textAlign: "right"
+                };
+
+                var arrowStyle = {
+                    marginTop: 3
                 };
 
                 var sortClassName = "icon-arrows";
@@ -353,7 +357,7 @@ var ngReactGridComponent = (function() {
                         sortClassName += " icon-desc";
                     }
 
-                    sortStyle.paddingTop = 4;
+                    arrowStyle.marginTop = 5;
                 } else {
                     sortClassName += " icon-both";
                 }
@@ -363,7 +367,7 @@ var ngReactGridComponent = (function() {
                         React.DOM.div( {className:"ngGridHeaderCellText", onClick:this.handleClick}, 
                             this.props.cell.displayName
                         ),
-                        React.DOM.div( {style:sortStyle}, React.DOM.i( {className:sortClassName})),
+                        React.DOM.div( {style:sortStyle}, React.DOM.i( {className:sortClassName, style:arrowStyle})),
                         React.DOM.div( {className:"ngGridHeaderCellResize"})
                     )
                 )
