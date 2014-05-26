@@ -31,6 +31,19 @@
     height: 30px;
 }
 
+.ngReactGrid .ngGridHeaderCellText {
+    display:inline-block;
+    width: 90%;
+    float: left;
+    cursor: pointer;
+}
+
+.ngReactGrid .ngGridHeaderCellResize {
+    width: 5%;
+    float: left;
+    text-align: right;
+}
+
 .ngReactGrid .ngReactGridHeaderToolbarWrapper {
     overflow: auto;
 }
@@ -48,10 +61,15 @@
 
 .ngReactGrid .ngReactGridSearch input {
     width: 50%;
+    border-radius: 15px;
+    border: 1px solid #CCC;
+    padding: 3px;
+    padding-left: 5px;
+    outline: none;
 }
 
 .ngReactGrid .ngReactGridHeaderWrapper {
-    margin-top: 10px;
+    margin-top: 5px;
 }
 
 .ngReactGrid .ngReactGridHeaderInner {
@@ -127,6 +145,31 @@
     padding: 5px;
     font-size: 11px;
     overflow: auto;
+}
+
+.icon-arrows {
+    display: inline-block;
+    margin-top: 1px;
+    line-height: 14px;
+    vertical-align: text-top;
+    background-image: url("../img/glyphicons-halflings.png");
+    background-repeat: no-repeat;
+    background-image: url('../img/arrow_icons.png');
+    background-repeat: no-repeat;
+    width: 7px;
+    height: 10px;
+}
+
+.icon-both {
+    background-position: -128px 2px;
+}
+
+.icon-asc {
+    background-position: 0 0;
+}
+
+.icon-desc {
+    background-position: -65px 0;
 }
 
 .ngReactGrid .ngReactGridStatus {

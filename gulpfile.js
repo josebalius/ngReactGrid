@@ -10,6 +10,11 @@ gulp.task('css', function() {
             .pipe(gulp.dest('./build/css'));
 });
 
+gulp.task('img', function() {
+    return gulp.src('./src/img/**.png')
+            .pipe(gulp.dest('./build/img'));
+});
+
 gulp.task('build-grid', function() {
     var jsxFilter = gulpFilter('**/*.jsx');
     return gulp.src(['./src/js/**.js', './src/jsx/**.jsx'])
@@ -27,7 +32,7 @@ gulp.task('uglify-build', ['build-grid'], function() {
             .pipe(gulp.dest('./build/js'))
 })
 
-gulp.task('build', ['build-grid', 'uglify-build', 'css']);
+gulp.task('build', ['build-grid', 'uglify-build', 'css', 'img']);
 
 gulp.task('default', ['build'], function() {
     gulp.watch('./src/**', ['build']);

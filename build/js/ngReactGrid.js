@@ -49,95 +49,168 @@ angular.module("ngReactGrid", [])
 /**
  * @factory ngReactGrid
  */
-.factory("ngReactGrid", function() {
+.factory("ngReactGrid", ['$rootScope', function($rootScope) {
+
+    var gridCore = function(grid, ngReactGrid) {
+        this.ngReactGrid = ngReactGrid;
+        this.grid = grid;
+        this.showingRecords = 0;
+        this.originalData = [];
+    };
+
+    gridCore.prototype.setPageSize = function(pageSize) {
+        $rootScope.$apply(function() {
+            this.ngReactGrid.update({
+                pageSize: pageSize
+            });
+
+            this.ngReactGrid.render();
+        }.bind(this));
+    };
+
+    gridCore.prototype.setSortField = function(field) {
+        $rootScope.$apply(function() {
+            if(this.grid.sortInfo.field !== field) {
+                this.grid.sortInfo.field = field;
+                this.grid.sortInfo.dir = "asc";
+            } else {
+                if(this.grid.sortInfo.dir === "asc") {
+                    this.grid.sortInfo.dir = "desc";
+                } else {
+                    this.grid.sortInfo.dir = "asc";
+                }
+            }
+
+            this.sort();
+        }.bind(this));
+    };
+
+    gridCore.prototype.sort = function() {
+        this.grid.data.sort(function(a, b) {
+            if(this.grid.sortInfo.dir === "asc") {
+                return a[this.grid.sortInfo.field] <= b[this.grid.sortInfo.field] ? -1 : 1;
+            } else {
+                return a[this.grid.sortInfo.field] >= b[this.grid.sortInfo.field] ? -1 : 1;
+            }
+        }.bind(this));
+
+        this.ngReactGrid.render();
+    };
+
+    gridCore.prototype.setSearch = function(search) {
+
+        $rootScope.$apply(function() {
+            search = String(search).toLowerCase();
+
+            this.grid.data = this.originalData.slice(0);
+
+            var filteredData = this.grid.data.filter(function(obj) {
+                var result = false;
+                for(var i in obj) {
+                    if(obj.hasOwnProperty(i)) {
+                        if(String(obj[i]).toLowerCase().indexOf(search) !== -1) {
+                            result = true;
+                            break;
+                        }
+                    }
+                }
+                return result;
+            });
+
+            this.ngReactGrid.update({
+                data: filteredData
+            });
+
+            this.ngReactGrid.render();
+        }.bind(this));
+
+    };
+
+    var grid = function(ngReactGrid) {
+        this.columnDefs = [];
+        this.data = [];
+        this.height = 500;
+        this.totalCount = 0;
+        this.totalPages = 0;
+        this.currentPage = 1;
+        this.pageSize = 25;
+        this.pageSizes = [25, 50, 100, 500];
+        this.sortInfo = {
+            field: "",
+            dir: ""
+        };
+        this.horizontalScroll = false;
+        this.scrollbarWidth = (function() {
+            var outer = document.createElement("div");
+            outer.style.visibility = "hidden";
+            outer.style.width = "100px";
+            outer.style.msOverflowStyle = "scrollbar"; // needed for WinJS apps
+
+            document.body.appendChild(outer);
+
+            var widthNoScroll = outer.offsetWidth;
+            // force scrollbars
+            outer.style.overflow = "scroll";
+
+            // add innerdiv
+            var inner = document.createElement("div");
+            inner.style.width = "100%";
+            outer.appendChild(inner);        
+
+            var widthWithScroll = inner.offsetWidth;
+
+            // remove divs
+            outer.parentNode.removeChild(outer);
+
+            return widthNoScroll - widthWithScroll;
+        })();
+
+        this.core = new gridCore(this, ngReactGrid);
+
+        return this;
+    };
 
     var ngReactGrid = function(scope, element, attrs) {
 
         this.scope = scope;
         this.element = element[0];
         this.attrs = attrs;
-
-        /**
-         * @todo find a better way to deal with this
-         * needs better protection for _ private functions
-         */
-        this.grid = {
-            columnDefs: [],
-            data: [],
-            height: 500,
-            totalCount: 0,
-            currentPage: 1,
-            pageSize: 25,
-            pageSizes: [25, 50, 100, 500],
-            scrollbarWidth: this.getScrollbarWidth(),
-            _nextPage: function() {
-
-            },
-            _prevPage: function() {
-
-            },
-            _goToPage: function() {
-
-            },
-            _sort: function(field) {
-
-            },
-            _columnResize: function(field, delta, index) {
-
-            },
-            _autoColumnResize: function(width, index) {
-
-            }
-        };
+        this.grid = new grid(this);
 
         /**
          * Watchers
          */
         scope.$watch("grid.data", function(newValue, oldValue) {
-            _.extend(this.grid, {data: newValue});
+            this.update({data: newValue}, true);
             this.render();
         }.bind(this));
 
-        this.update(scope.grid);
+        this.update(scope.grid, true);
         this.render();
     };
 
-    ngReactGrid.prototype.update = function(grid) {
+    ngReactGrid.prototype.update = function(grid, dataUpdate) {
+
+        for(var i in grid) {
+            if(grid.hasOwnProperty(i) && i === "core") {
+                throw new Error("Trying to update the grid with the reserved 'core' property");
+            }
+        }
+
         this.grid = _.extend(this.grid, grid);
         this.grid.totalCount = this.grid.data.length;
+        this.grid.totalPages = Math.ceil(this.grid.totalCount / this.grid.pageSize);
+
+        if(dataUpdate)
+            this.grid.core.originalData = this.grid.data.slice(0);
     };
 
     ngReactGrid.prototype.render = function() {
         React.renderComponent(ngReactGridComponent({grid: this.grid}), this.element);
     };
 
-    ngReactGrid.prototype.getScrollbarWidth = function() {
-        var outer = document.createElement("div");
-        outer.style.visibility = "hidden";
-        outer.style.width = "100px";
-        outer.style.msOverflowStyle = "scrollbar"; // needed for WinJS apps
-
-        document.body.appendChild(outer);
-
-        var widthNoScroll = outer.offsetWidth;
-        // force scrollbars
-        outer.style.overflow = "scroll";
-
-        // add innerdiv
-        var inner = document.createElement("div");
-        inner.style.width = "100%";
-        outer.appendChild(inner);        
-
-        var widthWithScroll = inner.offsetWidth;
-
-        // remove divs
-        outer.parentNode.removeChild(outer);
-
-        return widthNoScroll - widthWithScroll;
-    };
-
     return ngReactGrid;
-})
+}])
 /** @jsx React.DOM */
 /**
  * @author Jose Garcia - jose.balius@gmail.com
@@ -177,47 +250,77 @@ var ngReactGridComponent = (function() {
     var ngReactGridHeader = (function() {
 
         var ngGridHeaderCell = React.createClass({displayName: 'ngGridHeaderCell',
+            handleClick: function() {
+                this.props.grid.core.setSortField(this.props.cell.field);
+            },
             render: function() {
 
                 var cellStyle = {};
                 setCellWidth(this.props.grid, this.props.cell, cellStyle, this.props.last);
 
+                var sortStyle = {
+                    display: "inline-block",
+                    position: "absolute",
+                    marginLeft: 5,
+                    paddingTop: 2
+                };
+
+                var sortClassName = "icon-arrows";
+
+                if(this.props.grid.sortInfo.field === this.props.cell.field) {
+                    if(this.props.grid.sortInfo.dir === "asc") {
+                        sortClassName += " icon-asc";
+                    } else {
+                        sortClassName += " icon-desc";
+                    }
+
+                    sortStyle.paddingTop = 4;
+                } else {
+                    sortClassName += " icon-both";
+                }
+
                 return (
                     React.DOM.th( {title:this.props.cell.displayName, style:cellStyle}, 
-                        React.DOM.div(null, 
-                            this.props.cell.displayName
-                        )
+                        React.DOM.div( {className:"ngGridHeaderCellText", onClick:this.handleClick}, 
+                            this.props.cell.displayName, 
+                            React.DOM.div( {style:sortStyle}, React.DOM.i( {className:sortClassName}))
+                        ),
+                        React.DOM.div( {className:"ngGridHeaderCellResize"})
                     )
                 )
             }
         });
 
         var ngReactGridShowPerPage = React.createClass({displayName: 'ngReactGridShowPerPage',
+            handleChange: function() {
+                this.props.grid.core.setPageSize(this.refs.showPerPage.getDOMNode().value);
+            },
             render: function() {
 
-                var options = this.props.grid.pageSizes.map(function(pageSize) {
-                    return (React.DOM.option( {value:pageSize}, pageSize))
-                });
+                var options = this.props.grid.pageSizes.map(function(pageSize, key) {
+                    return (React.DOM.option( {value:pageSize, key:key}, pageSize))
+                }.bind(this));
 
                 return (
                     React.DOM.div( {className:"ngReactGridShowPerPage"}, 
-                        "Show ", React.DOM.select(null, options), " entries"
+                        "Show ", React.DOM.select( {onChange:this.handleChange, ref:"showPerPage", value:this.props.grid.pageSize}, options), " entries"
                     )
                 )
             }
         });
 
         var ngReactGridSearch = React.createClass({displayName: 'ngReactGridSearch',
+            handleSearch: function() {
+                this.props.grid.core.setSearch(this.refs.searchField.getDOMNode().value);
+            },
             render: function() {
                 return (
                     React.DOM.div( {className:"ngReactGridSearch"}, 
-                        React.DOM.input( {type:"search", placeholder:"Search..."} )
+                        React.DOM.input( {type:"input", placeholder:"Search...", ref:"searchField", onKeyUp:this.handleSearch} )
                     )
                 )
             }
         });
-
-
 
         return React.createClass({
             render: function() {
@@ -239,7 +342,7 @@ var ngReactGridComponent = (function() {
                 return (
                     React.DOM.div(null, 
                         React.DOM.div( {className:"ngReactGridHeaderToolbarWrapper"}, 
-                            ngReactGridShowPerPage( {grid:this.props.grid} ),
+                            ngReactGridShowPerPage( {grid:this.props.grid, setGridState:this.props.setGridState} ),
                             ngReactGridSearch( {grid:this.props.grid} )
                         ),
                         React.DOM.div( {className:"ngReactGridHeaderWrapper"}, 
@@ -302,7 +405,7 @@ var ngReactGridComponent = (function() {
                 }
             },
             calculateNeedsUpdate: function() {
-                if(this.props.grid.data.length > 100) {
+                if(this.props.grid.pageSize >= 100 && this.props.grid.data.length > 100) {
                     this.setState({
                         needsUpdate: true
                     });
@@ -329,6 +432,7 @@ var ngReactGridComponent = (function() {
                         needsUpdate: false
                     });
                 }
+
             },
             render: function() {
 
@@ -339,8 +443,11 @@ var ngReactGridComponent = (function() {
                 var rows;
 
                 if(!this.state.fullRender) {
-                    rows = this.props.grid.data.slice(0, 100).map(mapRows);
+                    var slice = this.props.grid.data.slice(0, this.props.grid.pageSize);
+                    this.props.grid.core.showingRecords = slice.length;
+                    rows = slice.map(mapRows);
                 } else {
+                    this.props.grid.core.showingRecords = this.props.grid.data.length;
                     rows = this.props.grid.data.map(mapRows);
                 }
                 
@@ -352,7 +459,19 @@ var ngReactGridComponent = (function() {
                     tableStyle.width = "calc(100% - " + this.props.grid.scrollbarWidth + "px)";
                 }
 
-                
+                if(this.props.grid.core.showingRecords === 0) {
+                    var noDataStyle = {
+                        textAlign: "center"
+                    };
+                    
+                    rows = (
+                        React.DOM.tr(null, 
+                            React.DOM.td( {colSpan:this.props.grid.columnDefs.length, style:noDataStyle}, 
+                                "No records found"
+                            )
+                        )
+                    )
+                }
 
                 return (
                     React.DOM.div( {className:"ngReactGridBody"}, 
@@ -377,7 +496,7 @@ var ngReactGridComponent = (function() {
             render: function() {
                 return (
                     React.DOM.div( {className:"ngReactGridStatus"}, 
-                        React.DOM.div(null, "Showing ", React.DOM.strong(null, "1"), " to ", React.DOM.strong(null, "10"), " of ", React.DOM.strong(null, this.props.grid.totalCount), " entries")
+                        React.DOM.div(null, "Showing ", React.DOM.strong(null, "1"), " to ", React.DOM.strong(null, this.props.grid.core.showingRecords), " of ", React.DOM.strong(null, this.props.grid.totalCount), " entries")
                     )
                 )
             }
@@ -385,16 +504,28 @@ var ngReactGridComponent = (function() {
 
         var ngReactGridPagination = React.createClass({displayName: 'ngReactGridPagination',
             render: function() {
+
+                var pagerNum = 2;
+                var totalPages = this.props.grid.totalPages;
+                var currentPage = this.props.grid.currentPage;
+                var indexStart = (currentPage - pagerNum) <= 0 ? 1 : (currentPage - pagerNum);
+                var indexFinish = (currentPage + pagerNum) >= totalPages ? totalPages : (currentPage + pagerNum);
+                var pages = [];
+
+                for(var i = indexStart; i <= indexFinish; i++) {
+                    pages.push(i);
+                }
+
+                pages = pages.map(function(page, key) {
+                    return React.DOM.li( {key:key}, React.DOM.a( {href:"#"}, page));
+                });
+
                 return (
                     React.DOM.div( {className:"ngReactGridPagination"}, 
                         React.DOM.ul(null, 
                             React.DOM.li(null, React.DOM.a( {href:"#"}, "Prev")),
                             React.DOM.li(null, React.DOM.a( {href:"#"}, "First")),
-                            React.DOM.li(null, React.DOM.a( {href:"#"}, "1")),
-                            React.DOM.li(null, React.DOM.a( {href:"#"}, "2")),
-                            React.DOM.li(null, React.DOM.a( {href:"#"}, "3")),
-                            React.DOM.li(null, React.DOM.a( {href:"#"}, "4")),
-                            React.DOM.li(null, React.DOM.a( {href:"#"}, "5")),
+                            pages,
                             React.DOM.li(null, React.DOM.a( {href:"#"}, "Last")),
                             React.DOM.li(null, React.DOM.a( {href:"#"}, "Next"))
                         )
