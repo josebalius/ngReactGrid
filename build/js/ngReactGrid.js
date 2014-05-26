@@ -130,7 +130,7 @@ angular.module("ngReactGrid", [])
         $rootScope.$apply(function() {
             search = String(search).toLowerCase();
 
-            if(this.localMode) {
+            if(this.grid.localMode) {
 
                 this.grid.data = this.originalData.slice(0);
 
@@ -185,6 +185,18 @@ angular.module("ngReactGrid", [])
             this.ngReactGrid.render();
 
         }.bind(this));
+    };
+
+    gridReact.prototype.cell = {
+        events: {
+            onClick: function(cell, row) {
+                if(cell.events && cell.events.onClick) {
+                    $rootScope.$apply(function() {
+                        cell.events.onClick(cell, row);
+                    });
+                }
+            }
+        }
     };
 
     var grid = function(ngReactGrid) {
@@ -450,15 +462,26 @@ var ngReactGridComponent = (function() {
     var ngReactGridBody = (function() {
 
         var ngReactGridBodyRowCell = React.createClass({displayName: 'ngReactGridBodyRowCell',
+            handleClick: function() {
+                this.props.grid.react.cell.events.onClick(this.props.cell, this.props.row);
+            },
             render: function() {
                 var cellText = this.props.row[this.props.cell.field];
                 var cellStyle = {};
                 setCellWidth(this.props.grid, this.props.cell, cellStyle, this.props.last, true);
-                return (
-                    React.DOM.td( {style:cellStyle, title:cellText}, 
-                        React.DOM.div(null, cellText)
+
+                if(this.props.cell.render) {
+                    cellText = this.props.cell.render(this.props.row);
+                    return (React.DOM.td( {style:cellStyle, dangerouslySetInnerHTML:{__html: cellText}, onClick:this.handleClick}))
+                } else {
+                    return (
+                        React.DOM.td( {style:cellStyle, title:cellText, onClick:this.handleClick}, 
+                            React.DOM.div(null, cellText)
+                        )
                     )
-                )
+                }
+
+                
             }
         });
 

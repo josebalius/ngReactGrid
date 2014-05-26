@@ -27,18 +27,20 @@
                 $scope.grid = {
                         data: dataSet,
                         pageSize: 25,
+                        horizontalScroll: true,
                         columnDefs: [
                         {
                             field: "firstName",
                             displayName: "First Name",
                             render: function(row) {
-                                return '<a href="#">' + row.firstName + '</a>';
+                                return '<a href="javascript:">' + row.firstName + '</a>';
                             },
                             events: {
                                 onClick: function(cell, row) {
                                     $scope.employee = row;
                                 }
-                            }
+                            },
+                            width: "40%"
                         },
                         {
                             field: "lastName",

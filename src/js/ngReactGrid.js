@@ -100,7 +100,7 @@ angular.module("ngReactGrid", [])
         $rootScope.$apply(function() {
             search = String(search).toLowerCase();
 
-            if(this.localMode) {
+            if(this.grid.localMode) {
 
                 this.grid.data = this.originalData.slice(0);
 
@@ -155,6 +155,18 @@ angular.module("ngReactGrid", [])
             this.ngReactGrid.render();
 
         }.bind(this));
+    };
+
+    gridReact.prototype.cell = {
+        events: {
+            onClick: function(cell, row) {
+                if(cell.events && cell.events.onClick) {
+                    $rootScope.$apply(function() {
+                        cell.events.onClick(cell, row);
+                    });
+                }
+            }
+        }
     };
 
     var grid = function(ngReactGrid) {
