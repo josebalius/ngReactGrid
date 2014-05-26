@@ -1,2 +1,2 @@
-ngReactGrid - v0.0.1
+ngReactGrid - v0.1.0
 ===========

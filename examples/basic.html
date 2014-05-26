@@ -5,7 +5,7 @@
         <link rel="stylesheet" type="text/css" href="../build/css/ngReactGrid.css">
     </head>
     <body>
-        <div ng-controller="BasicExampleController">
+        <div ng-controller="BasicExampleController" style="width: 100%">
             <ng-react-grid grid="grid"></ng-react-grid>
         </div>
 
@@ -52,13 +52,15 @@
 
                 $scope.grid = {
                         data: data,
+                        //horizontalScroll: true,
                         columnDefs: [
                         {
                             field: "firstName",
                             displayName: "First Name",
                             fn: function(columnValue, row) {
                                 return "Hey now";
-                            }
+                            },
+                            width: "60%"
                         },
                         {
                             field: "lastName",

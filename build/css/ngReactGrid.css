@@ -1,5 +1,4 @@
 .ngReactGrid table {
-    border-collapse: collapse;
     position: relative;
     table-layout: fixed;
     background-color: #FFF;
@@ -10,33 +9,45 @@
     color: #555555;
     display: table;
     border: 1px solid #CCC;
-    width: 100%;
     border-spacing: 0;
+    width: 100%;
 }
 
 .ngReactGrid .ngReactGridViewPort {
     overflow-y: scroll;
     overflow-x: scroll;
+    max-height: 400px;
 }
 
 .ngReactGrid .ngReactGridHeader {
     overflow-x: hidden;
     position: relative;
-    overflow-y: scroll;
+    overflow-y: hidden;
+    height: 30px;
+}
+
+.ngReactGrid .ngReactGridHeaderWrapper {
+    background: #ffffff; /* Old browsers */
+    background: -moz-linear-gradient(top, #f1f1f1 0%, #e1e1e1 100%, #7db9e8 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f1f1f1), color-stop(100%,#e1e1e1), color-stop(100%,#7db9e8)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top, #f1f1f1 0%,#e1e1e1 100%,#7db9e8 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top, #f1f1f1 0%,#e1e1e1 100%,#7db9e8 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top, #f1f1f1 0%,#e1e1e1 100%,#7db9e8 100%); /* IE10+ */
+    background: linear-gradient(to bottom, #f1f1f1 0%,#e1e1e1 100%,#7db9e8 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f1f1f1', endColorstr='#7db9e8',GradientType=0 ); /* IE6-9 */
 }
 
 .ngReactGrid .ngReactGridHeaderInner {
-    overflow-x: scroll;
+    overflow-x: hidden;
+    overflow-y: hidden;
 }
-
-
 
 .ngReactGrid .ngReactGridBody table {
     border-top: none;
     border-bottom: none;
 }
 
-.ngReactGrid table tr, .ngReactGrid table td, .ngReactGrid table th {
+.ngReactGrid table tr {
     border-collapse: collapse;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
@@ -45,7 +56,11 @@
     -webkit-transition: all .1s ease-out;
     -moz-transition: all .1s ease-out;
     transition: all .1s ease-out;
+}
+
+.ngReactGrid table td, .ngReactGrid table th {
     border-left: 1px solid #CCC;
+    vertical-align: top;
 }
 
 .ngReactGrid table th {
@@ -53,9 +68,14 @@
     text-align: left;
     color: rgba(0,0,0,.8);
     padding: 0px;
-    vertical-align: middle;
     padding: 5px;
     display: table-cell;
+}
+
+.ngReactGrid table th div {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .ngReactGrid table td {
@@ -68,6 +88,10 @@
 
 .ngReactGrid table tr:nth-child(odd) td {
     background: #f5f5f5;
+}
+
+.ngReactGrid table tr td:first-child, .ngReactGrid table tr th:first-child {
+    border-left: none;
 }
 
 .ngReactGrid .ngReactGridFooter, .ngReactGrid table th {
