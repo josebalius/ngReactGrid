@@ -2,7 +2,7 @@ ngReactGrid - v0.1.0
 ===========
 
 LICENCE
-===========
+----------
 The MIT License (MIT)
 
 Copyright (c) 2014 Jose Garcia
