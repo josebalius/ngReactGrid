@@ -45,10 +45,10 @@ var ngReactGridComponent = (function() {
                 setCellWidth(this.props.grid, this.props.cell, cellStyle, this.props.last);
 
                 var sortStyle = {
-                    display: "inline-block",
-                    position: "absolute",
-                    marginLeft: 5,
-                    paddingTop: 2
+                    paddingTop: 2,
+                    cursor: "pointer",
+                    width: "10%",
+                    "float": "left"
                 };
 
                 var sortClassName = "icon-arrows";
@@ -68,9 +68,9 @@ var ngReactGridComponent = (function() {
                 return (
                     <th title={this.props.cell.displayName} style={cellStyle}>
                         <div className="ngGridHeaderCellText" onClick={this.handleClick}>
-                            {this.props.cell.displayName} 
-                            <div style={sortStyle}><i className={sortClassName}></i></div>
+                            {this.props.cell.displayName}
                         </div>
+                        <div style={sortStyle}><i className={sortClassName}></i></div>
                         <div className="ngGridHeaderCellResize"></div>
                     </th>
                 )
@@ -184,6 +184,25 @@ var ngReactGridComponent = (function() {
 
 
         return React.createClass({
+            getInitialState: function() {
+                return {
+                    fullRender: false,
+                    needsUpdate: false
+                }
+            },
+            calculateIfNeedsUpdate: function() {
+                if(this.props.grid.data.length > 100) {
+                    this.setState({
+                        needsUpdate: true
+                    });
+                }
+            },
+            componentWillMount: function() {
+                this.calculateIfNeedsUpdate();
+            },
+            componentWillReceiveProps: function() {
+                this.calculateIfNeedsUpdate();
+            }, 
             componentDidMount: function() {
                 var domNode = this.getDOMNode();
                 var header = document.querySelector(".ngReactGridHeaderInner");
@@ -193,6 +212,14 @@ var ngReactGridComponent = (function() {
                     header.scrollLeft = viewPort.scrollLeft;
                 });
 
+                if(this.state.needsUpdate) {
+                    setTimeout(function() {
+                        this.setState({
+                            fullRender: true,
+                            needsUpdate: false
+                        });
+                    }.bind(this), 0);
+                }
             },
             render: function() {
 
@@ -216,7 +243,11 @@ var ngReactGridComponent = (function() {
                         </tr>
                     )
                 } else {
-                    rows = this.props.grid.data.map(mapRows);
+                    if(!this.state.fullRender) {
+                        rows = this.props.grid.data.slice(0, 100).map(mapRows);
+                    } else {
+                        rows = this.props.grid.data.map(mapRows);
+                    }
                 }
                 
                 

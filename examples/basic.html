@@ -2,7 +2,7 @@
 <html ng-app="example">
     <head>
         <title>ngReactGrid Basic Example</title>
-        <link rel="stylesheet" type="text/css" href="../build/css/ngReactGrid.css">
+        <link rel="stylesheet" type="text/css" href="https://rawgit.com/josebalius/ngReactGrid/master/build/css/ngReactGrid.css">
     </head>
     <body>
         <div ng-controller="BasicExampleController" style="width: 100%">
@@ -11,7 +11,7 @@
 
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.10/angular.min.js"></script>
         <script src="http://fb.me/react-0.10.0.js"></script>
-        <script src="../build/js/ngReactGrid.js"></script>
+        <script src="../build/js/ngReactGrid.min.js"></script>
         <script type="text/javascript">
 
             angular.module("example", ['ngReactGrid'])
@@ -25,7 +25,13 @@
                     navEffectiveDate3: "12/31/13",
                     navEffectiveDate4: "12/31/13",
                     navEffectiveDate5: "12/31/13",
-                    navEffectiveDate6: "12/31/13"
+                    navEffectiveDate6: "12/31/13",
+                  navEffectiveDate7: "12/31/13",
+                        navEffectiveDate8: "12/31/13",
+                        navEffectiveDate9: "12/31/13",
+                        navEffectiveDate10: "12/31/13",
+                        navEffectiveDate11: "12/31/13",
+                        navEffectiveDate12: "12/31/13"
                 }, {
                     firstName: "Jose2",
                     lastName: "Garcia2",
@@ -34,10 +40,16 @@
                     navEffectiveDate3: "12/31/13",
                     navEffectiveDate4: "12/31/13",
                     navEffectiveDate5: "12/31/13",
-                    navEffectiveDate6: "12/31/13"
+                    navEffectiveDate6: "12/31/13",
+                  navEffectiveDate7: "12/31/13",
+                        navEffectiveDate8: "12/31/13",
+                        navEffectiveDate9: "12/31/13",
+                        navEffectiveDate10: "12/31/13",
+                        navEffectiveDate11: "12/31/13",
+                        navEffectiveDate12: "12/31/13"
                 }];
 
-                for(var i = 0; i < 100; i++) {
+                for(var i = 0; i < 1000; i++) {
                     data.push({
                         firstName: "Jose"+i,
                         lastName: "Garcia"+i,
@@ -46,20 +58,24 @@
                         navEffectiveDate3: "12/31/13",
                         navEffectiveDate4: "12/31/13",
                         navEffectiveDate5: "12/31/13",
-                        navEffectiveDate6: "12/31/13"
+                        navEffectiveDate6: "12/31/13",
+                      navEffectiveDate7: "12/31/13",
+                        navEffectiveDate8: "12/31/13",
+                        navEffectiveDate9: "12/31/13",
+                        navEffectiveDate10: "12/31/13",
+                        navEffectiveDate11: "12/31/13",
+                        navEffectiveDate12: "12/31/13"
                     });
                 }
 
                 $scope.grid = {
                         data: data,
-                        //horizontalScroll: true,
+                        pageSize: 1000,
+                        horizontalScroll: true,
                         columnDefs: [
                         {
                             field: "firstName",
                             displayName: "First Name",
-                            fn: function(columnValue, row) {
-                                return "Hey now";
-                            }
                         },
                         {
                             field: "lastName",
@@ -88,109 +104,31 @@
                         {
                             field: "navEffectiveDate6",
                             displayName: "Nav Effective Date6"
-                        }],
-                        localMode: false,
-                        totalCount: 500,
-                        setPageSize: function(pageSize) {
-                            var data = [{
-                                firstName: "Jose",
-                                lastName: "Garcia",
-                                navEffectiveDate: "12/31/13",
-                                navEffectiveDate2: "12/31/13",
-                                navEffectiveDate3: "12/31/13",
-                                navEffectiveDate4: "12/31/13",
-                                navEffectiveDate5: "12/31/13",
-                                navEffectiveDate6: "12/31/13"
-                            }, {
-                                firstName: "Jose2",
-                                lastName: "Garcia2",
-                                navEffectiveDate: "12/31/13",
-                                navEffectiveDate2: "12/31/13",
-                                navEffectiveDate3: "12/31/13",
-                                navEffectiveDate4: "12/31/13",
-                                navEffectiveDate5: "12/31/13",
-                                navEffectiveDate6: "12/31/13"
-                            }];
-
-                            $timeout(function() {
-                                $scope.grid.data = data;
-                            }, 2000);
                         },
-                        setSortField: function(sortInfo) {
-                            var data = [{
-                                firstName: "Jose",
-                                lastName: "Garcia",
-                                navEffectiveDate: "12/31/13",
-                                navEffectiveDate2: "12/31/13",
-                                navEffectiveDate3: "12/31/13",
-                                navEffectiveDate4: "12/31/13",
-                                navEffectiveDate5: "12/31/13",
-                                navEffectiveDate6: "12/31/13"
-                            }, {
-                                firstName: "Jose2",
-                                lastName: "Garcia2",
-                                navEffectiveDate: "12/31/13",
-                                navEffectiveDate2: "12/31/13",
-                                navEffectiveDate3: "12/31/13",
-                                navEffectiveDate4: "12/31/13",
-                                navEffectiveDate5: "12/31/13",
-                                navEffectiveDate6: "12/31/13"
-                            }];
-
-                            $timeout(function() {
-                                $scope.grid.data = data;
-                            }, 2000);
+        {
+                            field: "navEffectiveDate7",
+                            displayName: "Nav Effective Date6"
                         },
-                        setSearch: function(query) {
-                            var data = [{
-                                firstName: "Jose",
-                                lastName: "Garcia",
-                                navEffectiveDate: "12/31/13",
-                                navEffectiveDate2: "12/31/13",
-                                navEffectiveDate3: "12/31/13",
-                                navEffectiveDate4: "12/31/13",
-                                navEffectiveDate5: "12/31/13",
-                                navEffectiveDate6: "12/31/13"
-                            }, {
-                                firstName: "Jose2",
-                                lastName: "Garcia2",
-                                navEffectiveDate: "12/31/13",
-                                navEffectiveDate2: "12/31/13",
-                                navEffectiveDate3: "12/31/13",
-                                navEffectiveDate4: "12/31/13",
-                                navEffectiveDate5: "12/31/13",
-                                navEffectiveDate6: "12/31/13"
-                            }];
-
-                            $timeout(function() {
-                                $scope.grid.data = data;
-                            }, 2000);
+        {
+                            field: "navEffectiveDate8",
+                            displayName: "Nav Effective Date6"
                         },
-                        goToPage: function(page) {
-                            var data = [{
-                                firstName: "Jose",
-                                lastName: "Garcia",
-                                navEffectiveDate: "12/31/13",
-                                navEffectiveDate2: "12/31/13",
-                                navEffectiveDate3: "12/31/13",
-                                navEffectiveDate4: "12/31/13",
-                                navEffectiveDate5: "12/31/13",
-                                navEffectiveDate6: "12/31/13"
-                            }, {
-                                firstName: "Jose2",
-                                lastName: "Garcia2",
-                                navEffectiveDate: "12/31/13",
-                                navEffectiveDate2: "12/31/13",
-                                navEffectiveDate3: "12/31/13",
-                                navEffectiveDate4: "12/31/13",
-                                navEffectiveDate5: "12/31/13",
-                                navEffectiveDate6: "12/31/13"
-                            }];
-
-                            $timeout(function() {
-                                $scope.grid.data = data;
-                            }, 2000);
-                        }
+        {
+                            field: "navEffectiveDate9",
+                            displayName: "Nav Effective Date6"
+                        },
+        {
+                            field: "navEffectiveDate10",
+                            displayName: "Nav Effective Date6"
+                        },
+        {
+                            field: "navEffectiveDate11",
+                            displayName: "Nav Effective Date6"
+                        },
+        {
+                            field: "navEffectiveDate12",
+                            displayName: "Nav Effective Date6"
+                        }]
                 };
             });
 
