@@ -1,7 +1,11 @@
 ngReactGrid - v0.1.0
 ===========
 
-LICENCE
+What is ngReactGrid?
+----------
+I wrote ngReactGrid to speed up the grids in my application that were previously using ngGrid. I tried to keep the API as similar as possible as I already had a large implementation of ngGrids. The grid uses ReactJS to render and is based off the jQuery DataTables table archictecture. ngReactGrid uses HTML tables to render and supports fixed table headers by default.
+
+License
 ----------
 The MIT License (MIT)
 
