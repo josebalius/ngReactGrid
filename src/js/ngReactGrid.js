@@ -25,6 +25,8 @@ angular.module("ngReactGrid", [])
         this.ngReactGrid = ngReactGrid;
         this.grid = grid;
         this.showingRecords = 0;
+        this.startIndex = 0;
+        this.endIndex = 0;
         this.originalData = [];
     };
 
@@ -89,11 +91,21 @@ angular.module("ngReactGrid", [])
 
             this.ngReactGrid.update({
                 data: filteredData
-            });
+            }, false, true);
 
             this.ngReactGrid.render();
         }.bind(this));
 
+    };
+
+    gridCore.prototype.goToPage = function(page) {
+        $rootScope.$apply(function() {
+            this.ngReactGrid.update({
+                currentPage: page
+            });
+
+            this.ngReactGrid.render();
+        }.bind(this));
     };
 
     var grid = function(ngReactGrid) {
@@ -159,7 +171,7 @@ angular.module("ngReactGrid", [])
         this.render();
     };
 
-    ngReactGrid.prototype.update = function(grid, dataUpdate) {
+    ngReactGrid.prototype.update = function(grid, dataUpdate, isSearch) {
 
         for(var i in grid) {
             if(grid.hasOwnProperty(i) && i === "core") {
@@ -168,11 +180,19 @@ angular.module("ngReactGrid", [])
         }
 
         this.grid = _.extend(this.grid, grid);
-        this.grid.totalCount = this.grid.data.length;
-        this.grid.totalPages = Math.ceil(this.grid.totalCount / this.grid.pageSize);
-
+        
         if(dataUpdate)
             this.grid.core.originalData = this.grid.data.slice(0);
+
+        var startIndex = (this.grid.currentPage - 1) * this.grid.pageSize;
+        var endIndex = (this.grid.pageSize * this.grid.currentPage);
+
+        this.grid.totalCount = (isSearch) ? grid.data.length : this.grid.core.originalData.length;
+        this.grid.totalPages = Math.ceil(this.grid.totalCount / this.grid.pageSize);
+        this.grid.data = (isSearch) ? grid.data.slice(startIndex, endIndex) : this.grid.core.originalData.slice(startIndex, endIndex);
+        this.grid.core.showingRecords = this.grid.data.length;
+        this.grid.core.startIndex = startIndex;
+        this.grid.core.endIndex = endIndex;
     };
 
     ngReactGrid.prototype.render = function() {

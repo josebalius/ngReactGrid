@@ -55,6 +55,8 @@ angular.module("ngReactGrid", [])
         this.ngReactGrid = ngReactGrid;
         this.grid = grid;
         this.showingRecords = 0;
+        this.startIndex = 0;
+        this.endIndex = 0;
         this.originalData = [];
     };
 
@@ -119,11 +121,21 @@ angular.module("ngReactGrid", [])
 
             this.ngReactGrid.update({
                 data: filteredData
-            });
+            }, false, true);
 
             this.ngReactGrid.render();
         }.bind(this));
 
+    };
+
+    gridCore.prototype.goToPage = function(page) {
+        $rootScope.$apply(function() {
+            this.ngReactGrid.update({
+                currentPage: page
+            });
+
+            this.ngReactGrid.render();
+        }.bind(this));
     };
 
     var grid = function(ngReactGrid) {
@@ -189,7 +201,7 @@ angular.module("ngReactGrid", [])
         this.render();
     };
 
-    ngReactGrid.prototype.update = function(grid, dataUpdate) {
+    ngReactGrid.prototype.update = function(grid, dataUpdate, isSearch) {
 
         for(var i in grid) {
             if(grid.hasOwnProperty(i) && i === "core") {
@@ -198,11 +210,19 @@ angular.module("ngReactGrid", [])
         }
 
         this.grid = _.extend(this.grid, grid);
-        this.grid.totalCount = this.grid.data.length;
-        this.grid.totalPages = Math.ceil(this.grid.totalCount / this.grid.pageSize);
-
+        
         if(dataUpdate)
             this.grid.core.originalData = this.grid.data.slice(0);
+
+        var startIndex = (this.grid.currentPage - 1) * this.grid.pageSize;
+        var endIndex = (this.grid.pageSize * this.grid.currentPage);
+
+        this.grid.totalCount = (isSearch) ? grid.data.length : this.grid.core.originalData.length;
+        this.grid.totalPages = Math.ceil(this.grid.totalCount / this.grid.pageSize);
+        this.grid.data = (isSearch) ? grid.data.slice(startIndex, endIndex) : this.grid.core.originalData.slice(startIndex, endIndex);
+        this.grid.core.showingRecords = this.grid.data.length;
+        this.grid.core.startIndex = startIndex;
+        this.grid.core.endIndex = endIndex;
     };
 
     ngReactGrid.prototype.render = function() {
@@ -398,25 +418,6 @@ var ngReactGridComponent = (function() {
 
 
         return React.createClass({
-            getInitialState: function() {
-                return {
-                    fullRender: false,
-                    needsUpdate: false
-                }
-            },
-            calculateNeedsUpdate: function() {
-                if(this.props.grid.pageSize >= 100 && this.props.grid.data.length > 100) {
-                    this.setState({
-                        needsUpdate: true
-                    });
-                }
-            },
-            componentWillMount: function() {
-                this.calculateNeedsUpdate();
-            },
-            componentWillReceiveProps: function() {
-                this.calculateNeedsUpdate();
-            }, 
             componentDidMount: function() {
                 var domNode = this.getDOMNode();
                 var header = document.querySelector(".ngReactGridHeaderInner");
@@ -426,30 +427,13 @@ var ngReactGridComponent = (function() {
                     header.scrollLeft = viewPort.scrollLeft;
                 });
 
-                if(this.state.needsUpdate) {
-                    this.setState({
-                        fullRender: true,
-                        needsUpdate: false
-                    });
-                }
-
             },
             render: function() {
 
                 var mapRows = function(row, index) {
                     return ngReactGridBodyRow( {key:index, row:row, columns:this.props.columnDefs, grid:this.props.grid} )
                 }.bind(this);
-
-                var rows;
-
-                if(!this.state.fullRender) {
-                    var slice = this.props.grid.data.slice(0, this.props.grid.pageSize);
-                    this.props.grid.core.showingRecords = slice.length;
-                    rows = slice.map(mapRows);
-                } else {
-                    this.props.grid.core.showingRecords = this.props.grid.data.length;
-                    rows = this.props.grid.data.map(mapRows);
-                }
+                var rows = this.props.grid.data.map(mapRows);
                 
                 var ngReactGridViewPortStyle = {}, tableStyle = {};
 
@@ -463,7 +447,7 @@ var ngReactGridComponent = (function() {
                     var noDataStyle = {
                         textAlign: "center"
                     };
-                    
+
                     rows = (
                         React.DOM.tr(null, 
                             React.DOM.td( {colSpan:this.props.grid.columnDefs.length, style:noDataStyle}, 
@@ -494,15 +478,39 @@ var ngReactGridComponent = (function() {
 
         var ngReactGridStatus = React.createClass({displayName: 'ngReactGridStatus',
             render: function() {
+
                 return (
                     React.DOM.div( {className:"ngReactGridStatus"}, 
-                        React.DOM.div(null, "Showing ", React.DOM.strong(null, "1"), " to ", React.DOM.strong(null, this.props.grid.core.showingRecords), " of ", React.DOM.strong(null, this.props.grid.totalCount), " entries")
+                        React.DOM.div(null, "Showing ", React.DOM.strong(null, this.props.grid.core.startIndex+1), " to ", React.DOM.strong(null, this.props.grid.core.endIndex), " of ", React.DOM.strong(null, this.props.grid.totalCount), " entries")
                     )
                 )
             }
         });
 
         var ngReactGridPagination = React.createClass({displayName: 'ngReactGridPagination',
+            goToPage: function(page) {
+                this.props.grid.core.goToPage(page);
+            },
+            goToLastPage: function() {
+                this.goToPage(this.props.grid.totalPages);
+            },
+            goToFirstPage: function() {
+                this.goToPage(1);
+            },
+            goToNextPage: function() {
+                var nextPage = (this.props.grid.currentPage + 1);
+                var diff = this.props.grid.totalPages - nextPage;
+
+                if(diff >= 0) {
+                    this.goToPage(nextPage);
+                }
+            },
+            goToPrevPage: function() {
+                var prevPage = (this.props.grid.currentPage - 1);
+                if(prevPage > 0) {
+                    this.goToPage(prevPage);
+                }
+            },
             render: function() {
 
                 var pagerNum = 2;
@@ -517,17 +525,18 @@ var ngReactGridComponent = (function() {
                 }
 
                 pages = pages.map(function(page, key) {
-                    return React.DOM.li( {key:key}, React.DOM.a( {href:"#"}, page));
-                });
+                    var pageClass = (page === this.props.grid.currentPage) ? "active" : "";
+                    return React.DOM.li( {key:key, className:pageClass, dataPage:page}, React.DOM.a( {href:"javascript:", onClick:this.goToPage.bind(null, page)}, page));
+                }.bind(this));
 
                 return (
                     React.DOM.div( {className:"ngReactGridPagination"}, 
                         React.DOM.ul(null, 
-                            React.DOM.li(null, React.DOM.a( {href:"#"}, "Prev")),
-                            React.DOM.li(null, React.DOM.a( {href:"#"}, "First")),
+                            React.DOM.li(null, React.DOM.a( {href:"javascript:", onClick:this.goToPrevPage}, "Prev")),
+                            React.DOM.li(null, React.DOM.a( {href:"javascript:", onClick:this.goToFirstPage}, "First")),
                             pages,
-                            React.DOM.li(null, React.DOM.a( {href:"#"}, "Last")),
-                            React.DOM.li(null, React.DOM.a( {href:"#"}, "Next"))
+                            React.DOM.li(null, React.DOM.a( {href:"javascript:", onClick:this.goToLastPage}, "Last")),
+                            React.DOM.li(null, React.DOM.a( {href:"javascript:", onClick:this.goToNextPage}, "Next"))
                         )
                     )
                 )

@@ -184,25 +184,6 @@ var ngReactGridComponent = (function() {
 
 
         return React.createClass({
-            getInitialState: function() {
-                return {
-                    fullRender: false,
-                    needsUpdate: false
-                }
-            },
-            calculateNeedsUpdate: function() {
-                if(this.props.grid.pageSize >= 100 && this.props.grid.data.length > 100) {
-                    this.setState({
-                        needsUpdate: true
-                    });
-                }
-            },
-            componentWillMount: function() {
-                this.calculateNeedsUpdate();
-            },
-            componentWillReceiveProps: function() {
-                this.calculateNeedsUpdate();
-            }, 
             componentDidMount: function() {
                 var domNode = this.getDOMNode();
                 var header = document.querySelector(".ngReactGridHeaderInner");
@@ -212,30 +193,13 @@ var ngReactGridComponent = (function() {
                     header.scrollLeft = viewPort.scrollLeft;
                 });
 
-                if(this.state.needsUpdate) {
-                    this.setState({
-                        fullRender: true,
-                        needsUpdate: false
-                    });
-                }
-
             },
             render: function() {
 
                 var mapRows = function(row, index) {
                     return <ngReactGridBodyRow key={index} row={row} columns={this.props.columnDefs} grid={this.props.grid} />
                 }.bind(this);
-
-                var rows;
-
-                if(!this.state.fullRender) {
-                    var slice = this.props.grid.data.slice(0, this.props.grid.pageSize);
-                    this.props.grid.core.showingRecords = slice.length;
-                    rows = slice.map(mapRows);
-                } else {
-                    this.props.grid.core.showingRecords = this.props.grid.data.length;
-                    rows = this.props.grid.data.map(mapRows);
-                }
+                var rows = this.props.grid.data.map(mapRows);
                 
                 var ngReactGridViewPortStyle = {}, tableStyle = {};
 
@@ -249,7 +213,7 @@ var ngReactGridComponent = (function() {
                     var noDataStyle = {
                         textAlign: "center"
                     };
-                    
+
                     rows = (
                         <tr>
                             <td colSpan={this.props.grid.columnDefs.length} style={noDataStyle}>
@@ -280,15 +244,39 @@ var ngReactGridComponent = (function() {
 
         var ngReactGridStatus = React.createClass({
             render: function() {
+
                 return (
                     <div className="ngReactGridStatus">
-                        <div>Showing <strong>1</strong> to <strong>{this.props.grid.core.showingRecords}</strong> of <strong>{this.props.grid.totalCount}</strong> entries</div>
+                        <div>Showing <strong>{this.props.grid.core.startIndex+1}</strong> to <strong>{this.props.grid.core.endIndex}</strong> of <strong>{this.props.grid.totalCount}</strong> entries</div>
                     </div>
                 )
             }
         });
 
         var ngReactGridPagination = React.createClass({
+            goToPage: function(page) {
+                this.props.grid.core.goToPage(page);
+            },
+            goToLastPage: function() {
+                this.goToPage(this.props.grid.totalPages);
+            },
+            goToFirstPage: function() {
+                this.goToPage(1);
+            },
+            goToNextPage: function() {
+                var nextPage = (this.props.grid.currentPage + 1);
+                var diff = this.props.grid.totalPages - nextPage;
+
+                if(diff >= 0) {
+                    this.goToPage(nextPage);
+                }
+            },
+            goToPrevPage: function() {
+                var prevPage = (this.props.grid.currentPage - 1);
+                if(prevPage > 0) {
+                    this.goToPage(prevPage);
+                }
+            },
             render: function() {
 
                 var pagerNum = 2;
@@ -303,17 +291,18 @@ var ngReactGridComponent = (function() {
                 }
 
                 pages = pages.map(function(page, key) {
-                    return <li key={key}><a href="#">{page}</a></li>;
-                });
+                    var pageClass = (page === this.props.grid.currentPage) ? "active" : "";
+                    return <li key={key} className={pageClass} dataPage={page}><a href="javascript:" onClick={this.goToPage.bind(null, page)}>{page}</a></li>;
+                }.bind(this));
 
                 return (
                     <div className="ngReactGridPagination">
                         <ul>
-                            <li><a href="#">Prev</a></li>
-                            <li><a href="#">First</a></li>
+                            <li><a href="javascript:" onClick={this.goToPrevPage}>Prev</a></li>
+                            <li><a href="javascript:" onClick={this.goToFirstPage}>First</a></li>
                             {pages}
-                            <li><a href="#">Last</a></li>
-                            <li><a href="#">Next</a></li>
+                            <li><a href="javascript:" onClick={this.goToLastPage}>Last</a></li>
+                            <li><a href="javascript:" onClick={this.goToNextPage}>Next</a></li>
                         </ul>
                     </div>
                 )
