@@ -21,7 +21,67 @@ angular.module("ngReactGrid", [])
  */
 .factory("ngReactGrid", function() {
 
-    var getScrollbarWidth = function() {
+    var ngReactGrid = function(scope, element, attrs) {
+
+        this.scope = scope;
+        this.element = element[0];
+        this.attrs = attrs;
+
+        /**
+         * @todo find a better way to deal with this
+         * needs better protection for _ private functions
+         */
+        this.grid = {
+            columnDefs: [],
+            data: [],
+            height: 500,
+            totalCount: 0,
+            currentPage: 1,
+            pageSize: 25,
+            pageSizes: [25, 50, 100, 500],
+            scrollbarWidth: this.getScrollbarWidth(),
+            _nextPage: function() {
+
+            },
+            _prevPage: function() {
+
+            },
+            _goToPage: function() {
+
+            },
+            _sort: function(field) {
+
+            },
+            _columnResize: function(field, delta, index) {
+
+            },
+            _autoColumnResize: function(width, index) {
+
+            }
+        };
+
+        /**
+         * Watchers
+         */
+        scope.$watch("grid.data", function(newValue, oldValue) {
+            _.extend(this.grid, {data: newValue});
+            this.render();
+        }.bind(this));
+
+        this.update(scope.grid);
+        this.render();
+    };
+
+    ngReactGrid.prototype.update = function(grid) {
+        this.grid = _.extend(this.grid, grid);
+        this.grid.totalCount = this.grid.data.length;
+    };
+
+    ngReactGrid.prototype.render = function() {
+        React.renderComponent(ngReactGridComponent({grid: this.grid}), this.element);
+    };
+
+    ngReactGrid.prototype.getScrollbarWidth = function() {
         var outer = document.createElement("div");
         outer.style.visibility = "hidden";
         outer.style.width = "100px";
@@ -44,40 +104,6 @@ angular.module("ngReactGrid", [])
         outer.parentNode.removeChild(outer);
 
         return widthNoScroll - widthWithScroll;
-    };
-
-    var ngReactGrid = function(scope, element, attrs) {
-        var render = function(grid) {
-            React.renderComponent(ngReactGridComponent({grid:grid}), element[0]);
-        };
-
-        var gridDefault = {
-            columnDefs: [],
-            data: [],
-            height: 500,
-            scrollbarWidth: getScrollbarWidth(),
-            sort: function(field) {
-
-            },
-            columnResize: function(field, delta, index) {
-
-            },
-            autoColumnResize: function(width, index) {
-
-            }
-        };
-
-        var grid = _.extend(gridDefault, scope.grid);
-
-        /**
-         * Watchers
-         */
-        scope.$watch("grid.data", function(newValue, oldValue) {
-            _.extend(grid, {data: newValue});
-            render(grid);
-        });
-
-        render(grid);
     };
 
     return ngReactGrid;

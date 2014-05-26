@@ -51,7 +51,67 @@ angular.module("ngReactGrid", [])
  */
 .factory("ngReactGrid", function() {
 
-    var getScrollbarWidth = function() {
+    var ngReactGrid = function(scope, element, attrs) {
+
+        this.scope = scope;
+        this.element = element[0];
+        this.attrs = attrs;
+
+        /**
+         * @todo find a better way to deal with this
+         * needs better protection for _ private functions
+         */
+        this.grid = {
+            columnDefs: [],
+            data: [],
+            height: 500,
+            totalCount: 0,
+            currentPage: 1,
+            pageSize: 25,
+            pageSizes: [25, 50, 100, 500],
+            scrollbarWidth: this.getScrollbarWidth(),
+            _nextPage: function() {
+
+            },
+            _prevPage: function() {
+
+            },
+            _goToPage: function() {
+
+            },
+            _sort: function(field) {
+
+            },
+            _columnResize: function(field, delta, index) {
+
+            },
+            _autoColumnResize: function(width, index) {
+
+            }
+        };
+
+        /**
+         * Watchers
+         */
+        scope.$watch("grid.data", function(newValue, oldValue) {
+            _.extend(this.grid, {data: newValue});
+            this.render();
+        }.bind(this));
+
+        this.update(scope.grid);
+        this.render();
+    };
+
+    ngReactGrid.prototype.update = function(grid) {
+        this.grid = _.extend(this.grid, grid);
+        this.grid.totalCount = this.grid.data.length;
+    };
+
+    ngReactGrid.prototype.render = function() {
+        React.renderComponent(ngReactGridComponent({grid: this.grid}), this.element);
+    };
+
+    ngReactGrid.prototype.getScrollbarWidth = function() {
         var outer = document.createElement("div");
         outer.style.visibility = "hidden";
         outer.style.width = "100px";
@@ -74,40 +134,6 @@ angular.module("ngReactGrid", [])
         outer.parentNode.removeChild(outer);
 
         return widthNoScroll - widthWithScroll;
-    };
-
-    var ngReactGrid = function(scope, element, attrs) {
-        var render = function(grid) {
-            React.renderComponent(ngReactGridComponent({grid:grid}), element[0]);
-        };
-
-        var gridDefault = {
-            columnDefs: [],
-            data: [],
-            height: 500,
-            scrollbarWidth: getScrollbarWidth(),
-            sort: function(field) {
-
-            },
-            columnResize: function(field, delta, index) {
-
-            },
-            autoColumnResize: function(width, index) {
-
-            }
-        };
-
-        var grid = _.extend(gridDefault, scope.grid);
-
-        /**
-         * Watchers
-         */
-        scope.$watch("grid.data", function(newValue, oldValue) {
-            _.extend(grid, {data: newValue});
-            render(grid);
-        });
-
-        render(grid);
     };
 
     return ngReactGrid;
@@ -166,6 +192,33 @@ var ngReactGridComponent = (function() {
             }
         });
 
+        var ngReactGridShowPerPage = React.createClass({displayName: 'ngReactGridShowPerPage',
+            render: function() {
+
+                var options = this.props.grid.pageSizes.map(function(pageSize) {
+                    return (React.DOM.option( {value:pageSize}, pageSize))
+                });
+
+                return (
+                    React.DOM.div( {className:"ngReactGridShowPerPage"}, 
+                        "Show ", React.DOM.select(null, options), " entries"
+                    )
+                )
+            }
+        });
+
+        var ngReactGridSearch = React.createClass({displayName: 'ngReactGridSearch',
+            render: function() {
+                return (
+                    React.DOM.div( {className:"ngReactGridSearch"}, 
+                        React.DOM.input( {type:"search", placeholder:"Search..."} )
+                    )
+                )
+            }
+        });
+
+
+
         return React.createClass({
             render: function() {
 
@@ -184,14 +237,19 @@ var ngReactGridComponent = (function() {
                 };
 
                 return (
-                    React.DOM.div( {className:"ngReactGridHeaderWrapper"}, 
-                        React.DOM.div( {className:"ngReactGridHeader", style:ngReactGridHeader}, 
-                            React.DOM.div(null),
-                            React.DOM.div( {className:"ngReactGridHeaderInner"}, 
-                                React.DOM.table( {style:tableStyle}, 
-                                    React.DOM.thead(null, 
-                                        React.DOM.tr(null, 
-                                            cells
+                    React.DOM.div(null, 
+                        React.DOM.div( {className:"ngReactGridHeaderToolbarWrapper"}, 
+                            ngReactGridShowPerPage( {grid:this.props.grid} ),
+                            ngReactGridSearch( {grid:this.props.grid} )
+                        ),
+                        React.DOM.div( {className:"ngReactGridHeaderWrapper"}, 
+                            React.DOM.div( {className:"ngReactGridHeader", style:ngReactGridHeader}, 
+                                React.DOM.div( {className:"ngReactGridHeaderInner"}, 
+                                    React.DOM.table( {style:tableStyle}, 
+                                        React.DOM.thead(null, 
+                                            React.DOM.tr(null, 
+                                                cells
+                                            )
                                         )
                                     )
                                 )
@@ -243,7 +301,7 @@ var ngReactGridComponent = (function() {
                     needsUpdate: false
                 }
             },
-            calculateIfNeedsUpdate: function() {
+            calculateNeedsUpdate: function() {
                 if(this.props.grid.data.length > 100) {
                     this.setState({
                         needsUpdate: true
@@ -251,10 +309,10 @@ var ngReactGridComponent = (function() {
                 }
             },
             componentWillMount: function() {
-                this.calculateIfNeedsUpdate();
+                this.calculateNeedsUpdate();
             },
             componentWillReceiveProps: function() {
-                this.calculateIfNeedsUpdate();
+                this.calculateNeedsUpdate();
             }, 
             componentDidMount: function() {
                 var domNode = this.getDOMNode();
@@ -286,17 +344,21 @@ var ngReactGridComponent = (function() {
                     rows = this.props.grid.data.map(mapRows);
                 }
                 
-                var ngReactGridViewPortStyle = {};
+                var ngReactGridViewPortStyle = {}, tableStyle = {};
 
                 if(!this.props.grid.horizontalScroll) {
                     ngReactGridViewPortStyle.overflowX = "hidden";
+                } else {
+                    tableStyle.width = "calc(100% - " + this.props.grid.scrollbarWidth + "px)";
                 }
+
+                
 
                 return (
                     React.DOM.div( {className:"ngReactGridBody"}, 
                         React.DOM.div( {className:"ngReactGridViewPort", style:ngReactGridViewPortStyle}, 
                             React.DOM.div( {className:"ngReactGridInnerViewPort"}, 
-                                React.DOM.table(null, 
+                                React.DOM.table( {style:tableStyle}, 
                                     React.DOM.tbody(null,  
                                         rows
                                     )
@@ -310,11 +372,45 @@ var ngReactGridComponent = (function() {
     })();
 
     var ngReactGridFooter = (function() {
+
+        var ngReactGridStatus = React.createClass({displayName: 'ngReactGridStatus',
+            render: function() {
+                return (
+                    React.DOM.div( {className:"ngReactGridStatus"}, 
+                        React.DOM.div(null, "Showing ", React.DOM.strong(null, "1"), " to ", React.DOM.strong(null, "10"), " of ", React.DOM.strong(null, this.props.grid.totalCount), " entries")
+                    )
+                )
+            }
+        });
+
+        var ngReactGridPagination = React.createClass({displayName: 'ngReactGridPagination',
+            render: function() {
+                return (
+                    React.DOM.div( {className:"ngReactGridPagination"}, 
+                        React.DOM.ul(null, 
+                            React.DOM.li(null, React.DOM.a( {href:"#"}, "Prev")),
+                            React.DOM.li(null, React.DOM.a( {href:"#"}, "First")),
+                            React.DOM.li(null, React.DOM.a( {href:"#"}, "1")),
+                            React.DOM.li(null, React.DOM.a( {href:"#"}, "2")),
+                            React.DOM.li(null, React.DOM.a( {href:"#"}, "3")),
+                            React.DOM.li(null, React.DOM.a( {href:"#"}, "4")),
+                            React.DOM.li(null, React.DOM.a( {href:"#"}, "5")),
+                            React.DOM.li(null, React.DOM.a( {href:"#"}, "Last")),
+                            React.DOM.li(null, React.DOM.a( {href:"#"}, "Next"))
+                        )
+                    )
+                )
+            }
+        });
+
         return React.createClass({
             render: function() {
                 return (
-                    React.DOM.div( {className:"ngReactGridFooter"}, "-")
-                );
+                    React.DOM.div( {className:"ngReactGridFooter"}, 
+                        ngReactGridStatus( {grid:this.props.grid} ),
+                        ngReactGridPagination( {grid:this.props.grid} )
+                    )
+                )
             }
         });
     })();

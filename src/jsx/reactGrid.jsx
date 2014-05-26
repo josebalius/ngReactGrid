@@ -51,6 +51,33 @@ var ngReactGridComponent = (function() {
             }
         });
 
+        var ngReactGridShowPerPage = React.createClass({
+            render: function() {
+
+                var options = this.props.grid.pageSizes.map(function(pageSize) {
+                    return (<option value={pageSize}>{pageSize}</option>)
+                });
+
+                return (
+                    <div className="ngReactGridShowPerPage">
+                        Show <select>{options}</select> entries
+                    </div>
+                )
+            }
+        });
+
+        var ngReactGridSearch = React.createClass({
+            render: function() {
+                return (
+                    <div className="ngReactGridSearch">
+                        <input type="search" placeholder="Search..." />
+                    </div>
+                )
+            }
+        });
+
+
+
         return React.createClass({
             render: function() {
 
@@ -69,17 +96,22 @@ var ngReactGridComponent = (function() {
                 };
 
                 return (
-                    <div className="ngReactGridHeaderWrapper">
-                        <div className="ngReactGridHeader" style={ngReactGridHeader}>
-                            <div></div>
-                            <div className="ngReactGridHeaderInner">
-                                <table style={tableStyle}>
-                                    <thead>
-                                        <tr>
-                                            {cells}
-                                        </tr>
-                                    </thead>
-                                </table>
+                    <div>
+                        <div className="ngReactGridHeaderToolbarWrapper">
+                            <ngReactGridShowPerPage grid={this.props.grid} />
+                            <ngReactGridSearch grid={this.props.grid} />
+                        </div>
+                        <div className="ngReactGridHeaderWrapper">
+                            <div className="ngReactGridHeader" style={ngReactGridHeader}>
+                                <div className="ngReactGridHeaderInner">
+                                    <table style={tableStyle}>
+                                        <thead>
+                                            <tr>
+                                                {cells}
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -128,7 +160,7 @@ var ngReactGridComponent = (function() {
                     needsUpdate: false
                 }
             },
-            calculateIfNeedsUpdate: function() {
+            calculateNeedsUpdate: function() {
                 if(this.props.grid.data.length > 100) {
                     this.setState({
                         needsUpdate: true
@@ -136,10 +168,10 @@ var ngReactGridComponent = (function() {
                 }
             },
             componentWillMount: function() {
-                this.calculateIfNeedsUpdate();
+                this.calculateNeedsUpdate();
             },
             componentWillReceiveProps: function() {
-                this.calculateIfNeedsUpdate();
+                this.calculateNeedsUpdate();
             }, 
             componentDidMount: function() {
                 var domNode = this.getDOMNode();
@@ -171,17 +203,21 @@ var ngReactGridComponent = (function() {
                     rows = this.props.grid.data.map(mapRows);
                 }
                 
-                var ngReactGridViewPortStyle = {};
+                var ngReactGridViewPortStyle = {}, tableStyle = {};
 
                 if(!this.props.grid.horizontalScroll) {
                     ngReactGridViewPortStyle.overflowX = "hidden";
+                } else {
+                    tableStyle.width = "calc(100% - " + this.props.grid.scrollbarWidth + "px)";
                 }
+
+                
 
                 return (
                     <div className="ngReactGridBody">
                         <div className="ngReactGridViewPort" style={ngReactGridViewPortStyle}>
                             <div className="ngReactGridInnerViewPort">
-                                <table>
+                                <table style={tableStyle}>
                                     <tbody> 
                                         {rows}
                                     </tbody>
@@ -195,11 +231,45 @@ var ngReactGridComponent = (function() {
     })();
 
     var ngReactGridFooter = (function() {
+
+        var ngReactGridStatus = React.createClass({
+            render: function() {
+                return (
+                    <div className="ngReactGridStatus">
+                        <div>Showing <strong>1</strong> to <strong>10</strong> of <strong>{this.props.grid.totalCount}</strong> entries</div>
+                    </div>
+                )
+            }
+        });
+
+        var ngReactGridPagination = React.createClass({
+            render: function() {
+                return (
+                    <div className="ngReactGridPagination">
+                        <ul>
+                            <li><a href="#">Prev</a></li>
+                            <li><a href="#">First</a></li>
+                            <li><a href="#">1</a></li>
+                            <li><a href="#">2</a></li>
+                            <li><a href="#">3</a></li>
+                            <li><a href="#">4</a></li>
+                            <li><a href="#">5</a></li>
+                            <li><a href="#">Last</a></li>
+                            <li><a href="#">Next</a></li>
+                        </ul>
+                    </div>
+                )
+            }
+        });
+
         return React.createClass({
             render: function() {
                 return (
-                    <div className="ngReactGridFooter">-</div>
-                );
+                    <div className="ngReactGridFooter">
+                        <ngReactGridStatus grid={this.props.grid} />
+                        <ngReactGridPagination grid={this.props.grid} />
+                    </div>
+                )
             }
         });
     })();
