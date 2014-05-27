@@ -212,6 +212,16 @@ var ngReactGridComponent = (function() {
                     });
                 }
             },
+            performFullRender: function() {
+                if(this.state.needsUpdate) {
+                    setTimeout(function() {
+                        this.setState({
+                            fullRender: true,
+                            needsUpdate: false
+                        });
+                    }.bind(this), 0);
+                }
+            },
             componentWillMount: function() {
                 this.calculateIfNeedsUpdate();
             },
@@ -227,14 +237,10 @@ var ngReactGridComponent = (function() {
                     header.scrollLeft = viewPort.scrollLeft;
                 });
 
-                if(this.state.needsUpdate) {
-                    setTimeout(function() {
-                        this.setState({
-                            fullRender: true,
-                            needsUpdate: false
-                        });
-                    }.bind(this), 0);
-                }
+                this.performFullRender();
+            },
+            componentDidUpdate: function() {
+                this.performFullRender();
             },
             render: function() {
 
@@ -312,7 +318,7 @@ var ngReactGridComponent = (function() {
 
                 return (
                     <div className="ngReactGridStatus">
-                        <div>Showing <strong>{this.props.grid.react.startIndex+1}</strong> to <strong>{this.props.grid.react.endIndex}</strong> of <strong>{this.props.grid.totalCount}</strong> entries</div>
+                        <div>Page <strong>{this.props.grid.currentPage}</strong> of <strong>{this.props.grid.totalPages}</strong> - Showing <strong>{this.props.grid.pageSize}</strong> of <strong>{this.props.grid.totalCount}</strong> records</div>
                     </div>
                 )
             }

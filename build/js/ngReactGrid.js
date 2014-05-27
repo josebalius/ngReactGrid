@@ -517,6 +517,16 @@ var ngReactGridComponent = (function() {
                     });
                 }
             },
+            performFullRender: function() {
+                if(this.state.needsUpdate) {
+                    setTimeout(function() {
+                        this.setState({
+                            fullRender: true,
+                            needsUpdate: false
+                        });
+                    }.bind(this), 0);
+                }
+            },
             componentWillMount: function() {
                 this.calculateIfNeedsUpdate();
             },
@@ -532,14 +542,10 @@ var ngReactGridComponent = (function() {
                     header.scrollLeft = viewPort.scrollLeft;
                 });
 
-                if(this.state.needsUpdate) {
-                    setTimeout(function() {
-                        this.setState({
-                            fullRender: true,
-                            needsUpdate: false
-                        });
-                    }.bind(this), 0);
-                }
+                this.performFullRender();
+            },
+            componentDidUpdate: function() {
+                this.performFullRender();
             },
             render: function() {
 
@@ -617,7 +623,7 @@ var ngReactGridComponent = (function() {
 
                 return (
                     React.DOM.div( {className:"ngReactGridStatus"}, 
-                        React.DOM.div(null, "Showing ", React.DOM.strong(null, this.props.grid.react.startIndex+1), " to ", React.DOM.strong(null, this.props.grid.react.endIndex), " of ", React.DOM.strong(null, this.props.grid.totalCount), " entries")
+                        React.DOM.div(null, "Page ", React.DOM.strong(null, this.props.grid.currentPage), " of ", React.DOM.strong(null, this.props.grid.totalPages), " - Showing ", React.DOM.strong(null, this.props.grid.pageSize), " of ", React.DOM.strong(null, this.props.grid.totalCount), " records")
                     )
                 )
             }
