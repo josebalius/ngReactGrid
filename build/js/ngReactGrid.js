@@ -114,13 +114,18 @@ angular.module("ngReactGrid", [])
     };
 
     gridReact.prototype.sort = function() {
-        this.grid.data.sort(function(a, b) {
+
+        var copy = this.grid.react.originalData.slice(0);
+
+        copy.sort(function(a, b) {
             if(this.grid.sortInfo.dir === "asc") {
                 return a[this.grid.sortInfo.field] <= b[this.grid.sortInfo.field] ? -1 : 1;
             } else {
                 return a[this.grid.sortInfo.field] >= b[this.grid.sortInfo.field] ? -1 : 1;
             }
         }.bind(this));
+
+        this.grid.data = copy;
 
         this.ngReactGrid.render();
     };
