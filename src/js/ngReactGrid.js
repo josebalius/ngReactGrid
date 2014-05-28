@@ -95,7 +95,9 @@ angular.module("ngReactGrid", [])
             }
         }.bind(this));
 
-        this.grid.data = copy;
+        this.ngReactGrid.update({
+            data: copy
+        }, true);
 
         this.ngReactGrid.render();
     };
@@ -172,6 +174,14 @@ angular.module("ngReactGrid", [])
                 }
             }
         }
+    };
+
+    gridReact.prototype.updateScope = function(func) {
+        return function() {
+            $rootScope.$apply(function() {
+                func();
+            });
+        };
     };
 
     var grid = function(ngReactGrid) {

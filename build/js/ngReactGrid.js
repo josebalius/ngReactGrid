@@ -125,7 +125,9 @@ angular.module("ngReactGrid", [])
             }
         }.bind(this));
 
-        this.grid.data = copy;
+        this.ngReactGrid.update({
+            data: copy
+        }, true);
 
         this.ngReactGrid.render();
     };
@@ -202,6 +204,14 @@ angular.module("ngReactGrid", [])
                 }
             }
         }
+    };
+
+    gridReact.prototype.updateScope = function(func) {
+        return function() {
+            $rootScope.$apply(function() {
+                func();
+            });
+        };
     };
 
     var grid = function(ngReactGrid) {
@@ -346,17 +356,105 @@ var ngReactGridComponent = (function() {
     var ngReactGridHeader = (function() {
 
         var ngGridHeaderCell = React.createClass({displayName: 'ngGridHeaderCell',
+            getInitialState: function() {
+                return {
+                    width: 0
+                };
+            },
+            cellStyle: {},
             handleClick: function() {
                 this.props.grid.react.setSortField(this.props.cell.field);
             },
+            componentWillReceiveProps: function() {
+                setCellWidth(this.props.grid, this.props.cell, this.cellStyle, this.props.last);
+                this.setState({
+                    width: this.cellStyle.width
+                });
+            },
+            componentWillMount: function() {
+                setCellWidth(this.props.grid, this.props.cell, this.cellStyle, this.props.last);
+                this.setState({
+                    width: this.cellStyle.width
+                });
+            },
+            resize: function(delta) {
+                console.debug(delta);
+            },
+            componentDidMount: function() {
+                var e = this.getDOMNode();
+                var resizeControl = e.querySelector(".ngGridHeaderResizeControl");
+                var isDragging = false;
+                var lastX = 0;
+                var self = this;
+                var head = document.getElementsByTagName('head')[0];
+
+                var processMouseUp = function() {
+                    var wasDragging = isDragging;
+                    isDragging = false;
+                    //$("#cursorChange").remove();
+                    window.removeEventListener('mousemove');
+
+                    console.debug('here');
+
+                    if(wasDragging) {
+                        //self.props.grid.resizeUpdateOriginalWidth(self.props.index);
+                    }
+                };
+
+                /*resizeControl.addEventListener('mousedown', function() {
+                    lastX = resizeControl.offsetLeft;
+
+                    window.removeEventListener('mousemove');
+                    window.addEventListener('mousemove', function(e) {
+                        isDragging = true;
+                        var delta = parseInt(e.pageX - lastX);
+                        self.resize(delta);
+                    });
+
+                    window.removeEventListener('mouseup');
+                    window.addEventListener('mouseup', function() {
+                        processMouseUp();
+                    });
+                });
+
+                /*resizeControl.on('mousedown', function() {
+                    lastX = resizeControl.offsetLeft;
+                    head.appendChild("<style type='text/css' id='cursorChange'>*{cursor:col-resize!important;-moz-user-select: none !important; -webkit-user-select: none !important; -ms-user-select:none !important; user-select:none; !important}</style>");
+
+                    window.removeEventListener('mousemove');
+                    window.addEventListener('mousemove', function(e) {
+                        console.debug(e);
+                    });
+                    /*$(window).on('mousemove', function(e) {
+                        isDragging = true;
+                        var delta = parseInt(e.pageX - lastX);
+                        self.props.grid.resize(self.props.cell.field, delta, self.props.index);
+                    });
+
+                    $(window).unbind('mouseup');
+                    $(window).on('mouseup', function() {
+                        processMouseUp();
+                    });
+                }).on('mouseup', function() {
+                    //processMouseUp();
+                });
+
+                resizeControl.on('dblclick', function() {
+                    var cellTextLength = self.props.cell.displayName.length;
+                    var pixelsPerCharacter = 9;
+                    var proposedWidth = cellTextLength * pixelsPerCharacter;
+                    self.props.grid.doubleClickResize(proposedWidth, self.props.index);
+                    self.props.grid.resizeUpdateOriginalWidth(self.props.index);
+                });
+                */
+            },
             render: function() {
 
-                var cellStyle = {};
-                setCellWidth(this.props.grid, this.props.cell, cellStyle, this.props.last);
+                var cellStyle = this.cellStyle;
 
                 var sortStyle = {
                     cursor: "pointer",
-                    width: "10%",
+                    width: "8%",
                     "float": "left",
                     textAlign: "right"
                 };
@@ -379,13 +477,30 @@ var ngReactGridComponent = (function() {
                     sortClassName += " icon-both";
                 }
 
+                var resizeStyle = {
+                    height: "21px",
+                    marginTop: "-4px",
+                    width: "1px",
+                    background: "#999999",
+                    borderRight: "1px solid #FFF",
+                    "float": "right"
+                };
+
+                var resizeWrapperStyle = {
+                    width: "2%",
+                    cursor: "col-resize",
+                    display: "none"
+                };
+
                 return (
                     React.DOM.th( {title:this.props.cell.displayName, style:cellStyle}, 
                         React.DOM.div( {className:"ngGridHeaderCellText", onClick:this.handleClick}, 
                             this.props.cell.displayName
                         ),
                         React.DOM.div( {style:sortStyle}, React.DOM.i( {className:sortClassName, style:arrowStyle})),
-                        React.DOM.div( {className:"ngGridHeaderCellResize"})
+                        React.DOM.div( {style:resizeWrapperStyle, className:"ngGridHeaderResizeControl"}, 
+                            React.DOM.div( {className:"ngGridHeaderCellResize", style:resizeStyle})
+                        )
                     )
                 )
             }
@@ -470,6 +585,9 @@ var ngReactGridComponent = (function() {
             handleClick: function() {
                 this.props.grid.react.cell.events.onClick(this.props.cell, this.props.row);
             },
+            updateScope: function(fn) {
+                return this.props.grid.react.updateScope(fn);
+            },
             render: function() {
                 var cellText = this.props.row[this.props.cell.field];
                 var cellStyle = {};
@@ -477,7 +595,25 @@ var ngReactGridComponent = (function() {
 
                 if(this.props.cell.render) {
                     cellText = this.props.cell.render(this.props.row);
-                    return (React.DOM.td( {style:cellStyle, dangerouslySetInnerHTML:{__html: cellText}, onClick:this.handleClick}))
+                    cellTextType = typeof cellText;
+
+                    if(cellTextType === 'string') {
+                        return (React.DOM.td( {style:cellStyle, dangerouslySetInnerHTML:{__html: cellText}, onClick:this.handleClick}))
+                    } else if(cellTextType === 'object') {
+
+                        for(var i in cellText.props) {
+                            if(cellText.props.hasOwnProperty(i) && typeof cellText.props[i] === 'function') {
+                                cellText.props[i] = this.updateScope(cellText.props[i]);
+                            }
+                        }
+
+                        return (
+                            React.DOM.td( {style:cellStyle}, 
+                                cellText
+                            )
+                        );
+                    }
+                    
                 } else {
                     return (
                         React.DOM.td( {style:cellStyle, title:cellText, onClick:this.handleClick}, 

@@ -2,7 +2,6 @@
     font-size: 12px;
     font-family: "Open Sans", "Helvetica Neue", "Helvetica", "Arial", "Droid Arabic Kufi","Droid Sans";
     padding: 5px;
-    border: 1px solid #CCC;
 }
 
 .ngReactGrid table {
@@ -64,8 +63,8 @@
     width: 50%;
     border-radius: 15px;
     border: 1px solid #CCC;
-    padding: 3px;
-    padding-left: 5px;
+    padding: 5px;
+    padding-left: 9px;
     outline: none;
 }
 

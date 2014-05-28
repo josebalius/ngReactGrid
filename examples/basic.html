@@ -2,7 +2,7 @@
 <html ng-app="example">
     <head>
         <title>ngReactGrid Basic Example</title>
-        <link rel="stylesheet" type="text/css" href="https://rawgit.com/josebalius/ngReactGrid/master/build/css/ngReactGrid.css">
+        <link rel="stylesheet" type="text/css" href="../build/css/ngReactGrid.css">
     </head>
     <body>
         <div ng-controller="BasicExampleController" style="width: 100%">
@@ -32,12 +32,9 @@
                             field: "firstName",
                             displayName: "First Name",
                             render: function(row) {
-                                return '<a href="#">' + row.firstName + '</a>';
-                            },
-                            events: {
-                                onClick: function(cell, row) {
+                                return React.DOM.a({href:"javascript:", onClick: function() {
                                     $scope.employee = row;
-                                }
+                                }}, row.firstName);
                             }
                         },
                         {
