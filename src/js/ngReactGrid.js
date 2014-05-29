@@ -86,9 +86,10 @@ angular.module("ngReactGrid", [])
     gridReact.prototype.sort = function() {
 
         var copy = this.grid.react.originalData.slice(0);
+        var isAsc = this.grid.sortInfo.dir === "asc";
 
         copy.sort(function(a, b) {
-            if(this.grid.sortInfo.dir === "asc") {
+            if(isAsc) {
                 return a[this.grid.sortInfo.field] <= b[this.grid.sortInfo.field] ? -1 : 1;
             } else {
                 return a[this.grid.sortInfo.field] >= b[this.grid.sortInfo.field] ? -1 : 1;
@@ -164,19 +165,21 @@ angular.module("ngReactGrid", [])
         }.bind(this));
     };
 
-    gridReact.prototype.cell = {
-        events: {
-            onClick: function(cell, row) {
-                if(cell.events && cell.events.onClick) {
-                    $rootScope.$apply(function() {
-                        cell.events.onClick(cell, row);
-                    });
+    gridReact.prototype.wrapFunctionsInAngular = function(cell) {  
+        for(var key in cell.props) {
+            if(cell.props.hasOwnProperty(key)) {
+                if(key === "children") {
+                    this.wrapFunctionsInAngular(cell.props[key]);
+                } else if(typeof cell.props[key] === 'function') {
+                    cell.props[key] = this.wrapWithRootScope(cell.props[key]);
                 }
             }
+            
         }
-    };
+        return cell;
+    }
 
-    gridReact.prototype.updateScope = function(func) {
+    gridReact.prototype.wrapWithRootScope = function(func) {
         return function() {
             $rootScope.$apply(function() {
                 func();

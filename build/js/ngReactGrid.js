@@ -116,9 +116,10 @@ angular.module("ngReactGrid", [])
     gridReact.prototype.sort = function() {
 
         var copy = this.grid.react.originalData.slice(0);
+        var isAsc = this.grid.sortInfo.dir === "asc";
 
         copy.sort(function(a, b) {
-            if(this.grid.sortInfo.dir === "asc") {
+            if(isAsc) {
                 return a[this.grid.sortInfo.field] <= b[this.grid.sortInfo.field] ? -1 : 1;
             } else {
                 return a[this.grid.sortInfo.field] >= b[this.grid.sortInfo.field] ? -1 : 1;
@@ -194,19 +195,21 @@ angular.module("ngReactGrid", [])
         }.bind(this));
     };
 
-    gridReact.prototype.cell = {
-        events: {
-            onClick: function(cell, row) {
-                if(cell.events && cell.events.onClick) {
-                    $rootScope.$apply(function() {
-                        cell.events.onClick(cell, row);
-                    });
+    gridReact.prototype.wrapFunctionsInAngular = function(cell) {  
+        for(var key in cell.props) {
+            if(cell.props.hasOwnProperty(key)) {
+                if(key === "children") {
+                    this.wrapFunctionsInAngular(cell.props[key]);
+                } else if(typeof cell.props[key] === 'function') {
+                    cell.props[key] = this.wrapWithRootScope(cell.props[key]);
                 }
             }
+            
         }
-    };
+        return cell;
+    }
 
-    gridReact.prototype.updateScope = function(func) {
+    gridReact.prototype.wrapWithRootScope = function(func) {
         return function() {
             $rootScope.$apply(function() {
                 func();
@@ -388,7 +391,7 @@ var ngReactGridComponent = (function() {
                 var self = this;
                 var head = document.getElementsByTagName('head')[0];
 
-                var processMouseUp = function() {
+                /*var processMouseUp = function() {
                     var wasDragging = isDragging;
                     isDragging = false;
                     //$("#cursorChange").remove();
@@ -401,7 +404,7 @@ var ngReactGridComponent = (function() {
                     }
                 };
 
-                /*resizeControl.addEventListener('mousedown', function() {
+                resizeControl.addEventListener('mousedown', function() {
                     lastX = resizeControl.offsetLeft;
 
                     window.removeEventListener('mousemove');
@@ -585,9 +588,6 @@ var ngReactGridComponent = (function() {
             handleClick: function() {
                 this.props.grid.react.cell.events.onClick(this.props.cell, this.props.row);
             },
-            updateScope: function(fn) {
-                return this.props.grid.react.updateScope(fn);
-            },
             render: function() {
                 var cellText = this.props.row[this.props.cell.field];
                 var cellStyle = {};
@@ -598,14 +598,10 @@ var ngReactGridComponent = (function() {
                     cellTextType = typeof cellText;
 
                     if(cellTextType === 'string') {
-                        return (React.DOM.td( {style:cellStyle, dangerouslySetInnerHTML:{__html: cellText}, onClick:this.handleClick}))
+                        return (React.DOM.td( {style:cellStyle}, cellText))
                     } else if(cellTextType === 'object') {
 
-                        for(var i in cellText.props) {
-                            if(cellText.props.hasOwnProperty(i) && typeof cellText.props[i] === 'function') {
-                                cellText.props[i] = this.updateScope(cellText.props[i]);
-                            }
-                        }
+                        cellText = this.props.grid.react.wrapFunctionsInAngular(cellText);
 
                         return (
                             React.DOM.td( {style:cellStyle}, 

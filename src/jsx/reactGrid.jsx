@@ -68,7 +68,7 @@ var ngReactGridComponent = (function() {
                 var self = this;
                 var head = document.getElementsByTagName('head')[0];
 
-                var processMouseUp = function() {
+                /*var processMouseUp = function() {
                     var wasDragging = isDragging;
                     isDragging = false;
                     //$("#cursorChange").remove();
@@ -81,7 +81,7 @@ var ngReactGridComponent = (function() {
                     }
                 };
 
-                /*resizeControl.addEventListener('mousedown', function() {
+                resizeControl.addEventListener('mousedown', function() {
                     lastX = resizeControl.offsetLeft;
 
                     window.removeEventListener('mousemove');
@@ -265,9 +265,6 @@ var ngReactGridComponent = (function() {
             handleClick: function() {
                 this.props.grid.react.cell.events.onClick(this.props.cell, this.props.row);
             },
-            updateScope: function(fn) {
-                return this.props.grid.react.updateScope(fn);
-            },
             render: function() {
                 var cellText = this.props.row[this.props.cell.field];
                 var cellStyle = {};
@@ -278,14 +275,10 @@ var ngReactGridComponent = (function() {
                     cellTextType = typeof cellText;
 
                     if(cellTextType === 'string') {
-                        return (<td style={cellStyle} dangerouslySetInnerHTML={{__html: cellText}} onClick={this.handleClick}></td>)
+                        return (<td style={cellStyle}>{cellText}</td>)
                     } else if(cellTextType === 'object') {
 
-                        for(var i in cellText.props) {
-                            if(cellText.props.hasOwnProperty(i) && typeof cellText.props[i] === 'function') {
-                                cellText.props[i] = this.updateScope(cellText.props[i]);
-                            }
-                        }
+                        cellText = this.props.grid.react.wrapFunctionsInAngular(cellText);
 
                         return (
                             <td style={cellStyle}>
