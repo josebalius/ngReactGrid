@@ -1,19 +1,7 @@
 ngReactGrid - v0.3.0
 ===========
 
-What is ngReactGrid?
-----------
-I wrote ngReactGrid to speed up the grids in my application that were previously using ngGrid. I tried to keep the API as similar as possible as I already had a large implementation of ngGrids. The grid uses ReactJS to render and is based off the jQuery DataTables table archictecture. ngReactGrid uses HTML tables to render and supports fixed table headers by default. Here is a blog post explaining the performance gains: http://www.josebalius.com/why-i-stopped-using-ng-grid-and-rolled-my-own-with-reactjs/
-
-Examples
-----------
-Working on some examples for you guys, in the meantime, checkout the following JSBins:
-
-Basic Functionality: http://jsbin.com/kacufina/1/
-
-Basic Functionality - Horizontal Scroll: http://jsbin.com/yapocupo/1/
-
-I am working on some examples to show off how to load data from the server and listen to the pageSize, Search, Sort, and Pagination events.
+Please refer to: http://josebalius.github.io/ngReactGrid/ for documentation.
 
 License
 ----------
