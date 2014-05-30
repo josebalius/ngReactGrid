@@ -1,4 +1,4 @@
-ngReactGrid - v0.3.0
+ngReactGrid - v0.4.0
 ===========
 
 Please refer to: http://josebalius.github.io/ngReactGrid/ for documentation.
