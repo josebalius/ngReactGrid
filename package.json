@@ -1,6 +1,6 @@
 {
   "name": "ngReactGrid",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "An AngularJS grid directive that uses ReactJS as the rendering engine. Based on ngGrid and jQuery DataTables.",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

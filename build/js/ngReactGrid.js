@@ -51,6 +51,8 @@ angular.module("ngReactGrid", [])
  */
 .factory("ngReactGrid", ['$rootScope', function($rootScope) {
 
+    var NO_GET_DATA_CALLBACK_ERROR = "localMode is false, please implement the getData function on the grid object";
+
     var gridReact = function(grid, ngReactGrid) {
         this.ngReactGrid = ngReactGrid;
         this.grid = grid;
@@ -69,11 +71,11 @@ angular.module("ngReactGrid", [])
             });
 
             if(!this.grid.localMode) {
-                if(this.grid.setPageSize) {
+                if(this.grid.getData) {
                     this.loading = true;
-                    this.grid.setPageSize(pageSize);
+                    this.grid.getData();
                 } else {
-                    throw new Error("localMode is false, please implement the setPageSize function on the grid object");
+                    throw new Error(NO_GET_DATA_CALLBACK_ERROR);
                 }
                 
             }
@@ -97,12 +99,12 @@ angular.module("ngReactGrid", [])
             }
 
             if(!this.grid.localMode) {
-                if(this.grid.setSortField) {
+                if(this.grid.getData) {
                     this.loading = true;
-                    this.grid.setSortField(this.grid.sortInfo);
+                    this.grid.getData();
                     this.ngReactGrid.render();
                 } else {
-                    throw new Error("localMode is false, please implement the setSortField function on the grid object");
+                    throw new Error(NO_GET_DATA_CALLBACK_ERROR);
                 }
                 
             } else {
@@ -136,6 +138,10 @@ angular.module("ngReactGrid", [])
     gridReact.prototype.setSearch = function(search) {
 
         $rootScope.$apply(function() {
+            this.ngReactGrid.update({
+                search: search
+            });
+
             search = String(search).toLowerCase();
 
             if(this.grid.localMode) {
@@ -160,11 +166,11 @@ angular.module("ngReactGrid", [])
                 }, false, true);
 
             } else {
-                if(this.grid.setSearch) {
+                if(this.grid.getData) {
                     this.loading = true;
-                    this.grid.setSearch(search);
+                    this.grid.getData();
                 } else {
-                    throw new Error("localMode is false, please implement the setSearch function on the grid object");
+                    throw new Error(NO_GET_DATA_CALLBACK_ERROR);
                 }
                 
             }
@@ -181,11 +187,11 @@ angular.module("ngReactGrid", [])
             });
 
             if(!this.grid.localMode) {
-                if(this.grid.goToPage) {
+                if(this.grid.getData) {
                     this.loading = true;
-                    this.grid.goToPage(page);
+                    this.grid.getData();
                 } else {
-                    throw new Error("localMode is false, please implement the goToPage function on the grid object");
+                    throw new Error(NO_GET_DATA_CALLBACK_ERROR);
                 }
                 
             }
@@ -231,6 +237,7 @@ angular.module("ngReactGrid", [])
             field: "",
             dir: ""
         };
+        this.search = "";
         this.horizontalScroll = false;
         this.scrollbarWidth = (function() {
             var outer = document.createElement("div");
@@ -268,16 +275,33 @@ angular.module("ngReactGrid", [])
         this.element = element[0];
         this.attrs = attrs;
         this.grid = new grid(this);
+        this.initWithGetData = false;
+
+        this.update(scope.grid, true);
 
         /**
          * Watchers
          */
         scope.$watch("grid.data", function(newValue, oldValue) {
-            this.update({data: newValue}, true);
-            this.render();
+            if(newValue) {
+                this.update({data: newValue}, true);
+                this.render();
+            }
         }.bind(this));
 
-        this.update(scope.grid, true);
+        scope.$watch("grid.totalCount", function(newValue, oldValue) {
+            if(newValue) {
+                this.update({totalCount: newValue}, true);
+                this.render();
+            }
+        }.bind(this));
+
+        if(this.grid.getData) {
+            this.initWithGetData = true;
+            this.grid.react.loading = true;
+            this.grid.getData(this.grid);
+        }
+
         this.render();
     };
 
@@ -310,7 +334,12 @@ angular.module("ngReactGrid", [])
         this.grid.react.showingRecords = this.grid.data.length;
         this.grid.react.startIndex = startIndex;
         this.grid.react.endIndex = endIndex;
-        this.grid.react.loading = false;
+
+        if(!this.initWithGetData)
+            this.grid.react.loading = false;
+        else
+            this.initWithGetData = false;
+
         this.grid.totalPages = Math.ceil(this.grid.totalCount / this.grid.pageSize);
     };
 
@@ -711,6 +740,20 @@ var ngReactGridComponent = (function() {
                     } else {
                         rows = this.props.grid.data.map(mapRows);
                     }
+
+                    if(this.props.grid.react.showingRecords === 0) {
+                        var noDataStyle = {
+                            textAlign: "center"
+                        };
+
+                        rows = (
+                            React.DOM.tr(null, 
+                                React.DOM.td( {colSpan:this.props.grid.columnDefs.length, style:noDataStyle}, 
+                                    "No records found"
+                                )
+                            )
+                        )
+                    }
                 }
                 
                 
@@ -720,20 +763,6 @@ var ngReactGridComponent = (function() {
                     ngReactGridViewPortStyle.overflowX = "hidden";
                 } else {
                     tableStyle.width = "calc(100% - " + this.props.grid.scrollbarWidth + "px)";
-                }
-
-                if(this.props.grid.react.showingRecords === 0) {
-                    var noDataStyle = {
-                        textAlign: "center"
-                    };
-
-                    rows = (
-                        React.DOM.tr(null, 
-                            React.DOM.td( {colSpan:this.props.grid.columnDefs.length, style:noDataStyle}, 
-                                "No records found"
-                            )
-                        )
-                    )
                 }
 
                 return (

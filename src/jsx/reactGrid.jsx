@@ -388,6 +388,20 @@ var ngReactGridComponent = (function() {
                     } else {
                         rows = this.props.grid.data.map(mapRows);
                     }
+
+                    if(this.props.grid.react.showingRecords === 0) {
+                        var noDataStyle = {
+                            textAlign: "center"
+                        };
+
+                        rows = (
+                            <tr>
+                                <td colSpan={this.props.grid.columnDefs.length} style={noDataStyle}>
+                                    No records found
+                                </td>
+                            </tr>
+                        )
+                    }
                 }
                 
                 
@@ -397,20 +411,6 @@ var ngReactGridComponent = (function() {
                     ngReactGridViewPortStyle.overflowX = "hidden";
                 } else {
                     tableStyle.width = "calc(100% - " + this.props.grid.scrollbarWidth + "px)";
-                }
-
-                if(this.props.grid.react.showingRecords === 0) {
-                    var noDataStyle = {
-                        textAlign: "center"
-                    };
-
-                    rows = (
-                        <tr>
-                            <td colSpan={this.props.grid.columnDefs.length} style={noDataStyle}>
-                                No records found
-                            </td>
-                        </tr>
-                    )
                 }
 
                 return (
