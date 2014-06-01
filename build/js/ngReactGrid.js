@@ -789,7 +789,7 @@ var ngReactGridComponent = (function() {
 
                 return (
                     React.DOM.div( {className:"ngReactGridStatus"}, 
-                        React.DOM.div(null, "Page ", React.DOM.strong(null, this.props.grid.currentPage), " of ", React.DOM.strong(null, this.props.grid.totalPages), " - Showing ", React.DOM.strong(null, this.props.grid.pageSize), " of ", React.DOM.strong(null, this.props.grid.totalCount), " records")
+                        React.DOM.div(null, "Page ", React.DOM.strong(null, this.props.grid.currentPage), " of ", React.DOM.strong(null, this.props.grid.totalPages), " - Showing ", React.DOM.strong(null, this.props.grid.react.showingRecords), " of ", React.DOM.strong(null, this.props.grid.totalCount), " records")
                     )
                 )
             }
