@@ -1,11 +1,10 @@
 /**
- * @author Jose Garcia - jose.balius@gmail.com
  * @module ngReactGrid
  */
 angular.module("ngReactGrid", [])
 
 /**
- * @directive ngReactGrid
+ * @directive ngReactGrid - <ng-react-grid grid="grid"></ng-react-grid>
  */
 .directive("ngReactGrid", ['ngReactGrid', function(ngReactGrid) {
     return {

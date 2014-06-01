@@ -1,3 +1,8 @@
+/**
+ * @license ngReactGrid v0.4.0
+ * (c) 2010-2014 Jose Garcia - http://josebalius.github.io/ngReactGrid/
+ * License: MIT
+ */
 var _ = {
     nativeForEach: Array.prototype.forEach,
     each: function(obj, iterator, context) {
@@ -29,13 +34,12 @@ var _ = {
     }
 };
 /**
- * @author Jose Garcia - jose.balius@gmail.com
  * @module ngReactGrid
  */
 angular.module("ngReactGrid", [])
 
 /**
- * @directive ngReactGrid
+ * @directive ngReactGrid - <ng-react-grid grid="grid"></ng-react-grid>
  */
 .directive("ngReactGrid", ['ngReactGrid', function(ngReactGrid) {
     return {
@@ -351,9 +355,8 @@ angular.module("ngReactGrid", [])
 }])
 /** @jsx React.DOM */
 /**
- * @author Jose Garcia - jose.balius@gmail.com
- * ngReactGrid React component
- */
+ * ngReactGridComponent - React Component
+ **/
 var ngReactGridComponent = (function() {
 
     var windowInnerWidth = window.innerWidth, windowInnerHeight = window.innerHeight;

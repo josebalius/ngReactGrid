@@ -1,7 +1,6 @@
 /**
- * @author Jose Garcia - jose.balius@gmail.com
- * ngReactGrid React component
- */
+ * ngReactGridComponent - React Component
+ **/
 var ngReactGridComponent = (function() {
 
     var windowInnerWidth = window.innerWidth, windowInnerHeight = window.innerHeight;

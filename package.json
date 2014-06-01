@@ -21,7 +21,8 @@
     "gulp-concat": "2.2.0",
     "gulp-filter": "0.4.1",
     "gulp-uglify": "0.3.0",
-    "gulp-rename": "1.2.0"
+    "gulp-rename": "1.2.0",
+    "gulp-replace": "0.3.0"
   }
 
 }

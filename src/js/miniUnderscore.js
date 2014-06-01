@@ -1,3 +1,8 @@
+/**
+ * @license ngReactGrid v{$version}
+ * (c) 2010-2014 Jose Garcia - http://josebalius.github.io/ngReactGrid/
+ * License: MIT
+ */
 var _ = {
     nativeForEach: Array.prototype.forEach,
     each: function(obj, iterator, context) {
