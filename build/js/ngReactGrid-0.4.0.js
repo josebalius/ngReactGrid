@@ -572,8 +572,7 @@ var ngReactGridComponent = (function() {
             }
         });
 
-        return React.createClass({
-            displayName: "ngReactGridHeader",
+        var ngReactGridHeader = React.createClass({displayName: 'ngReactGridHeader',
             render: function() {
 
                 var columnsLength = this.props.grid.columnDefs.length;
@@ -613,6 +612,8 @@ var ngReactGridComponent = (function() {
                 );
             }
         });
+
+        return ngReactGridHeader;
     })();
 
     var ngReactGridBody = (function() {
@@ -673,8 +674,7 @@ var ngReactGridComponent = (function() {
         });
 
 
-        return React.createClass({
-            displayName: "ngReactGridBody",
+        var ngReactGridBody = React.createClass({displayName: 'ngReactGridBody',
             getInitialState: function() {
                 return {
                     fullRender: false,
@@ -785,6 +785,8 @@ var ngReactGridComponent = (function() {
                 );
             }
         });
+
+        return ngReactGridBody;
     })();
 
     var ngReactGridFooter = (function() {
@@ -856,8 +858,7 @@ var ngReactGridComponent = (function() {
             }
         });
 
-        return React.createClass({
-            displayName: "ngReactGridFooter",
+        var ngReactGridFooter = React.createClass({displayName: 'ngReactGridFooter',
             render: function() {
                 return (
                     React.DOM.div( {className:"ngReactGridFooter"}, 
@@ -867,6 +868,8 @@ var ngReactGridComponent = (function() {
                 )
             }
         });
+
+        return ngReactGridFooter;
     })();
 
     var ngReactGrid = React.createClass({displayName: 'ngReactGrid',
