@@ -573,6 +573,7 @@ var ngReactGridComponent = (function() {
         });
 
         return React.createClass({
+            displayName: "ngReactGridHeader",
             render: function() {
 
                 var columnsLength = this.props.grid.columnDefs.length;
@@ -673,6 +674,7 @@ var ngReactGridComponent = (function() {
 
 
         return React.createClass({
+            displayName: "ngReactGridBody",
             getInitialState: function() {
                 return {
                     fullRender: false,
@@ -855,6 +857,7 @@ var ngReactGridComponent = (function() {
         });
 
         return React.createClass({
+            displayName: "ngReactGridFooter",
             render: function() {
                 return (
                     React.DOM.div( {className:"ngReactGridFooter"}, 
