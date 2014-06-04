@@ -3,6 +3,10 @@ ngReactGrid - v0.4.0
 
 Please refer to: http://josebalius.github.io/ngReactGrid/ for documentation.
 
+Todo
+----
+* Resizeable columns
+
 License
 ----------
 The MIT License (MIT)
