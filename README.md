@@ -7,6 +7,18 @@ The API of the grid is similar to that of ng-grid's, and the table architecture 
 
 Please refer to: http://josebalius.github.io/ngReactGrid/ for documentation.
 
+Features
+--------
+* Fast, awesome performance
+* Fixed headers
+* Server side hooks
+* Sorting
+* Pagination
+* Page size
+* Search
+* Horizontal scrolling
+* Custom width / height
+
 Todo
 ----
 * Resizeable columns
