@@ -36,7 +36,8 @@ angular.module("ngReactGrid", [])
         $rootScope.$apply(function() {
 
             this.ngReactGrid.update({
-                pageSize: pageSize
+                pageSize: pageSize,
+                currentPage: 1
             });
 
             if(!this.grid.localMode) {
@@ -98,7 +99,8 @@ angular.module("ngReactGrid", [])
         }.bind(this));
 
         this.ngReactGrid.update({
-            data: copy
+            data: copy,
+            currentPage: 1
         }, true);
 
         this.ngReactGrid.render();
@@ -131,7 +133,8 @@ angular.module("ngReactGrid", [])
                 });
 
                 this.ngReactGrid.update({
-                    data: filteredData
+                    data: filteredData,
+                    currentPage: 1
                 }, false, true);
 
             } else {

@@ -22,16 +22,21 @@
             $scope.employee = {};
 
             $scope.grid = {
-                    data: [],
+                    data: dataSet,
                     columnDefs: [
                     {
                         field: "firstName",
-                        displayName: "First Name"
+                        displayName: "First Name",
+                        render: function(row) {
+                            return React.DOM.a({href:"javascript:", onClick: function() {
+                                // you can do things with $scope in here or any other angular service/function
+                            }}, row.firstName);
+                        }
                     },
                     {
                         field: "lastName",
                         displayName: "Last Name"
-                    }],
+                    }]/*,
                     localMode: false,
                     getData: function() {
                         var grid = this;
@@ -39,7 +44,7 @@
                             $scope.grid.data = dataSet.slice(0, grid.pageSize);
                             $scope.grid.totalCount = dataSet.length;
                         }, 2000);
-                    }
+                    }*/
             };
         });
 
