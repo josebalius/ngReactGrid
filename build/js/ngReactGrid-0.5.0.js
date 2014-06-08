@@ -1,5 +1,5 @@
 /**
- * @license ngReactGrid v0.4.0
+ * @license ngReactGrid v0.5.0
  * (c) 2010-2014 Jose Garcia - http://josebalius.github.io/ngReactGrid/
  * License: MIT
  */
@@ -49,6 +49,32 @@ angular.module("ngReactGrid", [])
         }
     };
 }])
+
+.factory("ngReactGridCheckbox", function() {
+    var ngReactGridCheckbox = function(selectionTarget) {
+        return {
+            field: "",
+            fieldName: "",
+            render: function(row) {
+
+                var handleClick = function() {
+                    var index = selectionTarget.indexOf(row);
+                    if(index === -1) {
+                        selectionTarget.push(row);
+                    } else {
+                        selectionTarget.splice(index, 1);
+                    }
+                };
+
+                return (ngReactGridCheckboxComponent({selectionTarget: selectionTarget, handleClick: handleClick}));
+            },
+            sort: false,
+            width: 1
+        }
+    };
+
+    return ngReactGridCheckbox;
+})
 
 /**
  * @factory ngReactGrid
@@ -494,7 +520,8 @@ var ngReactGridComponent = (function() {
                     cursor: "pointer",
                     width: "8%",
                     "float": "left",
-                    textAlign: "right"
+                    textAlign: "right",
+                    display: (this.props.cell.sort === false) ? "none": ""
                 };
 
                 var arrowStyle = {
@@ -888,4 +915,25 @@ var ngReactGridComponent = (function() {
     });
 
     return ngReactGrid;
+})();
+/** @jsx React.DOM */
+var ngReactGridCheckboxComponent = (function() {
+    var ngReactGridCheckboxComponent = React.createClass({displayName: 'ngReactGridCheckboxComponent',
+        handleClick: function() {
+            this.props.handleClick();
+        },
+        render: function() {
+            var checkboxStyle = {
+                textAlign: "center"
+            };
+
+            return (
+                React.DOM.div( {style:checkboxStyle}, 
+                    React.DOM.input( {type:"checkbox", onClick:this.handleClick} )
+                )
+            )
+        }
+    });
+
+    return ngReactGridCheckboxComponent;
 })();

@@ -135,7 +135,8 @@ var ngReactGridComponent = (function() {
                     cursor: "pointer",
                     width: "8%",
                     "float": "left",
-                    textAlign: "right"
+                    textAlign: "right",
+                    display: (this.props.cell.sort === false) ? "none": ""
                 };
 
                 var arrowStyle = {

@@ -2,34 +2,39 @@
 <html ng-app="example">
     <head>
         <title>ngReactGrid Basic Example</title>
-        <link rel="stylesheet" type="text/css" href="../build/css/ngReactGrid-0.4.0.css">
+        <link rel="stylesheet" type="text/css" href="../build/css/ngReactGrid-0.5.0.css">
     </head>
     <body>
         <div ng-controller="BasicExampleController" style="width: 100%">
             <ng-react-grid grid="grid"></ng-react-grid>
             <br />
+            Selections: {{selections}}<br />
+            Clicked On Record: {{clickedOnRecord}}
         </div>
 
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.10/angular.min.js"></script>
         <script src="http://fb.me/react-0.10.0.js"></script>
         <script src="./dataSet.js"></script>
-        <script src="../build/js/ngReactGrid-0.4.0.min.js"></script>
+        <script src="../build/js/ngReactGrid-0.5.0.min.js"></script>
         <script type="text/javascript">
 
             angular.module("example", ['ngReactGrid'])
-            .controller("BasicExampleController", function($scope, $timeout) {
+            .controller("BasicExampleController", function($scope, $timeout, ngReactGridCheckbox) {
 
             $scope.employee = {};
+            $scope.selections = [];
+            $scope.clickedOnRecord = {};
 
             $scope.grid = {
                     data: dataSet,
                     columnDefs: [
+                    new ngReactGridCheckbox($scope.selections),
                     {
                         field: "firstName",
                         displayName: "First Name",
                         render: function(row) {
                             return React.DOM.a({href:"javascript:", onClick: function() {
-                                // you can do things with $scope in here or any other angular service/function
+                                $scope.clickedOnRecord = row;
                             }}, row.firstName);
                         }
                     },

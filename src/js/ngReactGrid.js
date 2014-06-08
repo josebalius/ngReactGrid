@@ -15,6 +15,32 @@ angular.module("ngReactGrid", [])
     };
 }])
 
+.factory("ngReactGridCheckbox", function() {
+    var ngReactGridCheckbox = function(selectionTarget) {
+        return {
+            field: "",
+            fieldName: "",
+            render: function(row) {
+
+                var handleClick = function() {
+                    var index = selectionTarget.indexOf(row);
+                    if(index === -1) {
+                        selectionTarget.push(row);
+                    } else {
+                        selectionTarget.splice(index, 1);
+                    }
+                };
+
+                return (ngReactGridCheckboxComponent({selectionTarget: selectionTarget, handleClick: handleClick}));
+            },
+            sort: false,
+            width: 1
+        }
+    };
+
+    return ngReactGridCheckbox;
+})
+
 /**
  * @factory ngReactGrid
  */
