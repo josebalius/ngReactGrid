@@ -27,6 +27,38 @@ Todo
 * Column pinning
 * Don't see your feature? I am accepting pull requests. Please contribute.
 
+Develop
+-------
+
+**Setup**
+
+```
+git clone 
+cd ngReactGrid
+npm install
+gulp
+```
+
+### Developing
+```bash
+# Clone this repo (or your fork).
+git clone https://github.com/josebalius/ngReactGrid.git
+cd ngReactGrid
+
+# Install all the the dev dependencies, Gulp, etc.
+npm install
+npm install -g gulp
+
+# Run gulp inside the ngReactGrid to watch your files and build
+gulp
+```
+
+You are now developing! Gulp will generate a build folder for you and put everything in there. I use examples/basic.html to implement features. It is my "sandbox" environment, so it is always changing (with whatever I'm working on)! However I still commit it because it is a good starting point for development. 
+
+I should probably create other examples, I will when I have some time. Please remember that there is also a documentation site: http://josebalius.github.io/ngReactGrid/
+
+Good luck!
+
 License
 ----------
 The MIT License (MIT)
