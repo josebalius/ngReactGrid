@@ -43,9 +43,9 @@ npm install -g gulp
 gulp
 ```
 
-You are now developing! Gulp will generate a build folder for you and put everything in there. I use examples/basic.html to implement features. It is my "sandbox" environment, so it is always changing (with whatever I'm working on)! However I still commit it because it is a good starting point for development. 
+I use examples/basic.html to implement features, it is my "sandbox" environment. This file however is always changing (with whatever it is that I am working on) so beware. I suggest you copy this file and set it up your way. I will be creating more examples when I have some time.
 
-I should probably create other examples, I will when I have some time. Please remember that there is also a documentation site: http://josebalius.github.io/ngReactGrid/
+Please remember that there is also a documentation site: http://josebalius.github.io/ngReactGrid/
 
 Good luck!
 
