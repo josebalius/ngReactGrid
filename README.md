@@ -30,15 +30,6 @@ Todo
 Develop
 -------
 
-**Setup**
-
-```
-git clone 
-cd ngReactGrid
-npm install
-gulp
-```
-
 ### Developing
 ```bash
 # Clone this repo (or your fork).
