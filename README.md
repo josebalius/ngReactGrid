@@ -30,7 +30,6 @@ Todo
 Develop
 -------
 
-### Developing
 ```bash
 # Clone this repo (or your fork).
 git clone https://github.com/josebalius/ngReactGrid.git
