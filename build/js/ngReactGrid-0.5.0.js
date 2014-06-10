@@ -66,7 +66,7 @@ angular.module("ngReactGrid", [])
                     }
                 };
 
-                return (ngReactGridCheckboxComponent({selectionTarget: selectionTarget, handleClick: handleClick}));
+                return ngReactGridCheckboxComponent({selectionTarget: selectionTarget, handleClick: handleClick, row: row});;
             },
             sort: false,
             width: 1
@@ -919,8 +919,22 @@ var ngReactGridComponent = (function() {
 /** @jsx React.DOM */
 var ngReactGridCheckboxComponent = (function() {
     var ngReactGridCheckboxComponent = React.createClass({displayName: 'ngReactGridCheckboxComponent',
+        getInitialState: function() {
+            return {
+                checked: false
+            };
+        },
         handleClick: function() {
+            this.setState({
+                checked: (this.state.checked) ? false : true
+            });
+
             this.props.handleClick();
+        },
+        componentWillReceiveProps: function(nextProps) {
+            this.setState({
+                checked: (nextProps.selectionTarget.indexOf(nextProps.row) === -1) ? false : true
+            });
         },
         render: function() {
             var checkboxStyle = {
@@ -929,7 +943,7 @@ var ngReactGridCheckboxComponent = (function() {
 
             return (
                 React.DOM.div( {style:checkboxStyle}, 
-                    React.DOM.input( {type:"checkbox", onClick:this.handleClick} )
+                    React.DOM.input( {type:"checkbox", onChange:this.handleClick, checked:this.state.checked} )
                 )
             )
         }

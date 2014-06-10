@@ -31,7 +31,7 @@ angular.module("ngReactGrid", [])
                     }
                 };
 
-                return (ngReactGridCheckboxComponent({selectionTarget: selectionTarget, handleClick: handleClick}));
+                return ngReactGridCheckboxComponent({selectionTarget: selectionTarget, handleClick: handleClick, row: row});;
             },
             sort: false,
             width: 1
