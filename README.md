@@ -23,6 +23,7 @@ Features
 
 Todo
 ----
+* Editable cells
 * Resizeable columns
 * Column pinning
 * Don't see your feature? I am accepting pull requests. Please contribute.
