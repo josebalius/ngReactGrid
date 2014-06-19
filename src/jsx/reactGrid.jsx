@@ -285,9 +285,11 @@ var ngReactGridComponent = (function() {
                         return (
                             <td style={cellStyle}>
                                 {cellText}
-                            </td>
+                            </td> 
                         );
-                    }
+                    } /*else {
+                        return (<td style={cellStyle}></td>);
+                    }*/
                     
                 } else {
                     return (

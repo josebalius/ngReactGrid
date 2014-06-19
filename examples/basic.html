@@ -33,9 +33,12 @@
                         field: "firstName",
                         displayName: "First Name",
                         render: function(row) {
-                            return React.DOM.a({href:"javascript:", onClick: function() {
+                            if(false) {
+                                return React.DOM.a({href:"javascript:", onClick: function() {
                                 $scope.clickedOnRecord = row;
                             }}, row.firstName);
+                            }
+                            
                         }
                     },
                     {
