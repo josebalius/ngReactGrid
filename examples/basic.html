@@ -31,15 +31,7 @@
                     new ngReactGridCheckbox($scope.selections),
                     {
                         field: "firstName",
-                        displayName: "First Name",
-                        render: function(row) {
-                            if(false) {
-                                return React.DOM.a({href:"javascript:", onClick: function() {
-                                $scope.clickedOnRecord = row;
-                            }}, row.firstName);
-                            }
-                            
-                        }
+                        displayName: "First Name"
                     },
                     {
                         field: "lastName",

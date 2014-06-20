@@ -96,10 +96,18 @@ angular.module("ngReactGrid", [])
     gridReact.prototype.setPageSize = function(pageSize) {
         $rootScope.$apply(function() {
 
-            this.ngReactGrid.update({
+            var update = {
                 pageSize: pageSize,
                 currentPage: 1
-            });
+            };
+
+            if(this.grid.search.length > 0) {
+                update.data = this.filteredData;
+                this.ngReactGrid.update(update, false, true)
+            } else {
+                this.ngReactGrid.update(update);
+            }
+
 
             if(!this.grid.localMode) {
                 if(this.grid.getData) {
@@ -108,11 +116,11 @@ angular.module("ngReactGrid", [])
                 } else {
                     throw new Error(NO_GET_DATA_CALLBACK_ERROR);
                 }
-                
+
             }
 
             this.ngReactGrid.render();
-            
+
         }.bind(this));
     };
 
@@ -137,18 +145,24 @@ angular.module("ngReactGrid", [])
                 } else {
                     throw new Error(NO_GET_DATA_CALLBACK_ERROR);
                 }
-                
+
             } else {
                 this.sort();
             }
 
-            
+
         }.bind(this));
     };
 
     gridReact.prototype.sort = function() {
+        var copy;
 
-        var copy = this.grid.react.originalData.slice(0);
+        if(this.grid.search.length > 0) {
+            copy = this.filteredData;
+        } else {
+            copy = this.grid.react.originalData.slice(0);
+        }
+
         var isAsc = this.grid.sortInfo.dir === "asc";
 
         copy.sort(function(a, b) {
@@ -162,7 +176,7 @@ angular.module("ngReactGrid", [])
         this.ngReactGrid.update({
             data: copy,
             currentPage: 1
-        }, true);
+        }, false, true);
 
         this.ngReactGrid.render();
     };
@@ -193,6 +207,8 @@ angular.module("ngReactGrid", [])
                     return result;
                 });
 
+                this.filteredData = filteredData;
+
                 this.ngReactGrid.update({
                     data: filteredData,
                     currentPage: 1
@@ -205,7 +221,7 @@ angular.module("ngReactGrid", [])
                 } else {
                     throw new Error(NO_GET_DATA_CALLBACK_ERROR);
                 }
-                
+
             }
 
             this.ngReactGrid.render();
@@ -215,9 +231,11 @@ angular.module("ngReactGrid", [])
 
     gridReact.prototype.goToPage = function(page) {
         $rootScope.$apply(function() {
+
             this.ngReactGrid.update({
+                data: (this.grid.search.length > 0) ? this.filteredData : this.originalData,
                 currentPage: page
-            });
+            }, false, true);
 
             if(!this.grid.localMode) {
                 if(this.grid.getData) {
@@ -226,7 +244,7 @@ angular.module("ngReactGrid", [])
                 } else {
                     throw new Error(NO_GET_DATA_CALLBACK_ERROR);
                 }
-                
+
             }
 
             this.ngReactGrid.render();
@@ -234,7 +252,7 @@ angular.module("ngReactGrid", [])
         }.bind(this));
     };
 
-    gridReact.prototype.wrapFunctionsInAngular = function(cell) {  
+    gridReact.prototype.wrapFunctionsInAngular = function(cell) {
         for(var key in cell.props) {
             if(cell.props.hasOwnProperty(key)) {
                 if(key === "children") {
@@ -243,10 +261,10 @@ angular.module("ngReactGrid", [])
                     cell.props[key] = this.wrapWithRootScope(cell.props[key]);
                 }
             }
-            
+
         }
         return cell;
-    }
+    };
 
     gridReact.prototype.wrapWithRootScope = function(func) {
         return function() {
@@ -287,7 +305,7 @@ angular.module("ngReactGrid", [])
             // add innerdiv
             var inner = document.createElement("div");
             inner.style.width = "100%";
-            outer.appendChild(inner);        
+            outer.appendChild(inner);
 
             var widthWithScroll = inner.offsetWidth;
 
@@ -347,7 +365,7 @@ angular.module("ngReactGrid", [])
         }
 
         this.grid = _.extend(this.grid, grid);
-        
+
         if(dataUpdate)
             this.grid.react.originalData = this.grid.data.slice(0);
 
@@ -381,7 +399,7 @@ angular.module("ngReactGrid", [])
     };
 
     return ngReactGrid;
-}])
+}]);
 /** @jsx React.DOM */
 /**
  * ngReactGridComponent - React Component
@@ -672,9 +690,9 @@ var ngReactGridComponent = (function() {
                                 cellText
                             ) 
                         );
-                    } else {
-                        return (React.DOM.td( {style:cellStyle}));
-                    }
+                    } /*else {
+                        return (<td style={cellStyle}></td>);
+                    }*/
                     
                 } else {
                     return (
