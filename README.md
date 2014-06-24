@@ -7,6 +7,13 @@ The API of the grid is similar to that of ng-grid's, and the table architecture 
 
 Please refer to: http://josebalius.github.io/ngReactGrid/ for documentation.
 
+Bower
+-----
+
+```
+bower install ngReactGrid
+```
+
 Features
 --------
 * Fast, awesome performance
