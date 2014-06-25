@@ -1,4 +1,4 @@
-ngReactGrid - v0.5.0
+ngReactGrid - v0.6.1
 ===========
 
 ngReactGrid is an Angular directive that can be used to render an enhanced HTML table or grid of data very fast using React as the rendering engine. 
