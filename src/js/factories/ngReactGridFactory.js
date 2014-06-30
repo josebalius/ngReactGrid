@@ -30,6 +30,13 @@ var ngReactGridFactory = function($rootScope) {
             }
         }.bind(this));
 
+        scope.$watch("grid.editing", function(newValue, oldValue) {
+            if(newValue !== oldValue) {
+                this.update({editing: newValue}, true);
+                this.render();
+            }
+        }.bind(this));
+
         if(this.grid.getData) {
             this.initWithGetData = true;
             this.grid.react.loading = true;

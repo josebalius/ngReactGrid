@@ -58,75 +58,10 @@ var ngReactGridComponent = (function() {
                 });
             },
             resize: function(delta) {
-                console.debug(delta);
+                // resize functionality coming soon
             },
             componentDidMount: function() {
-                var e = this.getDOMNode();
-                var resizeControl = e.querySelector(".ngGridHeaderResizeControl");
-                var isDragging = false;
-                var lastX = 0;
-                var self = this;
-                var head = document.getElementsByTagName('head')[0];
-
-                /*var processMouseUp = function() {
-                    var wasDragging = isDragging;
-                    isDragging = false;
-                    //$("#cursorChange").remove();
-                    window.removeEventListener('mousemove');
-
-                    console.debug('here');
-
-                    if(wasDragging) {
-                        //self.props.grid.resizeUpdateOriginalWidth(self.props.index);
-                    }
-                };
-
-                resizeControl.addEventListener('mousedown', function() {
-                    lastX = resizeControl.offsetLeft;
-
-                    window.removeEventListener('mousemove');
-                    window.addEventListener('mousemove', function(e) {
-                        isDragging = true;
-                        var delta = parseInt(e.pageX - lastX);
-                        self.resize(delta);
-                    });
-
-                    window.removeEventListener('mouseup');
-                    window.addEventListener('mouseup', function() {
-                        processMouseUp();
-                    });
-                });
-
-                /*resizeControl.on('mousedown', function() {
-                    lastX = resizeControl.offsetLeft;
-                    head.appendChild("<style type='text/css' id='cursorChange'>*{cursor:col-resize!important;-moz-user-select: none !important; -webkit-user-select: none !important; -ms-user-select:none !important; user-select:none; !important}</style>");
-
-                    window.removeEventListener('mousemove');
-                    window.addEventListener('mousemove', function(e) {
-                        console.debug(e);
-                    });
-                    /*$(window).on('mousemove', function(e) {
-                        isDragging = true;
-                        var delta = parseInt(e.pageX - lastX);
-                        self.props.grid.resize(self.props.cell.field, delta, self.props.index);
-                    });
-
-                    $(window).unbind('mouseup');
-                    $(window).on('mouseup', function() {
-                        processMouseUp();
-                    });
-                }).on('mouseup', function() {
-                    //processMouseUp();
-                });
-
-                resizeControl.on('dblclick', function() {
-                    var cellTextLength = self.props.cell.displayName.length;
-                    var pixelsPerCharacter = 9;
-                    var proposedWidth = cellTextLength * pixelsPerCharacter;
-                    self.props.grid.doubleClickResize(proposedWidth, self.props.index);
-                    self.props.grid.resizeUpdateOriginalWidth(self.props.index);
-                });
-                */
+                // resize functionality coming soon
             },
             render: function() {
 
@@ -265,6 +200,24 @@ var ngReactGridComponent = (function() {
     var ngReactGridBody = (function() {
 
         var ngReactGridBodyRowCell = React.createClass({displayName: 'ngReactGridBodyRowCell',
+            cell: function(cellText, cellStyle) {
+                cellTextType = typeof cellText;
+
+                if(cellTextType === 'string') {
+                    return (React.DOM.td( {style:cellStyle}, cellText))
+                } else if(cellTextType === 'object') {
+
+                    cellText = this.props.grid.react.wrapFunctionsInAngular(cellText);
+
+                    return (
+                        React.DOM.td( {style:cellStyle}, 
+                            cellText
+                        ) 
+                    );
+                } else {
+                    return defaultCell;
+                }
+            },
             render: function() {
                 var cellText = this.props.row[this.props.cell.field];
                 var cellStyle = {};
@@ -276,25 +229,12 @@ var ngReactGridComponent = (function() {
                         )
                     );
 
-                if(this.props.cell.render) {
+                if(this.props.grid.editing && this.props.cell.edit) {
+                    cellText = this.props.cell.edit(this.props.row);
+                    return this.cell(cellText, cellStyle);
+                } else if(this.props.cell.render) {
                     cellText = this.props.cell.render(this.props.row);
-                    cellTextType = typeof cellText;
-
-                    if(cellTextType === 'string') {
-                        return (React.DOM.td( {style:cellStyle}, cellText))
-                    } else if(cellTextType === 'object') {
-
-                        cellText = this.props.grid.react.wrapFunctionsInAngular(cellText);
-
-                        return (
-                            React.DOM.td( {style:cellStyle}, 
-                                cellText
-                            ) 
-                        );
-                    } else {
-                        return defaultCell;
-                    }
-                    
+                    return this.cell(cellText, cellStyle);
                 } else {
                     return defaultCell;
                 }
@@ -568,6 +508,21 @@ var ngReactGridCheckboxComponent = (function() {
 
     return ngReactGridCheckboxComponent;
 })();
+/** @jsx React.DOM */
+var ngReactGridTextFieldComponent = (function() {
+    var ngReactGridTextFieldComponent = React.createClass({displayName: 'ngReactGridTextFieldComponent',
+        handleChange: function() {
+            this.props.updateValue(this.refs.textField.getDOMNode().value);
+        },
+        render: function() {
+            return (
+                React.DOM.input( {type:"text", defaultValue:this.props.value, ref:"textField", onChange:this.handleChange} )
+            )
+        }
+    });
+
+    return ngReactGridTextFieldComponent;
+})();
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var gridReact = require("./gridReact");
 
@@ -576,6 +531,7 @@ var grid = function(ngReactGrid, $rootScope) {
     this.data = [];
     this.height = 500;
     this.localMode = true;
+    this.editing = false;
     this.totalCount = 0;
     this.totalPages = 0;
     this.currentPage = 1;
@@ -805,9 +761,11 @@ gridReact.prototype.wrapFunctionsInAngular = function(cell) {
 };
 
 gridReact.prototype.wrapWithRootScope = function(func) {
+    var self = this;
     return function() {
-        this.rootScope.$apply(function() {
-            func();
+        var args = arguments;
+        self.rootScope.$apply(function() {
+            func.apply(null, args);
         });
     };
 };
@@ -887,6 +845,13 @@ var ngReactGridFactory = function($rootScope) {
             }
         }.bind(this));
 
+        scope.$watch("grid.editing", function(newValue, oldValue) {
+            if(newValue !== oldValue) {
+                this.update({editing: newValue}, true);
+                this.render();
+            }
+        }.bind(this));
+
         if(this.grid.getData) {
             this.initWithGetData = true;
             this.grid.react.loading = true;
@@ -942,19 +907,39 @@ var ngReactGridFactory = function($rootScope) {
 };
 
 module.exports = ngReactGridFactory;
-},{"../classes/grid":1,"../vendors/miniUnderscore":7}],6:[function(require,module,exports){
+},{"../classes/grid":1,"../vendors/miniUnderscore":8}],6:[function(require,module,exports){
+var ngReactGridTextFieldFactory = function() {
+
+    var ngReactGridTextField = function(record, field) {
+        this.record = record;
+        this.field = field;
+        return ngReactGridTextFieldComponent({value: this.record[field], updateValue: this.updateValue.bind(this)});
+    };
+
+    ngReactGridTextField.prototype.updateValue = function(newValue) {
+        this.record[this.field] = newValue;
+    };
+
+    return ngReactGridTextField;
+
+};
+
+module.exports = ngReactGridTextFieldFactory;
+},{}],7:[function(require,module,exports){
 'use strict';
 
 var ngReactGridDirective = require('./directives/ngReactGridDirective');
 var ngReactGridCheckboxFactory = require('./factories/ngReactGridCheckboxFactory');
+var ngReactGridTextFieldFactory = require("./factories/ngReactGridTextFieldFactory");
 var ngReactGridFactory = require("./factories/ngReactGridFactory");
 
 angular.module('ngReactGrid', [])
     .factory("ngReactGridCheckbox", [ngReactGridCheckboxFactory])
+    .factory("ngReactGridTextField", [ngReactGridTextFieldFactory])
     .factory("ngReactGrid", ['$rootScope', ngReactGridFactory])
     .directive("ngReactGrid", ['ngReactGrid', ngReactGridDirective]);
 
-},{"./directives/ngReactGridDirective":3,"./factories/ngReactGridCheckboxFactory":4,"./factories/ngReactGridFactory":5}],7:[function(require,module,exports){
+},{"./directives/ngReactGridDirective":3,"./factories/ngReactGridCheckboxFactory":4,"./factories/ngReactGridFactory":5,"./factories/ngReactGridTextFieldFactory":6}],8:[function(require,module,exports){
 var _ = {
     nativeForEach: Array.prototype.forEach,
     each: function (obj, iterator, context) {
@@ -988,4 +973,4 @@ var _ = {
 
 module.exports = _;
 
-},{}]},{},[6])
+},{}]},{},[7])

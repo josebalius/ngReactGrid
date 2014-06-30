@@ -184,9 +184,11 @@ gridReact.prototype.wrapFunctionsInAngular = function(cell) {
 };
 
 gridReact.prototype.wrapWithRootScope = function(func) {
+    var self = this;
     return function() {
-        this.rootScope.$apply(function() {
-            func();
+        var args = arguments;
+        self.rootScope.$apply(function() {
+            func.apply(null, args);
         });
     };
 };

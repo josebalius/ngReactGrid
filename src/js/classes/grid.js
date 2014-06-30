@@ -5,6 +5,7 @@ var grid = function(ngReactGrid, $rootScope) {
     this.data = [];
     this.height = 500;
     this.localMode = true;
+    this.editing = false;
     this.totalCount = 0;
     this.totalPages = 0;
     this.currentPage = 1;

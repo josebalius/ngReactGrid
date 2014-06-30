@@ -57,75 +57,10 @@ var ngReactGridComponent = (function() {
                 });
             },
             resize: function(delta) {
-                console.debug(delta);
+                // resize functionality coming soon
             },
             componentDidMount: function() {
-                var e = this.getDOMNode();
-                var resizeControl = e.querySelector(".ngGridHeaderResizeControl");
-                var isDragging = false;
-                var lastX = 0;
-                var self = this;
-                var head = document.getElementsByTagName('head')[0];
-
-                /*var processMouseUp = function() {
-                    var wasDragging = isDragging;
-                    isDragging = false;
-                    //$("#cursorChange").remove();
-                    window.removeEventListener('mousemove');
-
-                    console.debug('here');
-
-                    if(wasDragging) {
-                        //self.props.grid.resizeUpdateOriginalWidth(self.props.index);
-                    }
-                };
-
-                resizeControl.addEventListener('mousedown', function() {
-                    lastX = resizeControl.offsetLeft;
-
-                    window.removeEventListener('mousemove');
-                    window.addEventListener('mousemove', function(e) {
-                        isDragging = true;
-                        var delta = parseInt(e.pageX - lastX);
-                        self.resize(delta);
-                    });
-
-                    window.removeEventListener('mouseup');
-                    window.addEventListener('mouseup', function() {
-                        processMouseUp();
-                    });
-                });
-
-                /*resizeControl.on('mousedown', function() {
-                    lastX = resizeControl.offsetLeft;
-                    head.appendChild("<style type='text/css' id='cursorChange'>*{cursor:col-resize!important;-moz-user-select: none !important; -webkit-user-select: none !important; -ms-user-select:none !important; user-select:none; !important}</style>");
-
-                    window.removeEventListener('mousemove');
-                    window.addEventListener('mousemove', function(e) {
-                        console.debug(e);
-                    });
-                    /*$(window).on('mousemove', function(e) {
-                        isDragging = true;
-                        var delta = parseInt(e.pageX - lastX);
-                        self.props.grid.resize(self.props.cell.field, delta, self.props.index);
-                    });
-
-                    $(window).unbind('mouseup');
-                    $(window).on('mouseup', function() {
-                        processMouseUp();
-                    });
-                }).on('mouseup', function() {
-                    //processMouseUp();
-                });
-
-                resizeControl.on('dblclick', function() {
-                    var cellTextLength = self.props.cell.displayName.length;
-                    var pixelsPerCharacter = 9;
-                    var proposedWidth = cellTextLength * pixelsPerCharacter;
-                    self.props.grid.doubleClickResize(proposedWidth, self.props.index);
-                    self.props.grid.resizeUpdateOriginalWidth(self.props.index);
-                });
-                */
+                // resize functionality coming soon
             },
             render: function() {
 
@@ -264,6 +199,24 @@ var ngReactGridComponent = (function() {
     var ngReactGridBody = (function() {
 
         var ngReactGridBodyRowCell = React.createClass({
+            cell: function(cellText, cellStyle) {
+                cellTextType = typeof cellText;
+
+                if(cellTextType === 'string') {
+                    return (<td style={cellStyle}>{cellText}</td>)
+                } else if(cellTextType === 'object') {
+
+                    cellText = this.props.grid.react.wrapFunctionsInAngular(cellText);
+
+                    return (
+                        <td style={cellStyle}>
+                            {cellText}
+                        </td> 
+                    );
+                } else {
+                    return defaultCell;
+                }
+            },
             render: function() {
                 var cellText = this.props.row[this.props.cell.field];
                 var cellStyle = {};
@@ -275,25 +228,12 @@ var ngReactGridComponent = (function() {
                         </td>
                     );
 
-                if(this.props.cell.render) {
+                if(this.props.grid.editing && this.props.cell.edit) {
+                    cellText = this.props.cell.edit(this.props.row);
+                    return this.cell(cellText, cellStyle);
+                } else if(this.props.cell.render) {
                     cellText = this.props.cell.render(this.props.row);
-                    cellTextType = typeof cellText;
-
-                    if(cellTextType === 'string') {
-                        return (<td style={cellStyle}>{cellText}</td>)
-                    } else if(cellTextType === 'object') {
-
-                        cellText = this.props.grid.react.wrapFunctionsInAngular(cellText);
-
-                        return (
-                            <td style={cellStyle}>
-                                {cellText}
-                            </td> 
-                        );
-                    } else {
-                        return defaultCell;
-                    }
-                    
+                    return this.cell(cellText, cellStyle);
                 } else {
                     return defaultCell;
                 }

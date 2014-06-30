@@ -7,6 +7,8 @@
 <body>
 <div ng-controller="BasicExampleController" style="width: 100%">
     <ng-react-grid grid="grid"></ng-react-grid>
+    <button type="button" ng-click="edit()" ng-show="!grid.editing">Edit Grid</button>
+    <button type="button" ng-click="save()" ng-show="grid.editing">Save Grid</button>
     <br/>
     Selections: {{selections}}<br/>
     Clicked On Record: {{clickedOnRecord}}
@@ -20,18 +22,30 @@
 <script type="text/javascript">
 
     angular.module("example", ['ngReactGrid'])
-            .controller("BasicExampleController", function ($scope, $timeout) {
+            .controller("BasicExampleController", function ($scope, $timeout, ngReactGridTextField) {
 
                 $scope.employee = {};
                 $scope.selections = [];
                 $scope.clickedOnRecord = {};
+
+                $scope.edit = function() {
+                    $scope.grid.editing = true;
+                };
+
+                $scope.save = function() {
+                    console.debug($scope.grid.data[0]);
+                    $scope.grid.editing = false;
+                };
 
                 $scope.grid = {
                     data: dataSet,
                     columnDefs: [
                         {
                             field: "firstName",
-                            displayName: "First Name"
+                            displayName: "First Name",
+                            edit: function(row) {
+                                return new ngReactGridTextField(row, 'firstName');
+                            }
                         },
                         {
                             field: "lastName",
