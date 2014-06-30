@@ -264,13 +264,16 @@ var ngReactGridComponent = (function() {
     var ngReactGridBody = (function() {
 
         var ngReactGridBodyRowCell = React.createClass({
-            handleClick: function() {
-                this.props.grid.react.cell.events.onClick(this.props.cell, this.props.row);
-            },
             render: function() {
                 var cellText = this.props.row[this.props.cell.field];
                 var cellStyle = {};
                 setCellWidth(this.props.grid, this.props.cell, cellStyle, this.props.last, true);
+
+                var defaultCell = (
+                        <td style={cellStyle} title={cellText}>
+                            <div>{cellText}</div>
+                        </td>
+                    );
 
                 if(this.props.cell.render) {
                     cellText = this.props.cell.render(this.props.row);
@@ -287,16 +290,12 @@ var ngReactGridComponent = (function() {
                                 {cellText}
                             </td> 
                         );
-                    } /*else {
-                        return (<td style={cellStyle}></td>);
-                    }*/
+                    } else {
+                        return defaultCell;
+                    }
                     
                 } else {
-                    return (
-                        <td style={cellStyle} title={cellText} onClick={this.handleClick}>
-                            <div>{cellText}</div>
-                        </td>
-                    )
+                    return defaultCell;
                 }
 
                 

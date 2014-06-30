@@ -1,408 +1,3 @@
-/**
- * @license ngReactGrid v0.6.1
- * (c) 2010-2014 Jose Garcia - http://josebalius.github.io/ngReactGrid/
- * License: MIT
- */
-if (typeof _ === 'undefined') {
-    var _ = {
-        nativeForEach: Array.prototype.forEach,
-        each: function (obj, iterator, context) {
-            if (obj == null) return obj;
-            if (this.nativeForEach && obj.forEach === this.nativeForEach) {
-                obj.forEach(iterator, context);
-            } else if (obj.length === +obj.length) {
-                for (var i = 0, length = obj.length; i < length; i++) {
-                    if (iterator.call(context, obj[i], i, obj) === breaker) return;
-                }
-            } else {
-                var keys = _.keys(obj);
-                for (var i = 0, length = keys.length; i < length; i++) {
-                    if (iterator.call(context, obj[keys[i]], keys[i], obj) === breaker) return;
-                }
-            }
-            return obj;
-        },
-        slice: Array.prototype.slice,
-        extend: function (obj) {
-            this.each(this.slice.call(arguments, 1), function (source) {
-                if (source) {
-                    for (var prop in source) {
-                        obj[prop] = source[prop];
-                    }
-                }
-            });
-            return obj;
-        }
-    };
-}
-
-/**
- * @module ngReactGrid
- */
-angular.module("ngReactGrid", [])
-
-/**
- * @directive ngReactGrid - <ng-react-grid grid="grid"></ng-react-grid>
- */
-.directive("ngReactGrid", ['ngReactGrid', function(ngReactGrid) {
-    return {
-        restrict: "E",
-        link: function(scope, element, attrs) {
-            new ngReactGrid(scope, element, attrs);
-        }
-    };
-}])
-
-.factory("ngReactGridCheckbox", function() {
-    var ngReactGridCheckbox = function(selectionTarget) {
-        return {
-            field: "",
-            fieldName: "",
-            render: function(row) {
-
-                var handleClick = function() {
-                    var index = selectionTarget.indexOf(row);
-                    if(index === -1) {
-                        selectionTarget.push(row);
-                    } else {
-                        selectionTarget.splice(index, 1);
-                    }
-                };
-
-                return ngReactGridCheckboxComponent({selectionTarget: selectionTarget, handleClick: handleClick, row: row});;
-            },
-            sort: false,
-            width: 1
-        }
-    };
-
-    return ngReactGridCheckbox;
-})
-
-/**
- * @factory ngReactGrid
- */
-.factory("ngReactGrid", ['$rootScope', function($rootScope) {
-
-    var NO_GET_DATA_CALLBACK_ERROR = "localMode is false, please implement the getData function on the grid object";
-
-    var gridReact = function(grid, ngReactGrid) {
-        this.ngReactGrid = ngReactGrid;
-        this.grid = grid;
-        this.showingRecords = 0;
-        this.startIndex = 0;
-        this.endIndex = 0;
-        this.originalData = [];
-        this.loading = false;
-    };
-
-    gridReact.prototype.setPageSize = function(pageSize) {
-        $rootScope.$apply(function() {
-
-            var update = {
-                pageSize: pageSize,
-                currentPage: 1
-            };
-
-            if(this.grid.search.length > 0) {
-                update.data = this.filteredData;
-                this.ngReactGrid.update(update, false, true)
-            } else {
-                this.ngReactGrid.update(update);
-            }
-
-
-            if(!this.grid.localMode) {
-                if(this.grid.getData) {
-                    this.loading = true;
-                    this.grid.getData();
-                } else {
-                    throw new Error(NO_GET_DATA_CALLBACK_ERROR);
-                }
-
-            }
-
-            this.ngReactGrid.render();
-
-        }.bind(this));
-    };
-
-    gridReact.prototype.setSortField = function(field) {
-        $rootScope.$apply(function() {
-            if(this.grid.sortInfo.field !== field) {
-                this.grid.sortInfo.field = field;
-                this.grid.sortInfo.dir = "asc";
-            } else {
-                if(this.grid.sortInfo.dir === "asc") {
-                    this.grid.sortInfo.dir = "desc";
-                } else {
-                    this.grid.sortInfo.dir = "asc";
-                }
-            }
-
-            if(!this.grid.localMode) {
-                if(this.grid.getData) {
-                    this.loading = true;
-                    this.grid.getData();
-                    this.ngReactGrid.render();
-                } else {
-                    throw new Error(NO_GET_DATA_CALLBACK_ERROR);
-                }
-
-            } else {
-                this.sort();
-            }
-
-
-        }.bind(this));
-    };
-
-    gridReact.prototype.sort = function() {
-        var copy;
-
-        if(this.grid.search.length > 0) {
-            copy = this.filteredData;
-        } else {
-            copy = this.grid.react.originalData.slice(0);
-        }
-
-        var isAsc = this.grid.sortInfo.dir === "asc";
-
-        copy.sort(function(a, b) {
-            if(isAsc) {
-                return a[this.grid.sortInfo.field] <= b[this.grid.sortInfo.field] ? -1 : 1;
-            } else {
-                return a[this.grid.sortInfo.field] >= b[this.grid.sortInfo.field] ? -1 : 1;
-            }
-        }.bind(this));
-
-        this.ngReactGrid.update({
-            data: copy,
-            currentPage: 1
-        }, false, true);
-
-        this.ngReactGrid.render();
-    };
-
-    gridReact.prototype.setSearch = function(search) {
-
-        $rootScope.$apply(function() {
-            this.ngReactGrid.update({
-                search: search
-            });
-
-            search = String(search).toLowerCase();
-
-            if(this.grid.localMode) {
-
-                this.grid.data = this.originalData.slice(0);
-
-                var filteredData = this.grid.data.filter(function(obj) {
-                    var result = false;
-                    for(var i in obj) {
-                        if(obj.hasOwnProperty(i)) {
-                            if(String(obj[i]).toLowerCase().indexOf(search) !== -1) {
-                                result = true;
-                                break;
-                            }
-                        }
-                    }
-                    return result;
-                });
-
-                this.filteredData = filteredData;
-
-                this.ngReactGrid.update({
-                    data: filteredData,
-                    currentPage: 1
-                }, false, true);
-
-            } else {
-                if(this.grid.getData) {
-                    this.loading = true;
-                    this.grid.getData();
-                } else {
-                    throw new Error(NO_GET_DATA_CALLBACK_ERROR);
-                }
-
-            }
-
-            this.ngReactGrid.render();
-        }.bind(this));
-
-    };
-
-    gridReact.prototype.goToPage = function(page) {
-        $rootScope.$apply(function() {
-
-            this.ngReactGrid.update({
-                data: (this.grid.search.length > 0) ? this.filteredData : this.originalData,
-                currentPage: page
-            }, false, true);
-
-            if(!this.grid.localMode) {
-                if(this.grid.getData) {
-                    this.loading = true;
-                    this.grid.getData();
-                } else {
-                    throw new Error(NO_GET_DATA_CALLBACK_ERROR);
-                }
-
-            }
-
-            this.ngReactGrid.render();
-
-        }.bind(this));
-    };
-
-    gridReact.prototype.wrapFunctionsInAngular = function(cell) {
-        for(var key in cell.props) {
-            if(cell.props.hasOwnProperty(key)) {
-                if(key === "children") {
-                    this.wrapFunctionsInAngular(cell.props[key]);
-                } else if(typeof cell.props[key] === 'function') {
-                    cell.props[key] = this.wrapWithRootScope(cell.props[key]);
-                }
-            }
-
-        }
-        return cell;
-    };
-
-    gridReact.prototype.wrapWithRootScope = function(func) {
-        return function() {
-            $rootScope.$apply(function() {
-                func();
-            });
-        };
-    };
-
-    var grid = function(ngReactGrid) {
-        this.columnDefs = [];
-        this.data = [];
-        this.height = 500;
-        this.localMode = true;
-        this.totalCount = 0;
-        this.totalPages = 0;
-        this.currentPage = 1;
-        this.pageSize = 25;
-        this.pageSizes = [25, 50, 100, 500];
-        this.sortInfo = {
-            field: "",
-            dir: ""
-        };
-        this.search = "";
-        this.horizontalScroll = false;
-        this.scrollbarWidth = (function() {
-            var outer = document.createElement("div");
-            outer.style.visibility = "hidden";
-            outer.style.width = "100px";
-            outer.style.msOverflowStyle = "scrollbar"; // needed for WinJS apps
-
-            document.body.appendChild(outer);
-
-            var widthNoScroll = outer.offsetWidth;
-            // force scrollbars
-            outer.style.overflow = "scroll";
-
-            // add innerdiv
-            var inner = document.createElement("div");
-            inner.style.width = "100%";
-            outer.appendChild(inner);
-
-            var widthWithScroll = inner.offsetWidth;
-
-            // remove divs
-            outer.parentNode.removeChild(outer);
-
-            return widthNoScroll - widthWithScroll;
-        })();
-
-        this.react = new gridReact(this, ngReactGrid);
-
-        return this;
-    };
-
-    var ngReactGrid = function(scope, element, attrs) {
-
-        this.scope = scope;
-        this.element = element[0];
-        this.attrs = attrs;
-        this.grid = new grid(this);
-        this.initWithGetData = false;
-
-        this.update(scope.grid, true);
-
-        /**
-         * Watchers
-         */
-        scope.$watch("grid.data", function(newValue, oldValue) {
-            if(newValue) {
-                this.update({data: newValue}, true);
-                this.render();
-            }
-        }.bind(this));
-
-        scope.$watch("grid.totalCount", function(newValue, oldValue) {
-            if(newValue) {
-                this.update({totalCount: newValue}, true);
-                this.render();
-            }
-        }.bind(this));
-
-        if(this.grid.getData) {
-            this.initWithGetData = true;
-            this.grid.react.loading = true;
-            this.grid.getData(this.grid);
-        }
-
-        this.render();
-    };
-
-    ngReactGrid.prototype.update = function(grid, dataUpdate, isSearch) {
-
-        for(var i in grid) {
-            if(grid.hasOwnProperty(i) && i === "react") {
-                throw new Error("Trying to update the grid with the reserved 'react' property");
-            }
-        }
-
-        this.grid = _.extend(this.grid, grid);
-
-        if(dataUpdate)
-            this.grid.react.originalData = this.grid.data.slice(0);
-
-        var startIndex = (this.grid.currentPage - 1) * this.grid.pageSize;
-        var endIndex = (this.grid.pageSize * this.grid.currentPage);
-
-        if(this.grid.localMode) {
-            if(isSearch) {
-                this.grid.totalCount = grid.data.length;
-                this.grid.data = grid.data.slice(startIndex, endIndex);
-            } else {
-                this.grid.totalCount = this.grid.react.originalData.length;
-                this.grid.data = this.grid.react.originalData.slice(startIndex, endIndex);
-            }
-        }
-
-        this.grid.react.showingRecords = this.grid.data.length;
-        this.grid.react.startIndex = startIndex;
-        this.grid.react.endIndex = endIndex;
-
-        if(!this.initWithGetData)
-            this.grid.react.loading = false;
-        else
-            this.initWithGetData = false;
-
-        this.grid.totalPages = Math.ceil(this.grid.totalCount / this.grid.pageSize);
-    };
-
-    ngReactGrid.prototype.render = function() {
-        React.renderComponent(ngReactGridComponent({grid: this.grid}), this.element);
-    };
-
-    return ngReactGrid;
-}]);
 /** @jsx React.DOM */
 /**
  * ngReactGridComponent - React Component
@@ -670,13 +265,16 @@ var ngReactGridComponent = (function() {
     var ngReactGridBody = (function() {
 
         var ngReactGridBodyRowCell = React.createClass({displayName: 'ngReactGridBodyRowCell',
-            handleClick: function() {
-                this.props.grid.react.cell.events.onClick(this.props.cell, this.props.row);
-            },
             render: function() {
                 var cellText = this.props.row[this.props.cell.field];
                 var cellStyle = {};
                 setCellWidth(this.props.grid, this.props.cell, cellStyle, this.props.last, true);
+
+                var defaultCell = (
+                        React.DOM.td( {style:cellStyle, title:cellText}, 
+                            React.DOM.div(null, cellText)
+                        )
+                    );
 
                 if(this.props.cell.render) {
                     cellText = this.props.cell.render(this.props.row);
@@ -693,16 +291,12 @@ var ngReactGridComponent = (function() {
                                 cellText
                             ) 
                         );
-                    } /*else {
-                        return (<td style={cellStyle}></td>);
-                    }*/
+                    } else {
+                        return defaultCell;
+                    }
                     
                 } else {
-                    return (
-                        React.DOM.td( {style:cellStyle, title:cellText, onClick:this.handleClick}, 
-                            React.DOM.div(null, cellText)
-                        )
-                    )
+                    return defaultCell;
                 }
 
                 
@@ -974,3 +568,424 @@ var ngReactGridCheckboxComponent = (function() {
 
     return ngReactGridCheckboxComponent;
 })();
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var gridReact = require("./gridReact");
+
+var grid = function(ngReactGrid, $rootScope) {
+    this.columnDefs = [];
+    this.data = [];
+    this.height = 500;
+    this.localMode = true;
+    this.totalCount = 0;
+    this.totalPages = 0;
+    this.currentPage = 1;
+    this.pageSize = 25;
+    this.pageSizes = [25, 50, 100, 500];
+    this.sortInfo = {
+        field: "",
+        dir: ""
+    };
+    this.search = "";
+    this.horizontalScroll = false;
+    this.scrollbarWidth = (function() {
+        var outer = document.createElement("div");
+        outer.style.visibility = "hidden";
+        outer.style.width = "100px";
+        outer.style.msOverflowStyle = "scrollbar"; // needed for WinJS apps
+
+        document.body.appendChild(outer);
+
+        var widthNoScroll = outer.offsetWidth;
+        // force scrollbars
+        outer.style.overflow = "scroll";
+
+        // add innerdiv
+        var inner = document.createElement("div");
+        inner.style.width = "100%";
+        outer.appendChild(inner);
+
+        var widthWithScroll = inner.offsetWidth;
+
+        // remove divs
+        outer.parentNode.removeChild(outer);
+
+        return widthNoScroll - widthWithScroll;
+    })();
+
+    this.react = new gridReact(this, ngReactGrid, $rootScope);
+
+    return this;
+};
+
+module.exports = grid;
+},{"./gridReact":2}],2:[function(require,module,exports){
+var NO_GET_DATA_CALLBACK_ERROR = "localMode is false, please implement the getData function on the grid object";
+
+var gridReact = function(grid, ngReactGrid, $rootScope) {
+    this.ngReactGrid = ngReactGrid;
+    this.grid = grid;
+    this.showingRecords = 0;
+    this.startIndex = 0;
+    this.endIndex = 0;
+    this.originalData = [];
+    this.loading = false;
+    this.rootScope = $rootScope;
+};
+
+gridReact.prototype.setPageSize = function(pageSize) {
+    this.rootScope.$apply(function() {
+
+        var update = {
+            pageSize: pageSize,
+            currentPage: 1
+        };
+
+        if(this.grid.search.length > 0) {
+            update.data = this.filteredData;
+            this.ngReactGrid.update(update, false, true)
+        } else {
+            this.ngReactGrid.update(update);
+        }
+
+        if(!this.grid.localMode) {
+            if(this.grid.getData) {
+                this.loading = true;
+                this.grid.getData();
+            } else {
+                throw new Error(NO_GET_DATA_CALLBACK_ERROR);
+            }
+
+        }
+
+        this.ngReactGrid.render();
+
+    }.bind(this));
+};
+
+gridReact.prototype.setSortField = function(field) {
+    this.rootScope.$apply(function() {
+        if(this.grid.sortInfo.field !== field) {
+            this.grid.sortInfo.field = field;
+            this.grid.sortInfo.dir = "asc";
+        } else {
+            if(this.grid.sortInfo.dir === "asc") {
+                this.grid.sortInfo.dir = "desc";
+            } else {
+                this.grid.sortInfo.dir = "asc";
+            }
+        }
+
+        if(!this.grid.localMode) {
+            if(this.grid.getData) {
+                this.loading = true;
+                this.grid.getData();
+                this.ngReactGrid.render();
+            } else {
+                throw new Error(NO_GET_DATA_CALLBACK_ERROR);
+            }
+
+        } else {
+            this.sort();
+        }
+
+
+    }.bind(this));
+};
+
+gridReact.prototype.sort = function() {
+    var copy;
+
+    if(this.grid.search.length > 0) {
+        copy = this.filteredData;
+    } else {
+        copy = this.grid.react.originalData.slice(0);
+    }
+
+    var isAsc = this.grid.sortInfo.dir === "asc";
+
+    copy.sort(function(a, b) {
+        if(isAsc) {
+            return a[this.grid.sortInfo.field] <= b[this.grid.sortInfo.field] ? -1 : 1;
+        } else {
+            return a[this.grid.sortInfo.field] >= b[this.grid.sortInfo.field] ? -1 : 1;
+        }
+    }.bind(this));
+
+    this.ngReactGrid.update({
+        data: copy,
+        currentPage: 1
+    }, false, true);
+
+    this.ngReactGrid.render();
+};
+
+gridReact.prototype.setSearch = function(search) {
+
+    this.rootScope.$apply(function() {
+        this.ngReactGrid.update({
+            search: search
+        });
+
+        search = String(search).toLowerCase();
+
+        if(this.grid.localMode) {
+
+            this.grid.data = this.originalData.slice(0);
+
+            var filteredData = this.grid.data.filter(function(obj) {
+                var result = false;
+                for(var i in obj) {
+                    if(obj.hasOwnProperty(i)) {
+                        if(String(obj[i]).toLowerCase().indexOf(search) !== -1) {
+                            result = true;
+                            break;
+                        }
+                    }
+                }
+                return result;
+            });
+
+            this.filteredData = filteredData;
+
+            this.ngReactGrid.update({
+                data: filteredData,
+                currentPage: 1
+            }, false, true);
+
+        } else {
+            if(this.grid.getData) {
+                this.loading = true;
+                this.grid.getData();
+            } else {
+                throw new Error(NO_GET_DATA_CALLBACK_ERROR);
+            }
+
+        }
+
+        this.ngReactGrid.render();
+    }.bind(this));
+
+};
+
+gridReact.prototype.goToPage = function(page) {
+    this.rootScope.$apply(function() {
+
+        this.ngReactGrid.update({
+            data: (this.grid.search.length > 0) ? this.filteredData : this.originalData,
+            currentPage: page
+        }, false, true);
+
+        if(!this.grid.localMode) {
+            if(this.grid.getData) {
+                this.loading = true;
+                this.grid.getData();
+            } else {
+                throw new Error(NO_GET_DATA_CALLBACK_ERROR);
+            }
+
+        }
+
+        this.ngReactGrid.render();
+
+    }.bind(this));
+};
+
+gridReact.prototype.wrapFunctionsInAngular = function(cell) {
+    for(var key in cell.props) {
+        if(cell.props.hasOwnProperty(key)) {
+            if(key === "children") {
+                this.wrapFunctionsInAngular(cell.props[key]);
+            } else if(typeof cell.props[key] === 'function') {
+                cell.props[key] = this.wrapWithRootScope(cell.props[key]);
+            }
+        }
+
+    }
+    return cell;
+};
+
+gridReact.prototype.wrapWithRootScope = function(func) {
+    return function() {
+        this.rootScope.$apply(function() {
+            func();
+        });
+    };
+};
+
+module.exports = gridReact;
+},{}],3:[function(require,module,exports){
+var ngReactGridDirective = function (ngReactGrid) {
+    return {
+        restrict: "E",
+        link: function (scope, element, attrs) {
+            new ngReactGrid(scope, element, attrs);
+        }
+    }
+};
+
+module.exports = ngReactGridDirective;
+
+
+},{}],4:[function(require,module,exports){
+var ngReactGridCheckboxFactory = function() {
+    var ngReactGridCheckbox = function(selectionTarget) {
+        return {
+            field: "",
+            fieldName: "",
+            render: function(row) {
+
+                var handleClick = function() {
+                    var index = selectionTarget.indexOf(row);
+                    if(index === -1) {
+                        selectionTarget.push(row);
+                    } else {
+                        selectionTarget.splice(index, 1);
+                    }
+                };
+
+                return ngReactGridCheckboxComponent({selectionTarget: selectionTarget, handleClick: handleClick, row: row});;
+            },
+            sort: false,
+            width: 1
+        }
+    };
+
+    return ngReactGridCheckbox;
+};
+
+module.exports = ngReactGridCheckboxFactory;
+},{}],5:[function(require,module,exports){
+var grid = require("../classes/grid");
+var _ = require('../vendors/miniUnderscore');
+
+var ngReactGridFactory = function($rootScope) {
+
+    var ngReactGrid = function(scope, element, attrs) {
+
+        this.scope = scope;
+        this.element = element[0];
+        this.attrs = attrs;
+        this.grid = new grid(this, $rootScope);
+        this.initWithGetData = false;
+
+        this.update(scope.grid, true);
+
+        /**
+         * Watchers
+         */
+        scope.$watch("grid.data", function(newValue, oldValue) {
+            if(newValue) {
+                this.update({data: newValue}, true);
+                this.render();
+            }
+        }.bind(this));
+
+        scope.$watch("grid.totalCount", function(newValue, oldValue) {
+            if(newValue) {
+                this.update({totalCount: newValue}, true);
+                this.render();
+            }
+        }.bind(this));
+
+        if(this.grid.getData) {
+            this.initWithGetData = true;
+            this.grid.react.loading = true;
+            this.grid.getData(this.grid);
+        }
+
+        this.render();
+    };
+
+    ngReactGrid.prototype.update = function(grid, dataUpdate, isSearch) {
+
+        for(var i in grid) {
+            if(grid.hasOwnProperty(i) && i === "react") {
+                throw new Error("Trying to update the grid with the reserved 'react' property");
+            }
+        }
+
+        this.grid = _.extend(this.grid, grid);
+
+        if(dataUpdate)
+            this.grid.react.originalData = this.grid.data.slice(0);
+
+        var startIndex = (this.grid.currentPage - 1) * this.grid.pageSize;
+        var endIndex = (this.grid.pageSize * this.grid.currentPage);
+
+        if(this.grid.localMode) {
+            if(isSearch) {
+                this.grid.totalCount = grid.data.length;
+                this.grid.data = grid.data.slice(startIndex, endIndex);
+            } else {
+                this.grid.totalCount = this.grid.react.originalData.length;
+                this.grid.data = this.grid.react.originalData.slice(startIndex, endIndex);
+            }
+        }
+
+        this.grid.react.showingRecords = this.grid.data.length;
+        this.grid.react.startIndex = startIndex;
+        this.grid.react.endIndex = endIndex;
+
+        if(!this.initWithGetData)
+            this.grid.react.loading = false;
+        else
+            this.initWithGetData = false;
+
+        this.grid.totalPages = Math.ceil(this.grid.totalCount / this.grid.pageSize);
+    };
+
+    ngReactGrid.prototype.render = function() {
+        React.renderComponent(ngReactGridComponent({grid: this.grid}), this.element);
+    };
+
+    return ngReactGrid;
+};
+
+module.exports = ngReactGridFactory;
+},{"../classes/grid":1,"../vendors/miniUnderscore":7}],6:[function(require,module,exports){
+'use strict';
+
+var ngReactGridDirective = require('./directives/ngReactGridDirective');
+var ngReactGridCheckboxFactory = require('./factories/ngReactGridCheckboxFactory');
+var ngReactGridFactory = require("./factories/ngReactGridFactory");
+
+angular.module('ngReactGrid', [])
+    .factory("ngReactGridCheckbox", [ngReactGridCheckboxFactory])
+    .factory("ngReactGrid", ['$rootScope', ngReactGridFactory])
+    .directive("ngReactGrid", ['ngReactGrid', ngReactGridDirective]);
+
+},{"./directives/ngReactGridDirective":3,"./factories/ngReactGridCheckboxFactory":4,"./factories/ngReactGridFactory":5}],7:[function(require,module,exports){
+var _ = {
+    nativeForEach: Array.prototype.forEach,
+    each: function (obj, iterator, context) {
+        if (obj == null) return obj;
+        if (this.nativeForEach && obj.forEach === this.nativeForEach) {
+            obj.forEach(iterator, context);
+        } else if (obj.length === +obj.length) {
+            for (var i = 0, length = obj.length; i < length; i++) {
+                if (iterator.call(context, obj[i], i, obj) === breaker) return;
+            }
+        } else {
+            var keys = _.keys(obj);
+            for (var i = 0, length = keys.length; i < length; i++) {
+                if (iterator.call(context, obj[keys[i]], keys[i], obj) === breaker) return;
+            }
+        }
+        return obj;
+    },
+    slice: Array.prototype.slice,
+    extend: function (obj) {
+        this.each(this.slice.call(arguments, 1), function (source) {
+            if (source) {
+                for (var prop in source) {
+                    obj[prop] = source[prop];
+                }
+            }
+        });
+        return obj;
+    }
+};
+
+module.exports = _;
+
+},{}]},{},[6])
