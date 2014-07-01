@@ -1,6 +1,6 @@
 var _ = require('../vendors/miniUnderscore');
 var NgReactGridReactManager = require("./NgReactGridReactManager");
-var NgReactGridDataManager = require("./NgReactGridDataManager");
+var NgReactGridEditManager = require("./NgReactGridEditManager");
 var NO_GET_DATA_CALLBACK_ERROR = "localMode is false, please implement the getData function on the grid object";
 
 /**
@@ -35,7 +35,7 @@ var NgReactGrid = function (scope, element, attrs, $rootScope) {
      * Initialize the NgReactGridReact class
      */
     this.react = new NgReactGridReactManager(this);
-    this.dataManager = new NgReactGridDataManager(this);
+    this.editManager = new NgReactGridEditManager(this);
 
     /**
      * Initialize events
@@ -72,7 +72,7 @@ NgReactGrid.prototype.init = function () {
     /**
      * Provide the editing API interface
      */
-    this.dataManager.mixinAPI(this.scope.grid);
+    this.editManager.mixinAPI(this.scope.grid);
 
     /**
      * If we are in server mode, perform the first call to load the data

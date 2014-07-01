@@ -230,3 +230,7 @@
     background: transparent;
     font-weight: bold;
 }
+
+.ngReactGridSelectField {
+    width: 95%;
+}

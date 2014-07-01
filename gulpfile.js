@@ -41,7 +41,7 @@ gulp.task('uglify-build', ['build-grid'], function () {
         }))
         .pipe(rename('ngReactGrid-' + packageJSON.version + '.min.js'))
         .pipe(gulp.dest('./build/js'))
-})
+});
 
 gulp.task('build', ['build-grid', 'uglify-build', 'css', 'img']);
 

@@ -3,7 +3,7 @@
  * @param ngReactGrid
  * @constructor
  */
-var NgReactGridDataManager = function(ngReactGrid) {
+var NgReactGridEditManager = function(ngReactGrid) {
     this.ngReactGrid = ngReactGrid;
     this.dataCopy = [];
 };
@@ -12,7 +12,7 @@ var NgReactGridDataManager = function(ngReactGrid) {
  * This function is used to add the edit/save/cancel API to the grid object created by the user.
  * @param gridObject
  */
-NgReactGridDataManager.prototype.mixinAPI = function(gridObject) {
+NgReactGridEditManager.prototype.mixinAPI = function(gridObject) {
     var self = this;
 
     /**
@@ -41,7 +41,7 @@ NgReactGridDataManager.prototype.mixinAPI = function(gridObject) {
 /**
  * This is the function that puts the grid into edit mode
  */
-NgReactGridDataManager.prototype.edit = function() {
+NgReactGridEditManager.prototype.edit = function() {
     this.ngReactGrid.editing = true;
     this.dataCopy = JSON.parse(JSON.stringify(this.ngReactGrid.react.originalData));
     this.ngReactGrid.render();
@@ -50,7 +50,7 @@ NgReactGridDataManager.prototype.edit = function() {
 /**
  * This is the function that will persist the modified data to the original model
  */
-NgReactGridDataManager.prototype.save = function() {
+NgReactGridEditManager.prototype.save = function() {
     this.ngReactGrid.editing = false;
     this.ngReactGrid.render();
 };
@@ -58,7 +58,7 @@ NgReactGridDataManager.prototype.save = function() {
 /**
  * This function is called whenever the modifications need to be reverted
  */
-NgReactGridDataManager.prototype.cancel = function() {
+NgReactGridEditManager.prototype.cancel = function() {
     this.ngReactGrid.editing = false;
 
     this.ngReactGrid.update(this.ngReactGrid.events.DATA, {
@@ -68,4 +68,4 @@ NgReactGridDataManager.prototype.cancel = function() {
     this.ngReactGrid.render();
 };
 
-module.exports = NgReactGridDataManager;
+module.exports = NgReactGridEditManager;

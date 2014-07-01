@@ -545,6 +545,20 @@ var ngReactGridCheckboxFieldComponent = (function() {
     return ngReactGridCheckboxFieldComponent;
 })();
 /** @jsx React.DOM */
+var ngReactGridSelectFieldComponent = (function() {
+
+    var ngReactGridSelectFieldComponent = React.createClass({displayName: 'ngReactGridSelectFieldComponent',
+        render: function() {
+            return (
+                React.DOM.select( {className:"ngReactGridSelectField"})
+            )
+        }
+    });
+
+    return ngReactGridSelectFieldComponent;
+
+})();
+/** @jsx React.DOM */
 var ngReactGridTextFieldComponent = (function() {
     var ngReactGridTextFieldComponent = React.createClass({displayName: 'ngReactGridTextFieldComponent',
         getInitialState: function() {
@@ -581,7 +595,7 @@ var ngReactGridTextFieldComponent = (function() {
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var _ = require('../vendors/miniUnderscore');
 var NgReactGridReactManager = require("./NgReactGridReactManager");
-var NgReactGridDataManager = require("./NgReactGridDataManager");
+var NgReactGridEditManager = require("./NgReactGridEditManager");
 var NO_GET_DATA_CALLBACK_ERROR = "localMode is false, please implement the getData function on the grid object";
 
 /**
@@ -616,7 +630,7 @@ var NgReactGrid = function (scope, element, attrs, $rootScope) {
      * Initialize the NgReactGridReact class
      */
     this.react = new NgReactGridReactManager(this);
-    this.dataManager = new NgReactGridDataManager(this);
+    this.editManager = new NgReactGridEditManager(this);
 
     /**
      * Initialize events
@@ -653,7 +667,7 @@ NgReactGrid.prototype.init = function () {
     /**
      * Provide the editing API interface
      */
-    this.dataManager.mixinAPI(this.scope.grid);
+    this.editManager.mixinAPI(this.scope.grid);
 
     /**
      * If we are in server mode, perform the first call to load the data
@@ -910,13 +924,13 @@ NgReactGrid.prototype.render = function() {
 };
 
 module.exports = NgReactGrid;
-},{"../vendors/miniUnderscore":9,"./NgReactGridDataManager":2,"./NgReactGridReactManager":3}],2:[function(require,module,exports){
+},{"../vendors/miniUnderscore":10,"./NgReactGridEditManager":2,"./NgReactGridReactManager":3}],2:[function(require,module,exports){
 /**
  * This class manages the editing/saving/reverting functionality to ngReactGrid
  * @param ngReactGrid
  * @constructor
  */
-var NgReactGridDataManager = function(ngReactGrid) {
+var NgReactGridEditManager = function(ngReactGrid) {
     this.ngReactGrid = ngReactGrid;
     this.dataCopy = [];
 };
@@ -925,7 +939,7 @@ var NgReactGridDataManager = function(ngReactGrid) {
  * This function is used to add the edit/save/cancel API to the grid object created by the user.
  * @param gridObject
  */
-NgReactGridDataManager.prototype.mixinAPI = function(gridObject) {
+NgReactGridEditManager.prototype.mixinAPI = function(gridObject) {
     var self = this;
 
     /**
@@ -954,7 +968,7 @@ NgReactGridDataManager.prototype.mixinAPI = function(gridObject) {
 /**
  * This is the function that puts the grid into edit mode
  */
-NgReactGridDataManager.prototype.edit = function() {
+NgReactGridEditManager.prototype.edit = function() {
     this.ngReactGrid.editing = true;
     this.dataCopy = JSON.parse(JSON.stringify(this.ngReactGrid.react.originalData));
     this.ngReactGrid.render();
@@ -963,7 +977,7 @@ NgReactGridDataManager.prototype.edit = function() {
 /**
  * This is the function that will persist the modified data to the original model
  */
-NgReactGridDataManager.prototype.save = function() {
+NgReactGridEditManager.prototype.save = function() {
     this.ngReactGrid.editing = false;
     this.ngReactGrid.render();
 };
@@ -971,7 +985,7 @@ NgReactGridDataManager.prototype.save = function() {
 /**
  * This function is called whenever the modifications need to be reverted
  */
-NgReactGridDataManager.prototype.cancel = function() {
+NgReactGridEditManager.prototype.cancel = function() {
     this.ngReactGrid.editing = false;
 
     this.ngReactGrid.update(this.ngReactGrid.events.DATA, {
@@ -981,7 +995,7 @@ NgReactGridDataManager.prototype.cancel = function() {
     this.ngReactGrid.render();
 };
 
-module.exports = NgReactGridDataManager;
+module.exports = NgReactGridEditManager;
 },{}],3:[function(require,module,exports){
 /**
  * This class is the bridge between the ngReactGrid class and React
@@ -1293,6 +1307,24 @@ var ngReactGridCheckboxFieldFactory = function() {
 
 module.exports = ngReactGridCheckboxFieldFactory;
 },{}],7:[function(require,module,exports){
+var ngReactGridSelectFieldFactory = function() {
+
+    var ngReactGridSelectField = function(record, field, referenceData) {
+        this.record = record;
+        this.field = field;
+        return ngReactGridSelectFieldComponent({value: this.record[field], updateValue: this.updateValue.bind(this)});
+    };
+
+    ngReactGridSelectField.prototype.updateValue = function(newValue) {
+        this.record[this.field] = newValue;
+    };
+
+    return ngReactGridSelectField;
+
+};
+
+module.exports = ngReactGridSelectFieldFactory;
+},{}],8:[function(require,module,exports){
 var ngReactGridTextFieldFactory = function() {
 
     var ngReactGridTextField = function(record, field) {
@@ -1310,21 +1342,23 @@ var ngReactGridTextFieldFactory = function() {
 };
 
 module.exports = ngReactGridTextFieldFactory;
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 'use strict';
 
 var ngReactGridDirective = require('./directives/ngReactGridDirective');
 var ngReactGridCheckboxFactory = require('./factories/ngReactGridCheckboxFactory');
 var ngReactGridTextFieldFactory = require("./factories/ngReactGridTextFieldFactory");
 var ngReactGridCheckboxFieldFactory = require("./factories/ngReactGridCheckboxFieldFactory");
+var ngReactGridSelectFieldFactory = require("./factories/ngReactGridSelectFieldFactory");
 
 angular.module('ngReactGrid', [])
     .factory("ngReactGridCheckbox", [ngReactGridCheckboxFactory])
     .factory("ngReactGridTextField", [ngReactGridTextFieldFactory])
     .factory("ngReactGridCheckboxField", [ngReactGridCheckboxFieldFactory])
+    .factory("ngReactGridSelectField", [ngReactGridSelectFieldFactory])
     .directive("ngReactGrid", ['$rootScope', ngReactGridDirective]);
 
-},{"./directives/ngReactGridDirective":4,"./factories/ngReactGridCheckboxFactory":5,"./factories/ngReactGridCheckboxFieldFactory":6,"./factories/ngReactGridTextFieldFactory":7}],9:[function(require,module,exports){
+},{"./directives/ngReactGridDirective":4,"./factories/ngReactGridCheckboxFactory":5,"./factories/ngReactGridCheckboxFieldFactory":6,"./factories/ngReactGridSelectFieldFactory":7,"./factories/ngReactGridTextFieldFactory":8}],10:[function(require,module,exports){
 var _ = {
     nativeForEach: Array.prototype.forEach,
     each: function (obj, iterator, context) {
@@ -1358,4 +1392,4 @@ var _ = {
 
 module.exports = _;
 
-},{}]},{},[8])
+},{}]},{},[9])
