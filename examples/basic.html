@@ -7,9 +7,9 @@
 <body>
 <div ng-controller="BasicExampleController" style="width: 100%">
     <ng-react-grid grid="grid"></ng-react-grid>
-    <button type="button" ng-click="edit()" ng-show="!grid.isEditing()">Edit Grid</button>
-    <button type="button" ng-click="save()" ng-show="grid.isEditing()">Save Grid</button>
-    <button type="button" ng-click="cancel()" ng-show="grid.isEditing()">Cancel</button>
+    <button type="button" ng-click="edit()" ng-show="!isEditing()">Edit Grid</button>
+    <button type="button" ng-click="save()" ng-show="isEditing()">Save Grid</button>
+    <button type="button" ng-click="cancel()" ng-show="isEditing()">Cancel</button>
     <br/>
     Selections: {{selections}}<br/>
     Clicked On Record: {{clickedOnRecord}}
@@ -28,19 +28,26 @@
                 $scope.employee = {};
                 $scope.selections = [];
                 $scope.clickedOnRecord = {};
+                $scope.editingGrid = false;
+
+                $scope.isEditing = function() {
+                    return $scope.editingGrid;
+                };
 
                 $scope.edit = function () {
                     $scope.grid.edit();
+                    $scope.editingGrid = true;
                 };
 
                 $scope.save = function () {
                     var data = $scope.grid.data;
-                    $scope.grid.editing = false;
+                    $scope.editingGrid = false;
+                    $scope.grid.save();
                 };
 
                 $scope.cancel = function () {
-                    $scope.grid.revertEdit();
-                    $scope.grid.editing = false;
+                    $scope.editingGrid = false;
+                    $scope.grid.cancel();
                 };
 
                 $scope.grid = {

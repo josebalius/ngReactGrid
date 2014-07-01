@@ -461,7 +461,6 @@ var ngReactGridComponent = (function() {
 
     var ngReactGrid = React.createClass({displayName: 'ngReactGrid',
         render: function() {
-        console.debug(this.props);
             return (
                 React.DOM.div( {className:"ngReactGrid"}, 
                     ngReactGridHeader( {grid:this.props.grid} ),
@@ -870,43 +869,63 @@ module.exports = NgReactGrid;
 },{"../vendors/miniUnderscore":8,"./NgReactGridDataManager":2,"./NgReactGridReactManager":3}],2:[function(require,module,exports){
 var NgReactGridDataManager = function(ngReactGrid) {
     this.ngReactGrid = ngReactGrid;
+    this.dataCopy = [];
 };
 
 NgReactGridDataManager.prototype.mixinAPI = function(gridObject) {
     var self = this;
 
+    /**
+     * This is the function that puts the grid into edit mode
+     */
     gridObject.edit = function() {
         self.edit.call(self);
     };
 
-    gridObject.saveEdit = function() {
-        self.saveEdit.call(self);
+    /**
+     * This is the function that will persist the modified data to the original model
+     */
+    gridObject.save = function() {
+        self.save.call(self);
     };
 
-    gridObject.cancelEdit = function() {
-        self.cancelEdit.call(self);
+    /**
+     * This function is called whenever the modifications need to be reverted
+     */
+    gridObject.cancel = function() {
+        self.cancel.call(self);
     };
 
-    gridObject.isEditing = function() {
-        self.isEditing.call(self);
-    };
 };
 
+/**
+ * This is the function that puts the grid into edit mode
+ */
 NgReactGridDataManager.prototype.edit = function() {
     this.ngReactGrid.editing = true;
+    this.dataCopy = JSON.parse(JSON.stringify(this.ngReactGrid.react.originalData));
     this.ngReactGrid.render();
 };
 
-NgReactGridDataManager.prototype.saveEdit = function() {
+/**
+ * This is the function that will persist the modified data to the original model
+ */
+NgReactGridDataManager.prototype.save = function() {
     this.ngReactGrid.editing = false;
+    this.ngReactGrid.render();
 };
 
-NgReactGridDataManager.prototype.cancelEdit = function() {
+/**
+ * This function is called whenever the modifications need to be reverted
+ */
+NgReactGridDataManager.prototype.cancel = function() {
     this.ngReactGrid.editing = false;
-};
 
-NgReactGridDataManager.prototype.isEditing = function() {
-    return this.ngReactGrid.editing;
+    this.ngReactGrid.update(this.ngReactGrid.events.DATA, {
+        data: this.dataCopy
+    });
+
+    this.ngReactGrid.render();
 };
 
 module.exports = NgReactGridDataManager;
