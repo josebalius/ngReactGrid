@@ -970,7 +970,7 @@ NgReactGridEditManager.prototype.mixinAPI = function(gridObject) {
  */
 NgReactGridEditManager.prototype.edit = function() {
     this.ngReactGrid.editing = true;
-    this.dataCopy = JSON.parse(JSON.stringify(this.ngReactGrid.react.originalData));
+    this.dataCopy = this.copyData(this.ngReactGrid.react.originalData);
     this.ngReactGrid.render();
 };
 
@@ -993,6 +993,10 @@ NgReactGridEditManager.prototype.cancel = function() {
     });
 
     this.ngReactGrid.render();
+};
+
+NgReactGridEditManager.prototype.copyData = function(data) {
+    return JSON.parse(JSON.stringify(data));
 };
 
 module.exports = NgReactGridEditManager;
