@@ -177,6 +177,7 @@ NgReactGridReactManager.prototype.setSearch = function (search) {
         this.ngReactGrid.update(this.ngReactGrid.events.SEARCH, update);
 
     } else {
+        this.ngReactGrid.search = search;
         this.ngReactGrid.getData();
     }
 };
@@ -236,7 +237,6 @@ NgReactGridReactManager.prototype.wrapWithRootScope = function (func) {
                 func.apply(null, args);
             });
         }
-
     };
 };
 

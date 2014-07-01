@@ -29,34 +29,60 @@
                 $scope.selections = [];
                 $scope.clickedOnRecord = {};
 
-                $scope.edit = function() {
+                $scope.edit = function () {
                     $scope.grid.editing = true;
                 };
 
-                $scope.save = function() {
+                $scope.save = function () {
                     var data = $scope.grid.data;
                     $scope.grid.editing = false;
                 };
 
-                $scope.cancel = function() {
+                $scope.cancel = function () {
                     $scope.grid.revertEdit();
                     $scope.grid.editing = false;
                 };
 
+                /*$scope.grid = {
+                 data: dataSet,
+                 columnDefs: [
+                 {
+                 field: "firstName",
+                 displayName: "First Name",
+                 edit: function(row) {
+                 return new ngReactGridTextField(row, 'firstName');
+                 }
+                 },
+                 {
+                 field: "lastName",
+                 displayName: "Last Name"
+                 }]
+                 };*/
+
                 $scope.grid = {
-                    data: dataSet,
+                    data: [],
                     columnDefs: [
                         {
                             field: "firstName",
-                            displayName: "First Name",
-                            edit: function(row) {
-                                return new ngReactGridTextField(row, 'firstName');
-                            }
+                            displayName: "First Name"
                         },
                         {
                             field: "lastName",
                             displayName: "Last Name"
-                        }]
+                        }
+                    ],
+                    localMode: false,
+                    getData: function () {
+                        var grid = this;
+                        $timeout(function () {
+                            if (grid.search) {
+                                $scope.grid.data = [];
+                            } else {
+                                $scope.grid.data = dataSet.slice((grid.currentPage - 1) * grid.pageSize, (grid.pageSize * grid.currentPage));
+                            }
+                            $scope.grid.totalCount = dataSet.length;
+                        }, 2000);
+                    }
                 };
             });
 

@@ -602,12 +602,16 @@ NgReactGrid.prototype.init = function () {
         }
     }
 
+    _.extend(this, this.scope.grid);
+
     /**
      * If we are in server mode, perform the first call to load the data
      */
     if(this.isServerMode()) {
         this.getData();
     }
+
+    this.render();
 
 };
 
@@ -617,6 +621,7 @@ NgReactGrid.prototype.init = function () {
 NgReactGrid.prototype.getData = function () {
     this.react.loading = true;
     this._getData(this);
+    this.render();
 };
 
 /**
@@ -696,14 +701,18 @@ NgReactGrid.prototype.setupUpdateEvents = function () {
  */
 NgReactGrid.prototype.initWatchers = function () {
     this.scope.$watch("grid.data", function (newValue, oldValue) {
-        if (newValue) {
+        if (newValue !== oldValue) {
+            if(this.isServerMode() && this.react.loading) {
+                this.react.loading = false;
+            }
+
             this.update(this.events.DATA, {
                 data: newValue
             });
         }
     }.bind(this));
 
-    this.scope.$watch("grid.totalCount", function (newValue, oldValue) {
+    this.scope.$watch("grid.totalCount", function (newValue) {
         if (newValue) {
             this.update(this.events.TOTALCOUNT, {totalCount: newValue});
         }
@@ -737,12 +746,22 @@ NgReactGrid.prototype.update = function (updateEvent, updates) {
         case this.events.SORTING:
             this.updateSorting(updates);
             break;
+
+        case this.events.TOTALCOUNT:
+            this.updateTotalCount(updates);
+            break;
     }
 
     this.render();
 
 };
 
+/**
+ * This function takes care of updating all data related properties. The second param will not the update the originalData
+ * property in the react manager
+ * @param updates
+ * @param updateContainsData
+ */
 NgReactGrid.prototype.updateData = function(updates, updateContainsData) {
 
     this.react.startIndex = (this.currentPage - 1) * this.pageSize;
@@ -760,6 +779,8 @@ NgReactGrid.prototype.updateData = function(updates, updateContainsData) {
             this.data = this.react.originalData.slice(this.react.startIndex, this.react.endIndex);
         }
 
+    } else {
+        this.data = updates.data;
     }
 
     this.react.showingRecords = this.data.length;
@@ -767,6 +788,10 @@ NgReactGrid.prototype.updateData = function(updates, updateContainsData) {
     this.totalPages = Math.ceil(this.totalCount / this.pageSize);
 };
 
+/**
+ * This function updates the necessary properties for a successful page size update
+ * @param updates
+ */
 NgReactGrid.prototype.updatePageSize = function(updates) {
     this.pageSize = updates.pageSize;
     this.currentPage = updates.currentPage;
@@ -775,6 +800,10 @@ NgReactGrid.prototype.updatePageSize = function(updates) {
     }, true);
 };
 
+/**
+ * This function updates the necessary properties for a successful pagination update
+ * @param updates
+ */
 NgReactGrid.prototype.updatePagination = function(updates) {
     this.currentPage = updates.currentPage;
     this.updateData({
@@ -782,6 +811,10 @@ NgReactGrid.prototype.updatePagination = function(updates) {
     }, true);
 };
 
+/**
+ * This function updates the necessary properties for a successful search update
+ * @param updates
+ */
 NgReactGrid.prototype.updateSearch = function(updates) {
     this.search = updates.search;
     this.currentPage = 1;
@@ -790,6 +823,10 @@ NgReactGrid.prototype.updateSearch = function(updates) {
     }, true);
 };
 
+/**
+ * This function updates the necessary properties for a successful sorting update
+ * @param updates
+ */
 NgReactGrid.prototype.updateSorting = function(updates) {
     this.sortInfo = updates.sortInfo;
 
@@ -799,6 +836,15 @@ NgReactGrid.prototype.updateSorting = function(updates) {
             data: updates.data
         }, true);
     }
+};
+
+/**
+ * This function updates the necessary properties for a successful total count update
+ * @param updates
+ */
+NgReactGrid.prototype.updateTotalCount = function(updates) {
+    this.totalCount = updates.totalCount;
+    this.totalPages = Math.ceil(this.totalCount / this.pageSize);
 };
 
 /**
@@ -989,6 +1035,7 @@ NgReactGridReactManager.prototype.setSearch = function (search) {
         this.ngReactGrid.update(this.ngReactGrid.events.SEARCH, update);
 
     } else {
+        this.ngReactGrid.search = search;
         this.ngReactGrid.getData();
     }
 };
@@ -1048,7 +1095,6 @@ NgReactGridReactManager.prototype.wrapWithRootScope = function (func) {
                 func.apply(null, args);
             });
         }
-
     };
 };
 
