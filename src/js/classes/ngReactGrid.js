@@ -226,15 +226,15 @@ NgReactGrid.prototype.updatePageSize = function(updates) {
     this.pageSize = updates.pageSize;
     this.currentPage = updates.currentPage;
     this.updateData({
-        data: this.react.originalData
-    });
+        data: (this.isSearching()) ? this.react.filteredData : this.react.originalData
+    }, true);
 };
 
 NgReactGrid.prototype.updatePagination = function(updates) {
     this.currentPage = updates.currentPage;
     this.updateData({
         data: (this.isSearching()) ? this.react.filteredData : this.react.originalData
-    });
+    }, true);
 };
 
 NgReactGrid.prototype.updateSearch = function(updates) {

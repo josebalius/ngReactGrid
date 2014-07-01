@@ -227,7 +227,7 @@ NgReactGridReactManager.prototype.wrapWithRootScope = function(func) {
     var self = this;
     return function() {
         var args = arguments;
-        self.rootScope.$apply(function() {
+        self.ngReactGrid.rootScope.$apply(function() {
             func.apply(null, args);
         });
     };
