@@ -9,6 +9,7 @@
     <ng-react-grid grid="grid"></ng-react-grid>
     <button type="button" ng-click="edit()" ng-show="!grid.editing">Edit Grid</button>
     <button type="button" ng-click="save()" ng-show="grid.editing">Save Grid</button>
+    <button type="button" ng-click="cancel()" ng-show="grid.editing">Cancel</button>
     <br/>
     Selections: {{selections}}<br/>
     Clicked On Record: {{clickedOnRecord}}
@@ -18,7 +19,7 @@
         src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.10/angular.min.js"></script>
 <script src="http://fb.me/react-0.10.0.js"></script>
 <script src="./dataSet.js"></script>
-<script src="../build/js/ngReactGrid-0.6.1.min.js"></script>
+<script src="../build/js/ngReactGrid-0.6.1.js"></script>
 <script type="text/javascript">
 
     angular.module("example", ['ngReactGrid'])
@@ -33,7 +34,12 @@
                 };
 
                 $scope.save = function() {
-                    console.debug($scope.grid.data[0]);
+                    var data = $scope.grid.data;
+                    $scope.grid.editing = false;
+                };
+
+                $scope.cancel = function() {
+                    $scope.grid.revertEdit();
                     $scope.grid.editing = false;
                 };
 
