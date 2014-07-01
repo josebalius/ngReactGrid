@@ -1,3 +1,8 @@
+/**
+ * This class is the bridge between the ngReactGrid class and React
+ * @param ngReactGrid
+ * @constructor
+ */
 var NgReactGridReactManager = function (ngReactGrid) {
     /**
      * Reference to the ngReactGrid main class

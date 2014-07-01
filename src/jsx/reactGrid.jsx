@@ -211,7 +211,7 @@ var ngReactGridComponent = (function() {
                     return (
                         <td style={cellStyle}>
                             {cellText}
-                        </td> 
+                        </td>
                     );
                 } else {
                     return defaultCell;

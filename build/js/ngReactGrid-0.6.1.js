@@ -212,7 +212,7 @@ var ngReactGridComponent = (function() {
                     return (
                         React.DOM.td( {style:cellStyle}, 
                             cellText
-                        ) 
+                        )
                     );
                 } else {
                     return defaultCell;
@@ -535,7 +535,7 @@ var ngReactGridTextFieldComponent = (function() {
         },
         render: function() {
             return (
-                React.DOM.input( {type:"text", value:this.state.defaultValue, ref:"textField", onChange:this.handleChange} )
+                React.DOM.input( {type:"text", value:this.state.defaultValue, className:"ngReactTextField", ref:"textField", onChange:this.handleChange} )
             )
         }
     });
@@ -548,6 +548,14 @@ var NgReactGridReactManager = require("./NgReactGridReactManager");
 var NgReactGridDataManager = require("./NgReactGridDataManager");
 var NO_GET_DATA_CALLBACK_ERROR = "localMode is false, please implement the getData function on the grid object";
 
+/**
+ * NgReactGrid - Main class
+ * @param scope
+ * @param element
+ * @param attrs
+ * @param $rootScope
+ * @constructor
+ */
 var NgReactGrid = function (scope, element, attrs, $rootScope) {
     this.columnDefs = scope.grid.columnDefs || [];
     this.data = [];
@@ -867,11 +875,20 @@ NgReactGrid.prototype.render = function() {
 
 module.exports = NgReactGrid;
 },{"../vendors/miniUnderscore":8,"./NgReactGridDataManager":2,"./NgReactGridReactManager":3}],2:[function(require,module,exports){
+/**
+ * This class manages the editing/saving/reverting functionality to ngReactGrid
+ * @param ngReactGrid
+ * @constructor
+ */
 var NgReactGridDataManager = function(ngReactGrid) {
     this.ngReactGrid = ngReactGrid;
     this.dataCopy = [];
 };
 
+/**
+ * This function is used to add the edit/save/cancel API to the grid object created by the user.
+ * @param gridObject
+ */
 NgReactGridDataManager.prototype.mixinAPI = function(gridObject) {
     var self = this;
 
@@ -930,6 +947,11 @@ NgReactGridDataManager.prototype.cancel = function() {
 
 module.exports = NgReactGridDataManager;
 },{}],3:[function(require,module,exports){
+/**
+ * This class is the bridge between the ngReactGrid class and React
+ * @param ngReactGrid
+ * @constructor
+ */
 var NgReactGridReactManager = function (ngReactGrid) {
     /**
      * Reference to the ngReactGrid main class

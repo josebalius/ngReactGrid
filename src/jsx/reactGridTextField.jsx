@@ -24,7 +24,7 @@ var ngReactGridTextFieldComponent = (function() {
         },
         render: function() {
             return (
-                <input type="text" value={this.state.defaultValue} ref="textField" onChange={this.handleChange} />
+                <input type="text" value={this.state.defaultValue} className="ngReactTextField" ref="textField" onChange={this.handleChange} />
             )
         }
     });

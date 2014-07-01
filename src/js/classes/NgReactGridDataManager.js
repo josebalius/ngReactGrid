@@ -1,8 +1,17 @@
+/**
+ * This class manages the editing/saving/reverting functionality to ngReactGrid
+ * @param ngReactGrid
+ * @constructor
+ */
 var NgReactGridDataManager = function(ngReactGrid) {
     this.ngReactGrid = ngReactGrid;
     this.dataCopy = [];
 };
 
+/**
+ * This function is used to add the edit/save/cancel API to the grid object created by the user.
+ * @param gridObject
+ */
 NgReactGridDataManager.prototype.mixinAPI = function(gridObject) {
     var self = this;
 

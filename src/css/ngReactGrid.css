@@ -220,3 +220,13 @@
     border: 1px solid #ddd;
     margin-left: -1px;
 }
+
+.ngReactTextField {
+    margin:0;
+    width: 95%;
+    outline: none;
+    border: none;
+    padding: 4px;
+    background: transparent;
+    font-weight: bold;
+}

@@ -3,6 +3,14 @@ var NgReactGridReactManager = require("./NgReactGridReactManager");
 var NgReactGridDataManager = require("./NgReactGridDataManager");
 var NO_GET_DATA_CALLBACK_ERROR = "localMode is false, please implement the getData function on the grid object";
 
+/**
+ * NgReactGrid - Main class
+ * @param scope
+ * @param element
+ * @param attrs
+ * @param $rootScope
+ * @constructor
+ */
 var NgReactGrid = function (scope, element, attrs, $rootScope) {
     this.columnDefs = scope.grid.columnDefs || [];
     this.data = [];
