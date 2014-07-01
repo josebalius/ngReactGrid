@@ -461,6 +461,7 @@ var ngReactGridComponent = (function() {
 
     var ngReactGrid = React.createClass({displayName: 'ngReactGrid',
         render: function() {
+        console.debug(this.props);
             return (
                 React.DOM.div( {className:"ngReactGrid"}, 
                     ngReactGridHeader( {grid:this.props.grid} ),
@@ -545,6 +546,7 @@ var ngReactGridTextFieldComponent = (function() {
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var _ = require('../vendors/miniUnderscore');
 var NgReactGridReactManager = require("./NgReactGridReactManager");
+var NgReactGridDataManager = require("./NgReactGridDataManager");
 var NO_GET_DATA_CALLBACK_ERROR = "localMode is false, please implement the getData function on the grid object";
 
 var NgReactGrid = function (scope, element, attrs, $rootScope) {
@@ -571,6 +573,7 @@ var NgReactGrid = function (scope, element, attrs, $rootScope) {
      * Initialize the NgReactGridReact class
      */
     this.react = new NgReactGridReactManager(this);
+    this.dataManager = new NgReactGridDataManager(this);
 
     /**
      * Initialize events
@@ -605,10 +608,19 @@ NgReactGrid.prototype.init = function () {
     _.extend(this, this.scope.grid);
 
     /**
+     * Provide the editing API interface
+     */
+    this.dataManager.mixinAPI(this.scope.grid);
+
+    /**
      * If we are in server mode, perform the first call to load the data
      */
     if(this.isServerMode()) {
         this.getData();
+    } else {
+        this.updateData({
+            data: this.data
+        });
     }
 
     this.render();
@@ -855,7 +867,50 @@ NgReactGrid.prototype.render = function() {
 };
 
 module.exports = NgReactGrid;
-},{"../vendors/miniUnderscore":7,"./NgReactGridReactManager":2}],2:[function(require,module,exports){
+},{"../vendors/miniUnderscore":8,"./NgReactGridDataManager":2,"./NgReactGridReactManager":3}],2:[function(require,module,exports){
+var NgReactGridDataManager = function(ngReactGrid) {
+    this.ngReactGrid = ngReactGrid;
+};
+
+NgReactGridDataManager.prototype.mixinAPI = function(gridObject) {
+    var self = this;
+
+    gridObject.edit = function() {
+        self.edit.call(self);
+    };
+
+    gridObject.saveEdit = function() {
+        self.saveEdit.call(self);
+    };
+
+    gridObject.cancelEdit = function() {
+        self.cancelEdit.call(self);
+    };
+
+    gridObject.isEditing = function() {
+        self.isEditing.call(self);
+    };
+};
+
+NgReactGridDataManager.prototype.edit = function() {
+    this.ngReactGrid.editing = true;
+    this.ngReactGrid.render();
+};
+
+NgReactGridDataManager.prototype.saveEdit = function() {
+    this.ngReactGrid.editing = false;
+};
+
+NgReactGridDataManager.prototype.cancelEdit = function() {
+    this.ngReactGrid.editing = false;
+};
+
+NgReactGridDataManager.prototype.isEditing = function() {
+    return this.ngReactGrid.editing;
+};
+
+module.exports = NgReactGridDataManager;
+},{}],3:[function(require,module,exports){
 var NgReactGridReactManager = function (ngReactGrid) {
     /**
      * Reference to the ngReactGrid main class
@@ -1099,7 +1154,7 @@ NgReactGridReactManager.prototype.wrapWithRootScope = function (func) {
 };
 
 module.exports = NgReactGridReactManager;
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 var ngReactGrid = require("../classes/NgReactGrid");
 
 var ngReactGridDirective = function ($rootScope) {
@@ -1114,7 +1169,7 @@ var ngReactGridDirective = function ($rootScope) {
 module.exports = ngReactGridDirective;
 
 
-},{"../classes/NgReactGrid":1}],4:[function(require,module,exports){
+},{"../classes/NgReactGrid":1}],5:[function(require,module,exports){
 var ngReactGridCheckboxFactory = function() {
     var ngReactGridCheckbox = function(selectionTarget) {
         return {
@@ -1142,7 +1197,7 @@ var ngReactGridCheckboxFactory = function() {
 };
 
 module.exports = ngReactGridCheckboxFactory;
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 var ngReactGridTextFieldFactory = function() {
 
     var ngReactGridTextField = function(record, field) {
@@ -1160,7 +1215,7 @@ var ngReactGridTextFieldFactory = function() {
 };
 
 module.exports = ngReactGridTextFieldFactory;
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 'use strict';
 
 var ngReactGridDirective = require('./directives/ngReactGridDirective');
@@ -1172,7 +1227,7 @@ angular.module('ngReactGrid', [])
     .factory("ngReactGridTextField", [ngReactGridTextFieldFactory])
     .directive("ngReactGrid", ['$rootScope', ngReactGridDirective]);
 
-},{"./directives/ngReactGridDirective":3,"./factories/ngReactGridCheckboxFactory":4,"./factories/ngReactGridTextFieldFactory":5}],7:[function(require,module,exports){
+},{"./directives/ngReactGridDirective":4,"./factories/ngReactGridCheckboxFactory":5,"./factories/ngReactGridTextFieldFactory":6}],8:[function(require,module,exports){
 var _ = {
     nativeForEach: Array.prototype.forEach,
     each: function (obj, iterator, context) {
@@ -1206,4 +1261,4 @@ var _ = {
 
 module.exports = _;
 
-},{}]},{},[6])
+},{}]},{},[7])
