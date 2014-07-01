@@ -460,7 +460,6 @@ var ngReactGridComponent = (function() {
 
     var ngReactGrid = React.createClass({
         render: function() {
-        console.debug(this.props);
             return (
                 <div className="ngReactGrid">
                     <ngReactGridHeader grid={this.props.grid} />

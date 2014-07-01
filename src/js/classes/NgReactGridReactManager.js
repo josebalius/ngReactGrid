@@ -84,7 +84,7 @@ NgReactGridReactManager.prototype.setSortField = function(field) {
      */
     var update = {
         sortInfo: {
-            field: "",
+            field: field,
             dir: ""
         }
     };
@@ -93,7 +93,6 @@ NgReactGridReactManager.prototype.setSortField = function(field) {
      * Are we sorting on a new field
      */
     if(this.ngReactGrid.sortInfo.field !== field) {
-        update.sortInfo.field = field;
         update.sortInfo.dir = "asc";
     } else {
         /**
@@ -104,6 +103,7 @@ NgReactGridReactManager.prototype.setSortField = function(field) {
         } else {
             update.sortInfo.dir = "asc";
         }
+
     }
 
     /**
@@ -188,7 +188,6 @@ NgReactGridReactManager.prototype.setSearch = function(search) {
 NgReactGridReactManager.prototype.goToPage = function(page) {
 
     var update = {
-        data: (this.ngReactGrid.isSearching()) ? this.filteredData : this.originalData,
         currentPage: page
     };
 

@@ -180,22 +180,41 @@ NgReactGrid.prototype.update = function (updateEvent, updates) {
         case this.events.PAGESIZE:
             this.updatePageSize(updates);
             break;
+
+        case this.events.PAGINATION:
+            this.updatePagination(updates);
+            break;
+
+        case this.events.SEARCH:
+            this.updateSearch(updates);
+            break;
+
+        case this.events.SORTING:
+            this.updateSorting(updates);
+            break;
     }
 
     this.render();
 
 };
 
-NgReactGrid.prototype.updateData = function(updates) {
+NgReactGrid.prototype.updateData = function(updates, updateContainsData) {
 
     this.react.startIndex = (this.currentPage - 1) * this.pageSize;
     this.react.endIndex = (this.pageSize * this.currentPage);
 
-    this.react.originalData = updates.data.slice(0);
-
     if(this.isLocalMode()) {
-        this.totalCount = this.react.originalData.length;
-        this.data = this.react.originalData.slice(this.react.startIndex, this.react.endIndex);
+        if(updateContainsData) {
+
+            this.data = updates.data.slice(this.react.startIndex, this.react.endIndex);
+            this.totalCount = updates.data.length;
+
+        } else {
+            this.react.originalData = updates.data.slice(0);
+            this.totalCount = this.react.originalData.length;
+            this.data = this.react.originalData.slice(this.react.startIndex, this.react.endIndex);
+        }
+
     }
 
     this.react.showingRecords = this.data.length;
@@ -204,7 +223,37 @@ NgReactGrid.prototype.updateData = function(updates) {
 };
 
 NgReactGrid.prototype.updatePageSize = function(updates) {
+    this.pageSize = updates.pageSize;
+    this.currentPage = updates.currentPage;
+    this.updateData({
+        data: this.react.originalData
+    });
+};
 
+NgReactGrid.prototype.updatePagination = function(updates) {
+    this.currentPage = updates.currentPage;
+    this.updateData({
+        data: (this.isSearching()) ? this.react.filteredData : this.react.originalData
+    });
+};
+
+NgReactGrid.prototype.updateSearch = function(updates) {
+    this.search = updates.search;
+    this.currentPage = 1;
+    this.updateData({
+        data: updates.data
+    }, true);
+};
+
+NgReactGrid.prototype.updateSorting = function(updates) {
+    this.sortInfo = updates.sortInfo;
+
+    if(updates.data) {
+        this.currentPage = 1;
+        this.updateData({
+            data: updates.data
+        }, true);
+    }
 };
 
 /**

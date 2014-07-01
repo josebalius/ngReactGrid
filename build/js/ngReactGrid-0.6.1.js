@@ -511,12 +511,31 @@ var ngReactGridCheckboxComponent = (function() {
 /** @jsx React.DOM */
 var ngReactGridTextFieldComponent = (function() {
     var ngReactGridTextFieldComponent = React.createClass({displayName: 'ngReactGridTextFieldComponent',
+        getInitialState: function() {
+            return {
+                defaultValue: ""
+            };
+        },
         handleChange: function() {
-            this.props.updateValue(this.refs.textField.getDOMNode().value);
+            var value = this.refs.textField.getDOMNode().value;
+            this.props.updateValue(value);
+            this.setState({
+                defaultValue: value
+            });
+        },
+        componentWillReceiveProps: function(nextProps) {
+            this.setState({
+                defaultValue: nextProps.value
+            });
+        },
+        componentWillMount: function() {
+            this.setState({
+                defaultValue: this.props.value
+            });
         },
         render: function() {
             return (
-                React.DOM.input( {type:"text", defaultValue:this.props.value, ref:"textField", onChange:this.handleChange} )
+                React.DOM.input( {type:"text", value:this.state.defaultValue, ref:"textField", onChange:this.handleChange} )
             )
         }
     });
@@ -524,10 +543,12 @@ var ngReactGridTextFieldComponent = (function() {
     return ngReactGridTextFieldComponent;
 })();
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var gridReact = require("./gridReact");
+var _ = require('../vendors/miniUnderscore');
+var NgReactGridReactManager = require("./NgReactGridReactManager");
+var NO_GET_DATA_CALLBACK_ERROR = "localMode is false, please implement the getData function on the grid object";
 
-var grid = function(ngReactGrid, $rootScope) {
-    this.columnDefs = [];
+var NgReactGrid = function (scope, element, attrs, $rootScope) {
+    this.columnDefs = scope.grid.columnDefs || [];
     this.data = [];
     this.height = 500;
     this.localMode = true;
@@ -537,216 +558,465 @@ var grid = function(ngReactGrid, $rootScope) {
     this.currentPage = 1;
     this.pageSize = 25;
     this.pageSizes = [25, 50, 100, 500];
-    this.sortInfo = {
-        field: "",
-        dir: ""
-    };
+    this.sortInfo = {field: "", dir: ""};
     this.search = "";
     this.horizontalScroll = false;
-    this.scrollbarWidth = (function() {
-        var outer = document.createElement("div");
-        outer.style.visibility = "hidden";
-        outer.style.width = "100px";
-        outer.style.msOverflowStyle = "scrollbar"; // needed for WinJS apps
-
-        document.body.appendChild(outer);
-
-        var widthNoScroll = outer.offsetWidth;
-        // force scrollbars
-        outer.style.overflow = "scroll";
-
-        // add innerdiv
-        var inner = document.createElement("div");
-        inner.style.width = "100%";
-        outer.appendChild(inner);
-
-        var widthWithScroll = inner.offsetWidth;
-
-        // remove divs
-        outer.parentNode.removeChild(outer);
-
-        return widthNoScroll - widthWithScroll;
-    })();
-
-    this.react = new gridReact(this, ngReactGrid, $rootScope);
-
-    return this;
-};
-
-module.exports = grid;
-},{"./gridReact":2}],2:[function(require,module,exports){
-var NO_GET_DATA_CALLBACK_ERROR = "localMode is false, please implement the getData function on the grid object";
-
-var gridReact = function(grid, ngReactGrid, $rootScope) {
-    this.ngReactGrid = ngReactGrid;
-    this.grid = grid;
-    this.showingRecords = 0;
-    this.startIndex = 0;
-    this.endIndex = 0;
-    this.originalData = [];
-    this.loading = false;
+    this.scrollbarWidth = this.getScrollbarWidth();
+    this.scope = scope;
+    this.element = element;
+    this.attrs = attrs;
     this.rootScope = $rootScope;
+
+    /**
+     * Initialize the NgReactGridReact class
+     */
+    this.react = new NgReactGridReactManager(this);
+
+    /**
+     * Initialize events
+     */
+    this.setupUpdateEvents();
+
+    /**
+     * Initialize scope watchers
+     */
+    this.initWatchers();
+
+    /**
+     * Init the grid
+     */
+    this.init();
 };
 
-gridReact.prototype.setPageSize = function(pageSize) {
-    this.rootScope.$apply(function() {
+NgReactGrid.prototype.init = function () {
 
-        var update = {
-            pageSize: pageSize,
-            currentPage: 1
-        };
-
-        if(this.grid.search.length > 0) {
-            update.data = this.filteredData;
-            this.ngReactGrid.update(update, false, true)
+    /**
+     * Check if getData is set, override with our own and keep a private copy
+     */
+    if (typeof this.scope.grid.localMode && this.scope.grid.localMode === false) {
+        if (this.scope.grid.getData) {
+            this._getData = this.scope.grid.getData;
+            delete this.scope.grid.getData;
         } else {
-            this.ngReactGrid.update(update);
+            throw new Error(NO_GET_DATA_CALLBACK_ERROR);
         }
-
-        if(!this.grid.localMode) {
-            if(this.grid.getData) {
-                this.loading = true;
-                this.grid.getData();
-            } else {
-                throw new Error(NO_GET_DATA_CALLBACK_ERROR);
-            }
-
-        }
-
-        this.ngReactGrid.render();
-
-    }.bind(this));
-};
-
-gridReact.prototype.setSortField = function(field) {
-    this.rootScope.$apply(function() {
-        if(this.grid.sortInfo.field !== field) {
-            this.grid.sortInfo.field = field;
-            this.grid.sortInfo.dir = "asc";
-        } else {
-            if(this.grid.sortInfo.dir === "asc") {
-                this.grid.sortInfo.dir = "desc";
-            } else {
-                this.grid.sortInfo.dir = "asc";
-            }
-        }
-
-        if(!this.grid.localMode) {
-            if(this.grid.getData) {
-                this.loading = true;
-                this.grid.getData();
-                this.ngReactGrid.render();
-            } else {
-                throw new Error(NO_GET_DATA_CALLBACK_ERROR);
-            }
-
-        } else {
-            this.sort();
-        }
-
-
-    }.bind(this));
-};
-
-gridReact.prototype.sort = function() {
-    var copy;
-
-    if(this.grid.search.length > 0) {
-        copy = this.filteredData;
-    } else {
-        copy = this.grid.react.originalData.slice(0);
     }
 
-    var isAsc = this.grid.sortInfo.dir === "asc";
+    /**
+     * If we are in server mode, perform the first call to load the data
+     */
+    if(this.isServerMode()) {
+        this.getData();
+    }
+
+};
+
+/**
+ * Get data wrapper, at the moment it doesn't do much but expect some hooks and functionality being added in the future
+ */
+NgReactGrid.prototype.getData = function () {
+    this.react.loading = true;
+    this._getData(this);
+};
+
+/**
+ * This is called once during initialization to figure out the width of the scrollbars
+ * @returns {number}
+ */
+NgReactGrid.prototype.getScrollbarWidth = function () {
+    var outer = document.createElement("div");
+    outer.style.visibility = "hidden";
+    outer.style.width = "100px";
+    outer.style.msOverflowStyle = "scrollbar"; // needed for WinJS apps
+
+    document.body.appendChild(outer);
+
+    var widthNoScroll = outer.offsetWidth;
+
+    /*
+     * Force scroll bars
+     */
+    outer.style.overflow = "scroll";
+
+    /*
+     * Add innerDiv
+     */
+    var inner = document.createElement("div");
+    inner.style.width = "100%";
+    outer.appendChild(inner);
+
+    var widthWithScroll = inner.offsetWidth;
+
+    // remove divs
+    outer.parentNode.removeChild(outer);
+
+    return widthNoScroll - widthWithScroll;
+};
+
+/**
+ * Returns whether there is an active search on the grid
+ * @returns {string|boolean}
+ */
+NgReactGrid.prototype.isSearching = function () {
+    return this.search && this.search.length > 0;
+};
+
+/**
+ * Returns whether the grid is in local mode
+ * @returns {boolean|*}
+ */
+NgReactGrid.prototype.isLocalMode = function () {
+    return this.localMode;
+};
+
+/**
+ * Returns whether the grid is in server mode
+ * @returns {boolean}
+ */
+NgReactGrid.prototype.isServerMode = function () {
+    return !this.localMode;
+};
+
+/**
+ * Manages the different events that can update the grid
+ */
+NgReactGrid.prototype.setupUpdateEvents = function () {
+    this.events = {
+        PAGESIZE: "PAGESIZE",
+        SORTING: "SORTING",
+        SEARCH: "SEARCH",
+        PAGINATION: "PAGINATION",
+        DATA: "DATA",
+        TOTALCOUNT: "TOTALCOUNT"
+    };
+};
+
+/**
+ * Initializes the scope watchers needed for the grid
+ */
+NgReactGrid.prototype.initWatchers = function () {
+    this.scope.$watch("grid.data", function (newValue, oldValue) {
+        if (newValue) {
+            this.update(this.events.DATA, {
+                data: newValue
+            });
+        }
+    }.bind(this));
+
+    this.scope.$watch("grid.totalCount", function (newValue, oldValue) {
+        if (newValue) {
+            this.update(this.events.TOTALCOUNT, {totalCount: newValue});
+        }
+    }.bind(this));
+};
+
+/**
+ * Updates the grid model, re-renders the react component
+ * @param updateEvent
+ * @param updates
+ */
+NgReactGrid.prototype.update = function (updateEvent, updates) {
+
+    switch(updateEvent) {
+        case this.events.DATA:
+            this.updateData(updates);
+            break;
+
+        case this.events.PAGESIZE:
+            this.updatePageSize(updates);
+            break;
+
+        case this.events.PAGINATION:
+            this.updatePagination(updates);
+            break;
+
+        case this.events.SEARCH:
+            this.updateSearch(updates);
+            break;
+
+        case this.events.SORTING:
+            this.updateSorting(updates);
+            break;
+    }
+
+    this.render();
+
+};
+
+NgReactGrid.prototype.updateData = function(updates, updateContainsData) {
+
+    this.react.startIndex = (this.currentPage - 1) * this.pageSize;
+    this.react.endIndex = (this.pageSize * this.currentPage);
+
+    if(this.isLocalMode()) {
+        if(updateContainsData) {
+
+            this.data = updates.data.slice(this.react.startIndex, this.react.endIndex);
+            this.totalCount = updates.data.length;
+
+        } else {
+            this.react.originalData = updates.data.slice(0);
+            this.totalCount = this.react.originalData.length;
+            this.data = this.react.originalData.slice(this.react.startIndex, this.react.endIndex);
+        }
+
+    }
+
+    this.react.showingRecords = this.data.length;
+
+    this.totalPages = Math.ceil(this.totalCount / this.pageSize);
+};
+
+NgReactGrid.prototype.updatePageSize = function(updates) {
+    this.pageSize = updates.pageSize;
+    this.currentPage = updates.currentPage;
+    this.updateData({
+        data: this.react.originalData
+    });
+};
+
+NgReactGrid.prototype.updatePagination = function(updates) {
+    this.currentPage = updates.currentPage;
+    this.updateData({
+        data: (this.isSearching()) ? this.react.filteredData : this.react.originalData
+    });
+};
+
+NgReactGrid.prototype.updateSearch = function(updates) {
+    this.search = updates.search;
+    this.currentPage = 1;
+    this.updateData({
+        data: updates.data
+    }, true);
+};
+
+NgReactGrid.prototype.updateSorting = function(updates) {
+    this.sortInfo = updates.sortInfo;
+
+    if(updates.data) {
+        this.currentPage = 1;
+        this.updateData({
+            data: updates.data
+        }, true);
+    }
+};
+
+/**
+ * Calls React to render the grid component on the given element
+ */
+NgReactGrid.prototype.render = function() {
+    React.renderComponent(ngReactGridComponent({grid: this}), this.element[0]);
+};
+
+module.exports = NgReactGrid;
+},{"../vendors/miniUnderscore":7,"./NgReactGridReactManager":2}],2:[function(require,module,exports){
+var NgReactGridReactManager = function(ngReactGrid) {
+    /**
+     * Reference to the ngReactGrid main class
+     */
+    this.ngReactGrid = ngReactGrid;
+
+    /**
+     * How many records we are currently showing with filters, search, pageSize and pagination applied
+     * @type {number}
+     */
+    this.showingRecords = 0;
+
+    /**
+     * The starting index by which we are filtering the local data
+     * @type {number}
+     */
+    this.startIndex = 0;
+
+    /**
+     * The end index by which we are filtering local data
+     * @type {number}
+     */
+    this.endIndex = 0;
+
+    /**
+     * This is a copy of the data given to ngReactGrid (local data only)
+     * @type {Array}
+     */
+    this.originalData = [];
+
+    /**
+     * This is a copy of the data given to ngReactGrid whenever it is filtered (local data only)
+     * @type {Array}
+     */
+    this.filteredData = [];
+
+    /**
+     * Loading indicator
+     * @type {boolean}
+     */
+    this.loading = false;
+};
+
+/**
+ * Page size setter, this is called for the ngReactGridComponent (React class)
+ * @param pageSize
+ */
+NgReactGridReactManager.prototype.setPageSize = function(pageSize) {
+
+    var update = {
+        pageSize: pageSize,
+        currentPage: 1
+    };
+
+    /*
+     * Is there a search in place
+     */
+    if(this.ngReactGrid.isSearching()) {
+        update.data = this.filteredData;
+    }
+
+    /**
+     * Send the update event to the main class
+     */
+    this.ngReactGrid.update(this.ngReactGrid.events.PAGESIZE, update);
+
+    /**
+     * If we are in server mode, call getData
+     */
+    if(this.ngReactGrid.isServerMode()) {
+        this.ngReactGrid.getData();
+    }
+};
+
+/**
+ * Sorting callback, this is called from the ngReactGridComponent whenever a header cell is clicked (and is sortable)
+ * @param field
+ */
+NgReactGridReactManager.prototype.setSortField = function(field) {
+
+    /**
+     * The initial update to the grid
+     * @type {{sortInfo: {field: string, dir: string}}}
+     */
+    var update = {
+        sortInfo: {
+            field: field,
+            dir: ""
+        }
+    };
+
+    /**
+     * Are we sorting on a new field
+     */
+    if(this.ngReactGrid.sortInfo.field !== field) {
+        update.sortInfo.dir = "asc";
+    } else {
+        /**
+         * Switch the sorting direction
+         */
+        if(this.ngReactGrid.sortInfo.dir === "asc") {
+            update.sortInfo.dir = "desc";
+        } else {
+            update.sortInfo.dir = "asc";
+        }
+
+    }
+
+    /**
+     * Call getData for Server Mode or perform a local sort
+     */
+    if(this.ngReactGrid.isServerMode()) {
+        this.ngReactGrid.update(this.ngReactGrid.events.SORTING, update);
+        this.ngReactGrid.getData();
+    } else {
+        this.performLocalSort(update);
+    }
+};
+
+/**
+ * Simple asc -> desc, desc -> asc sorting, used for local data, resets the current page to 1
+ * @param update
+ */
+NgReactGridReactManager.prototype.performLocalSort = function(update) {
+    var copy;
+
+    if(this.ngReactGrid.isSearching()) {
+        copy = this.filteredData;
+    } else {
+        copy = this.originalData.slice(0);
+    }
+
+    var isAsc = update.sortInfo.dir === "asc";
 
     copy.sort(function(a, b) {
         if(isAsc) {
-            return a[this.grid.sortInfo.field] <= b[this.grid.sortInfo.field] ? -1 : 1;
+            return a[update.sortInfo.field] <= b[update.sortInfo.field] ? -1 : 1;
         } else {
-            return a[this.grid.sortInfo.field] >= b[this.grid.sortInfo.field] ? -1 : 1;
+            return a[update.sortInfo.field] >= b[update.sortInfo.field] ? -1 : 1;
         }
     }.bind(this));
 
-    this.ngReactGrid.update({
-        data: copy,
-        currentPage: 1
-    }, false, true);
+    update.data = copy;
+    update.currentPage = 1;
 
-    this.ngReactGrid.render();
+    this.ngReactGrid.update(this.ngReactGrid.events.SORTING, update);
 };
 
-gridReact.prototype.setSearch = function(search) {
+/**
+ * Search callback for everytime the user updates the search box, supports local mode and server mode
+ * @param search
+ */
+NgReactGridReactManager.prototype.setSearch = function(search) {
+    var update = {
+        search: search
+    };
 
-    this.rootScope.$apply(function() {
-        this.ngReactGrid.update({
-            search: search
-        });
-
+    if(this.ngReactGrid.isLocalMode()) {
         search = String(search).toLowerCase();
 
-        if(this.grid.localMode) {
-
-            this.grid.data = this.originalData.slice(0);
-
-            var filteredData = this.grid.data.filter(function(obj) {
-                var result = false;
-                for(var i in obj) {
-                    if(obj.hasOwnProperty(i)) {
-                        if(String(obj[i]).toLowerCase().indexOf(search) !== -1) {
-                            result = true;
-                            break;
-                        }
+        this.filteredData = this.originalData.slice(0).filter(function(obj) {
+            var result = false;
+            for(var i in obj) {
+                if(obj.hasOwnProperty(i)) {
+                    if(String(obj[i]).toLowerCase().indexOf(search) !== -1) {
+                        result = true;
+                        break;
                     }
                 }
-                return result;
-            });
-
-            this.filteredData = filteredData;
-
-            this.ngReactGrid.update({
-                data: filteredData,
-                currentPage: 1
-            }, false, true);
-
-        } else {
-            if(this.grid.getData) {
-                this.loading = true;
-                this.grid.getData();
-            } else {
-                throw new Error(NO_GET_DATA_CALLBACK_ERROR);
             }
+            return result;
+        });
 
-        }
+        update.data = this.filteredData;
+        update.currentPage = 1;
 
-        this.ngReactGrid.render();
-    }.bind(this));
+        this.ngReactGrid.update(this.ngReactGrid.events.SEARCH, update);
 
+    } else {
+        this.ngReactGrid.getData();
+    }
 };
 
-gridReact.prototype.goToPage = function(page) {
-    this.rootScope.$apply(function() {
+/**
+ * Pagination call back, called every time a pagination change is made
+ * @param page
+ */
+NgReactGridReactManager.prototype.goToPage = function(page) {
 
-        this.ngReactGrid.update({
-            data: (this.grid.search.length > 0) ? this.filteredData : this.originalData,
-            currentPage: page
-        }, false, true);
+    var update = {
+        currentPage: page
+    };
 
-        if(!this.grid.localMode) {
-            if(this.grid.getData) {
-                this.loading = true;
-                this.grid.getData();
-            } else {
-                throw new Error(NO_GET_DATA_CALLBACK_ERROR);
-            }
+    this.ngReactGrid.update(this.ngReactGrid.events.PAGINATION, update);
 
-        }
-
-        this.ngReactGrid.render();
-
-    }.bind(this));
+    if(this.ngReactGrid.isServerMode()) {
+        this.ngReactGrid.getData();
+    }
 };
 
-gridReact.prototype.wrapFunctionsInAngular = function(cell) {
+/**
+ * This function is called from React to make sure that any callbacks being passed into react cell components, update the
+ * angular scope
+ * @param cell
+ * @returns {*}
+ */
+NgReactGridReactManager.prototype.wrapFunctionsInAngular = function(cell) {
     for(var key in cell.props) {
         if(cell.props.hasOwnProperty(key)) {
             if(key === "children") {
@@ -760,7 +1030,12 @@ gridReact.prototype.wrapFunctionsInAngular = function(cell) {
     return cell;
 };
 
-gridReact.prototype.wrapWithRootScope = function(func) {
+/**
+ * This is the wrapping function on all callbacks passed into the React cell components for ngReactGrid
+ * @param func
+ * @returns {Function}
+ */
+NgReactGridReactManager.prototype.wrapWithRootScope = function(func) {
     var self = this;
     return function() {
         var args = arguments;
@@ -770,13 +1045,15 @@ gridReact.prototype.wrapWithRootScope = function(func) {
     };
 };
 
-module.exports = gridReact;
+module.exports = NgReactGridReactManager;
 },{}],3:[function(require,module,exports){
-var ngReactGridDirective = function (ngReactGrid) {
+var ngReactGrid = require("../classes/NgReactGrid");
+
+var ngReactGridDirective = function ($rootScope) {
     return {
         restrict: "E",
         link: function (scope, element, attrs) {
-            new ngReactGrid(scope, element, attrs);
+            new ngReactGrid(scope, element, attrs, $rootScope);
         }
     }
 };
@@ -784,7 +1061,7 @@ var ngReactGridDirective = function (ngReactGrid) {
 module.exports = ngReactGridDirective;
 
 
-},{}],4:[function(require,module,exports){
+},{"../classes/NgReactGrid":1}],4:[function(require,module,exports){
 var ngReactGridCheckboxFactory = function() {
     var ngReactGridCheckbox = function(selectionTarget) {
         return {
@@ -813,101 +1090,6 @@ var ngReactGridCheckboxFactory = function() {
 
 module.exports = ngReactGridCheckboxFactory;
 },{}],5:[function(require,module,exports){
-var grid = require("../classes/grid");
-var _ = require('../vendors/miniUnderscore');
-
-var ngReactGridFactory = function($rootScope) {
-
-    var ngReactGrid = function(scope, element, attrs) {
-
-        this.scope = scope;
-        this.element = element[0];
-        this.attrs = attrs;
-        this.grid = new grid(this, $rootScope);
-        this.initWithGetData = false;
-
-        this.update(scope.grid, true);
-
-        /**
-         * Watchers
-         */
-        scope.$watch("grid.data", function(newValue, oldValue) {
-            if(newValue) {
-                this.update({data: newValue}, true);
-                this.render();
-            }
-        }.bind(this));
-
-        scope.$watch("grid.totalCount", function(newValue, oldValue) {
-            if(newValue) {
-                this.update({totalCount: newValue}, true);
-                this.render();
-            }
-        }.bind(this));
-
-        scope.$watch("grid.editing", function(newValue, oldValue) {
-            if(newValue !== oldValue) {
-                this.update({editing: newValue}, true);
-                this.render();
-            }
-        }.bind(this));
-
-        if(this.grid.getData) {
-            this.initWithGetData = true;
-            this.grid.react.loading = true;
-            this.grid.getData(this.grid);
-        }
-
-        this.render();
-    };
-
-    ngReactGrid.prototype.update = function(grid, dataUpdate, isSearch) {
-
-        for(var i in grid) {
-            if(grid.hasOwnProperty(i) && i === "react") {
-                throw new Error("Trying to update the grid with the reserved 'react' property");
-            }
-        }
-
-        this.grid = _.extend(this.grid, grid);
-
-        if(dataUpdate)
-            this.grid.react.originalData = this.grid.data.slice(0);
-
-        var startIndex = (this.grid.currentPage - 1) * this.grid.pageSize;
-        var endIndex = (this.grid.pageSize * this.grid.currentPage);
-
-        if(this.grid.localMode) {
-            if(isSearch) {
-                this.grid.totalCount = grid.data.length;
-                this.grid.data = grid.data.slice(startIndex, endIndex);
-            } else {
-                this.grid.totalCount = this.grid.react.originalData.length;
-                this.grid.data = this.grid.react.originalData.slice(startIndex, endIndex);
-            }
-        }
-
-        this.grid.react.showingRecords = this.grid.data.length;
-        this.grid.react.startIndex = startIndex;
-        this.grid.react.endIndex = endIndex;
-
-        if(!this.initWithGetData)
-            this.grid.react.loading = false;
-        else
-            this.initWithGetData = false;
-
-        this.grid.totalPages = Math.ceil(this.grid.totalCount / this.grid.pageSize);
-    };
-
-    ngReactGrid.prototype.render = function() {
-        React.renderComponent(ngReactGridComponent({grid: this.grid}), this.element);
-    };
-
-    return ngReactGrid;
-};
-
-module.exports = ngReactGridFactory;
-},{"../classes/grid":1,"../vendors/miniUnderscore":8}],6:[function(require,module,exports){
 var ngReactGridTextFieldFactory = function() {
 
     var ngReactGridTextField = function(record, field) {
@@ -925,21 +1107,19 @@ var ngReactGridTextFieldFactory = function() {
 };
 
 module.exports = ngReactGridTextFieldFactory;
-},{}],7:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 'use strict';
 
 var ngReactGridDirective = require('./directives/ngReactGridDirective');
 var ngReactGridCheckboxFactory = require('./factories/ngReactGridCheckboxFactory');
 var ngReactGridTextFieldFactory = require("./factories/ngReactGridTextFieldFactory");
-var ngReactGridFactory = require("./factories/ngReactGridFactory");
 
 angular.module('ngReactGrid', [])
     .factory("ngReactGridCheckbox", [ngReactGridCheckboxFactory])
     .factory("ngReactGridTextField", [ngReactGridTextFieldFactory])
-    .factory("ngReactGrid", ['$rootScope', ngReactGridFactory])
-    .directive("ngReactGrid", ['ngReactGrid', ngReactGridDirective]);
+    .directive("ngReactGrid", ['$rootScope', ngReactGridDirective]);
 
-},{"./directives/ngReactGridDirective":3,"./factories/ngReactGridCheckboxFactory":4,"./factories/ngReactGridFactory":5,"./factories/ngReactGridTextFieldFactory":6}],8:[function(require,module,exports){
+},{"./directives/ngReactGridDirective":3,"./factories/ngReactGridCheckboxFactory":4,"./factories/ngReactGridTextFieldFactory":5}],7:[function(require,module,exports){
 var _ = {
     nativeForEach: Array.prototype.forEach,
     each: function (obj, iterator, context) {
@@ -973,4 +1153,4 @@ var _ = {
 
 module.exports = _;
 
-},{}]},{},[7])
+},{}]},{},[6])
