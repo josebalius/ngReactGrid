@@ -1,11 +1,30 @@
 var ngReactGridTextFieldComponent = (function() {
     var ngReactGridTextFieldComponent = React.createClass({
+        getInitialState: function() {
+            return {
+                defaultValue: ""
+            };
+        },
         handleChange: function() {
-            this.props.updateValue(this.refs.textField.getDOMNode().value);
+            var value = this.refs.textField.getDOMNode().value;
+            this.props.updateValue(value);
+            this.setState({
+                defaultValue: value
+            });
+        },
+        componentWillReceiveProps: function(nextProps) {
+            this.setState({
+                defaultValue: nextProps.value
+            });
+        },
+        componentWillMount: function() {
+            this.setState({
+                defaultValue: this.props.value
+            });
         },
         render: function() {
             return (
-                <input type="text" defaultValue={this.props.value} ref="textField" onChange={this.handleChange} />
+                <input type="text" value={this.state.defaultValue} ref="textField" onChange={this.handleChange} />
             )
         }
     });

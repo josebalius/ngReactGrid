@@ -1,8 +1,10 @@
-var ngReactGridDirective = function (ngReactGrid) {
+var ngReactGrid = require("../classes/NgReactGrid");
+
+var ngReactGridDirective = function ($rootScope) {
     return {
         restrict: "E",
         link: function (scope, element, attrs) {
-            new ngReactGrid(scope, element, attrs);
+            new ngReactGrid(scope, element, attrs, $rootScope);
         }
     }
 };
