@@ -30,7 +30,7 @@
                 $scope.clickedOnRecord = {};
                 $scope.editingGrid = false;
 
-                $scope.isEditing = function() {
+                $scope.isEditing = function () {
                     return $scope.editingGrid;
                 };
 
@@ -50,48 +50,48 @@
                     $scope.grid.cancel();
                 };
 
-                $scope.grid = {
-                    data: dataSet,
-                    columnDefs: [
-                        {
-                            field: "firstName",
-                            displayName: "First Name",
-                            edit: function (row) {
-                                return new ngReactGridSelectField(row, 'firstName');
-                            }
-                        },
-                        {
-                            field: "lastName",
-                            displayName: "Last Name"
-                        }
-                    ]
-                };
-
                 /*$scope.grid = {
-                 data: [],
+                 data: dataSet,
                  columnDefs: [
                  {
                  field: "firstName",
-                 displayName: "First Name"
+                 displayName: "First Name",
+                 edit: function (row) {
+                 return new ngReactGridSelectField(row, 'firstName');
+                 }
                  },
                  {
                  field: "lastName",
                  displayName: "Last Name"
                  }
-                 ],
-                 localMode: false,
-                 getData: function () {
-                 var grid = this;
-                 $timeout(function () {
-                 if (grid.search) {
-                 $scope.grid.data = [];
-                 } else {
-                 $scope.grid.data = dataSet.slice((grid.currentPage - 1) * grid.pageSize, (grid.pageSize * grid.currentPage));
-                 }
-                 $scope.grid.totalCount = dataSet.length;
-                 }, 2000);
-                 }
+                 ]
                  };*/
+
+                $scope.grid = {
+                    data: [],
+                    columnDefs: [
+                        {
+                            field: "firstName",
+                            displayName: "First Name"
+                        },
+                        {
+                            field: "lastName",
+                            displayName: "Last Name"
+                        }
+                    ],
+                    localMode: false,
+                    getData: function () {
+                        var grid = this;
+                        $timeout(function () {
+                            if (grid.search) {
+                                $scope.grid.data = [];
+                            } else {
+                                $scope.grid.data = dataSet.slice((grid.currentPage - 1) * grid.pageSize, (grid.pageSize * grid.currentPage));
+                            }
+                            $scope.grid.totalCount = dataSet.length;
+                        }, 2000);
+                    }
+                };
             });
 
 </script>

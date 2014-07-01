@@ -53,6 +53,9 @@ var NgReactGrid = function (scope, element, attrs, $rootScope) {
     this.init();
 };
 
+/**
+ * Init function for NgReactGrid, decides whether to getData or render with local data
+ */
 NgReactGrid.prototype.init = function () {
 
     /**
@@ -106,7 +109,12 @@ NgReactGrid.prototype.getScrollbarWidth = function () {
     var outer = document.createElement("div");
     outer.style.visibility = "hidden";
     outer.style.width = "100px";
-    outer.style.msOverflowStyle = "scrollbar"; // needed for WinJS apps
+
+    /**
+     * Needed for WinJS apps
+     * @type {string}
+     */
+    outer.style.msOverflowStyle = "scrollbar";
 
     document.body.appendChild(outer);
 
@@ -126,7 +134,9 @@ NgReactGrid.prototype.getScrollbarWidth = function () {
 
     var widthWithScroll = inner.offsetWidth;
 
-    // remove divs
+    /**
+     * Remove divs
+     */
     outer.parentNode.removeChild(outer);
 
     return widthNoScroll - widthWithScroll;
