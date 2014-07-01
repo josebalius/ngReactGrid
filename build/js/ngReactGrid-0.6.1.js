@@ -509,6 +509,42 @@ var ngReactGridCheckboxComponent = (function() {
     return ngReactGridCheckboxComponent;
 })();
 /** @jsx React.DOM */
+var ngReactGridCheckboxFieldComponent = (function() {
+    var ngReactGridCheckboxFieldComponent = React.createClass({displayName: 'ngReactGridCheckboxFieldComponent',
+        getInitialState: function() {
+            return {
+                checked: false
+            }
+        },
+        handleClick: function() {
+            var newState = {
+                checked: (this.state.checked) ? false : true
+            };
+
+            this.setState(newState);
+
+            this.props.updateValue(newState.checked);
+        },
+        componentWillReceiveProps: function(nextProps) {
+            this.setState({
+                checked: (nextProps.value) ? true : false
+            });
+        },
+        componentWillMount: function() {
+            this.setState({
+                checked: (this.props.value === true) ? true : false
+            });
+        },
+        render: function() {
+            return (
+                React.DOM.input( {type:"checkbox", checked:this.state.checked, onChange:this.handleClick} )
+            )
+        }
+    });
+
+    return ngReactGridCheckboxFieldComponent;
+})();
+/** @jsx React.DOM */
 var ngReactGridTextFieldComponent = (function() {
     var ngReactGridTextFieldComponent = React.createClass({displayName: 'ngReactGridTextFieldComponent',
         getInitialState: function() {
@@ -874,7 +910,7 @@ NgReactGrid.prototype.render = function() {
 };
 
 module.exports = NgReactGrid;
-},{"../vendors/miniUnderscore":8,"./NgReactGridDataManager":2,"./NgReactGridReactManager":3}],2:[function(require,module,exports){
+},{"../vendors/miniUnderscore":9,"./NgReactGridDataManager":2,"./NgReactGridReactManager":3}],2:[function(require,module,exports){
 /**
  * This class manages the editing/saving/reverting functionality to ngReactGrid
  * @param ngReactGrid
@@ -1239,6 +1275,24 @@ var ngReactGridCheckboxFactory = function() {
 
 module.exports = ngReactGridCheckboxFactory;
 },{}],6:[function(require,module,exports){
+var ngReactGridCheckboxFieldFactory = function() {
+
+    var ngReactGridCheckboxField = function(record, field) {
+        this.record = record;
+        this.field = field;
+        return ngReactGridCheckboxFieldComponent({value: this.record[field], updateValue: this.updateValue.bind(this)});
+    };
+
+    ngReactGridCheckboxField.prototype.updateValue = function(newValue) {
+        this.record[this.field] = newValue;
+    };
+
+    return ngReactGridCheckboxField;
+
+};
+
+module.exports = ngReactGridCheckboxFieldFactory;
+},{}],7:[function(require,module,exports){
 var ngReactGridTextFieldFactory = function() {
 
     var ngReactGridTextField = function(record, field) {
@@ -1256,19 +1310,21 @@ var ngReactGridTextFieldFactory = function() {
 };
 
 module.exports = ngReactGridTextFieldFactory;
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 'use strict';
 
 var ngReactGridDirective = require('./directives/ngReactGridDirective');
 var ngReactGridCheckboxFactory = require('./factories/ngReactGridCheckboxFactory');
 var ngReactGridTextFieldFactory = require("./factories/ngReactGridTextFieldFactory");
+var ngReactGridCheckboxFieldFactory = require("./factories/ngReactGridCheckboxFieldFactory");
 
 angular.module('ngReactGrid', [])
     .factory("ngReactGridCheckbox", [ngReactGridCheckboxFactory])
     .factory("ngReactGridTextField", [ngReactGridTextFieldFactory])
+    .factory("ngReactGridCheckboxField", [ngReactGridCheckboxFieldFactory])
     .directive("ngReactGrid", ['$rootScope', ngReactGridDirective]);
 
-},{"./directives/ngReactGridDirective":4,"./factories/ngReactGridCheckboxFactory":5,"./factories/ngReactGridTextFieldFactory":6}],8:[function(require,module,exports){
+},{"./directives/ngReactGridDirective":4,"./factories/ngReactGridCheckboxFactory":5,"./factories/ngReactGridCheckboxFieldFactory":6,"./factories/ngReactGridTextFieldFactory":7}],9:[function(require,module,exports){
 var _ = {
     nativeForEach: Array.prototype.forEach,
     each: function (obj, iterator, context) {
@@ -1302,4 +1358,4 @@ var _ = {
 
 module.exports = _;
 
-},{}]},{},[7])
+},{}]},{},[8])
