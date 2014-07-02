@@ -245,19 +245,32 @@ NgReactGridReactManager.prototype.wrapWithRootScope = function (func) {
     };
 };
 
-NgReactGridReactManager.prototype.getObjectPropertyByString = function (o, s) {
-    s = s.replace(/\[(\w+)\]/g, '.$1'); // convert indexes to properties
-    s = s.replace(/^\./, '');           // strip a leading dot
-    var a = s.split('.');
+/**
+ * This function allows you to get a property from any object, no matter how many levels deep it is
+ * @param object
+ * @param str
+ * @returns {*}
+ */
+NgReactGridReactManager.prototype.getObjectPropertyByString = function (object, str) {
+    /**
+     * Convert indexes to properties
+     */
+    str = str.replace(/\[(\w+)\]/g, '.$1');
+
+    /**
+     * Strip a leading dot
+     */
+    str = str.replace(/^\./, '');
+    var a = str.split('.');
     while (a.length) {
         var n = a.shift();
-        if (n in o) {
-            o = o[n];
+        if (n in object) {
+            object = object[n];
         } else {
             return;
         }
     }
-    return o;
+    return object;
 };
 
 module.exports = NgReactGridReactManager;
