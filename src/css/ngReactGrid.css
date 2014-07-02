@@ -28,7 +28,7 @@
     overflow-x: hidden;
     position: relative;
     overflow-y: hidden;
-    height: 25px;
+    height: 27px;
 }
 
 .ngReactGrid .ngGridHeaderCellText {
@@ -76,6 +76,10 @@
 .ngReactGrid .ngReactGridHeaderInner {
     overflow-x: hidden;
     overflow-y: hidden;
+}
+
+.ngReactGrid .ngReactGridHeaderInner table {
+    line-height: 15px;
 }
 
 .ngReactGrid .ngReactGridBody table {
