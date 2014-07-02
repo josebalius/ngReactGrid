@@ -138,10 +138,13 @@ NgReactGridReactManager.prototype.performLocalSort = function (update) {
     var isAsc = update.sortInfo.dir === "asc";
 
     copy.sort(function (a, b) {
+        var aField = this.getObjectPropertyByString(a, update.sortInfo.field);
+        var bField = this.getObjectPropertyByString(b, update.sortInfo.field);
+
         if (isAsc) {
-            return a[update.sortInfo.field] <= b[update.sortInfo.field] ? -1 : 1;
+            return aField <= bField ? -1 : 1;
         } else {
-            return a[update.sortInfo.field] >= b[update.sortInfo.field] ? -1 : 1;
+            return aField >= bField ? -1 : 1;
         }
     }.bind(this));
 
