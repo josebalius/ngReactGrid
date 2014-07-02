@@ -1276,6 +1276,7 @@ NgReactGridReactManager.prototype.wrapWithRootScope = function (func) {
  * @returns {*}
  */
 NgReactGridReactManager.prototype.getObjectPropertyByString = function (object, str) {
+
     /**
      * Convert indexes to properties
      */
@@ -1288,7 +1289,7 @@ NgReactGridReactManager.prototype.getObjectPropertyByString = function (object, 
     var a = str.split('.');
     while (a.length) {
         var n = a.shift();
-        if (n in object) {
+        if (object != null && n in object) {
             object = object[n];
         } else {
             return;
