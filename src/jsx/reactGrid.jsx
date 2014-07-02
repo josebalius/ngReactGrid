@@ -349,7 +349,12 @@ var ngReactGridComponent = (function() {
                 }
                 
                 
-                var ngReactGridViewPortStyle = {}, tableStyle = {};
+                var ngReactGridViewPortStyle = {
+                    maxHeight: this.props.grid.height,
+                    minHeight: this.props.grid.height
+                };
+
+                var tableStyle = {};
 
                 if(!this.props.grid.horizontalScroll) {
                     ngReactGridViewPortStyle.overflowX = "hidden";

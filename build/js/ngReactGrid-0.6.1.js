@@ -350,7 +350,12 @@ var ngReactGridComponent = (function() {
                 }
                 
                 
-                var ngReactGridViewPortStyle = {}, tableStyle = {};
+                var ngReactGridViewPortStyle = {
+                    maxHeight: this.props.grid.height,
+                    minHeight: this.props.grid.height
+                };
+
+                var tableStyle = {};
 
                 if(!this.props.grid.horizontalScroll) {
                     ngReactGridViewPortStyle.overflowX = "hidden";
@@ -621,7 +626,7 @@ var NO_GET_DATA_CALLBACK_ERROR = "localMode is false, please implement the getDa
 var NgReactGrid = function (scope, element, attrs, $rootScope) {
     this.columnDefs = scope.grid.columnDefs || [];
     this.data = [];
-    this.height = 500;
+    this.height = 400;
     this.localMode = true;
     this.editing = false;
     this.totalCount = 0;
