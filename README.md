@@ -30,8 +30,8 @@ Features
 
 Todo
 ----
-* Editable cells
-* Resizeable columns
+* Editable cells - In Progress
+* Resizeable columns - In Progress
 * Column pinning
 * Don't see your feature? I am accepting pull requests. Please contribute.
 
