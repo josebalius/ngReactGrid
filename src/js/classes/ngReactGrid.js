@@ -79,10 +79,11 @@ NgReactGrid.prototype.init = function () {
     this.editManager.mixinAPI(this.scope.grid);
 
     /**
-     * If we are in server mode, perform the first call to load the data
+     * If we are in server mode, perform the first call to load the data, and add refresh API
      */
     if(this.isServerMode()) {
         this.getData();
+        this.addRefreshAPI();
     } else {
         this.updateData({
             data: this.data
@@ -100,6 +101,17 @@ NgReactGrid.prototype.getData = function () {
     this.react.loading = true;
     this._getData(this);
     this.render();
+};
+
+/**
+ * This function mixes in the "refresh" API method that can be used in server mode grids.
+ */
+NgReactGrid.prototype.addRefreshAPI = function() {
+    var self = this;
+
+    this.scope.grid.refresh = function() {
+          self.getData.call(self);
+    };
 };
 
 /**

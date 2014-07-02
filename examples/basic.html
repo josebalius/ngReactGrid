@@ -35,8 +35,9 @@
                 };
 
                 $scope.edit = function () {
-                    $scope.grid.edit();
-                    $scope.editingGrid = true;
+                    //$scope.grid.edit();
+                    //$scope.editingGrid = true;
+                    $scope.grid.refresh();
                 };
 
                 $scope.save = function () {
@@ -50,14 +51,14 @@
                     $scope.grid.cancel();
                 };
 
-                var referenceData = dataSet.slice(0, 100).map(function(rec) {
+                var referenceData = dataSet.slice(0, 100).map(function (rec) {
                     return {
                         id: rec.firstName,
                         name: rec.firstName
                     }
                 });
 
-                dataSet = dataSet.map(function(rec) {
+                dataSet = dataSet.map(function (rec) {
                     return {
                         user: {
                             firstName: rec.firstName,
@@ -66,48 +67,48 @@
                     };
                 });
 
+                /*$scope.grid = {
+                 data: dataSet,
+                 columnDefs: [
+                 {
+                 field: "user.firstName",
+                 displayName: "First Name",
+                 edit: function (row) {
+                 return new ngReactGridSelectField(row, 'firstName', referenceData);
+                 }
+                 },
+                 {
+                 field: "user.lastName",
+                 displayName: "Last Name"
+                 }
+                 ]
+                 };*/
+
                 $scope.grid = {
-                    data: dataSet,
+                    data: [],
                     columnDefs: [
                         {
                             field: "user.firstName",
-                            displayName: "First Name",
-                            edit: function (row) {
-                                return new ngReactGridSelectField(row, 'firstName', referenceData);
-                            }
+                            displayName: "First Name"
                         },
                         {
                             field: "user.lastName",
                             displayName: "Last Name"
                         }
-                    ]
+                    ],
+                    localMode: false,
+                    getData: function () {
+                        var grid = this;
+                        $timeout(function () {
+                            if (grid.search) {
+                                $scope.grid.data = [];
+                            } else {
+                                $scope.grid.data = dataSet.slice((grid.currentPage - 1) * grid.pageSize, (grid.pageSize * grid.currentPage));
+                            }
+                            $scope.grid.totalCount = dataSet.length;
+                        }, 2000);
+                    }
                 };
-
-                /*$scope.grid = {
-                 data: [],
-                 columnDefs: [
-                 {
-                 field: "firstName",
-                 displayName: "First Name"
-                 },
-                 {
-                 field: "lastName",
-                 displayName: "Last Name"
-                 }
-                 ],
-                 localMode: false,
-                 getData: function () {
-                 var grid = this;
-                 $timeout(function () {
-                 if (grid.search) {
-                 $scope.grid.data = [];
-                 } else {
-                 $scope.grid.data = dataSet.slice((grid.currentPage - 1) * grid.pageSize, (grid.pageSize * grid.currentPage));
-                 }
-                 $scope.grid.totalCount = dataSet.length;
-                 }, 2000);
-                 }
-                 };*/
             });
 
 </script>
