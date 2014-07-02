@@ -57,18 +57,22 @@
                     }
                 });
 
+                dataSet = dataSet.map(function(rec) {
+                    return rec.user = rec;
+                });
+
                 $scope.grid = {
                     data: dataSet,
                     columnDefs: [
                         {
-                            field: "firstName",
+                            field: "user.firstName",
                             displayName: "First Name",
                             edit: function (row) {
                                 return new ngReactGridSelectField(row, 'firstName', referenceData);
                             }
                         },
                         {
-                            field: "lastName",
+                            field: "user.lastName",
                             displayName: "Last Name"
                         }
                     ]

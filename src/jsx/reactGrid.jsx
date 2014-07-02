@@ -75,7 +75,7 @@ var ngReactGridComponent = (function() {
                 };
 
                 var arrowStyle = {
-                    marginTop: 3
+                    marginTop: 1
                 };
 
                 var sortClassName = "icon-arrows";
@@ -218,7 +218,7 @@ var ngReactGridComponent = (function() {
                 }
             },
             render: function() {
-                var cellText = this.props.row[this.props.cell.field];
+                var cellText = this.props.grid.react.getObjectPropertyByString(this.props.row, this.props.cell.field);
                 var cellStyle = {};
                 setCellWidth(this.props.grid, this.props.cell, cellStyle, this.props.last, true);
 
