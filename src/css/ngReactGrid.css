@@ -224,6 +224,7 @@
     background-color: #fff;
     border: 1px solid #ddd;
     margin-left: -1px;
+    font-size:11px;
 }
 
 .ngReactTextField {

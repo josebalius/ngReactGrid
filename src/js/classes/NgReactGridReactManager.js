@@ -155,6 +155,39 @@ NgReactGridReactManager.prototype.performLocalSort = function (update) {
 };
 
 /**
+ * This is a recursive search function that will transverse an object searching for an index of a string
+ * @param obj
+ * @param search
+ * @returns {boolean}
+ */
+NgReactGridReactManager.prototype.deepSearch = function(obj, search) {
+    var found = false;
+
+    if(obj) {
+        for (var i in obj) {
+            if (obj.hasOwnProperty(i)) {
+
+                var prop = obj[i];
+
+                if(typeof prop === "object") {
+                    found = this.deepSearch(prop, search);
+                    if(found === true) break;
+                } else {
+                    if (String(obj[i]).toLowerCase().indexOf(search) !== -1) {
+                        found = true;
+                        break;
+                    }
+                }
+
+
+            }
+        }
+    }
+
+    return found;
+};
+
+/**
  * Search callback for everytime the user updates the search box, supports local mode and server mode
  * @param search
  */
@@ -167,17 +200,10 @@ NgReactGridReactManager.prototype.setSearch = function (search) {
         search = String(search).toLowerCase();
 
         this.filteredData = this.originalData.slice(0).filter(function (obj) {
-            var result = false;
-            for (var i in obj) {
-                if (obj.hasOwnProperty(i)) {
-                    if (String(obj[i]).toLowerCase().indexOf(search) !== -1) {
-                        result = true;
-                        break;
-                    }
-                }
-            }
-            return result;
-        });
+            var found = false;
+            found = this.deepSearch(obj, search);
+            return found;
+        }.bind(this));
 
         update.data = this.filteredData;
         update.currentPage = 1;

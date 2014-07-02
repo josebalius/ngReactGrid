@@ -58,7 +58,12 @@
                 });
 
                 dataSet = dataSet.map(function(rec) {
-                    return rec.user = rec;
+                    return {
+                        user: {
+                            firstName: rec.firstName,
+                            lastName: rec.lastName
+                        }
+                    };
                 });
 
                 $scope.grid = {

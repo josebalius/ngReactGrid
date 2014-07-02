@@ -71,11 +71,12 @@ var ngReactGridComponent = (function() {
                     width: "8%",
                     "float": "left",
                     textAlign: "right",
-                    display: (this.props.cell.sort === false) ? "none": ""
+                    display: (this.props.cell.sort === false) ? "none": "inline-block",
+                    overflow: "visible"
                 };
 
                 var arrowStyle = {
-                    marginTop: 1
+                    marginTop: 2
                 };
 
                 var sortClassName = "icon-arrows";
