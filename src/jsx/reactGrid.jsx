@@ -215,7 +215,7 @@ var ngReactGridComponent = (function() {
                         </td>
                     );
                 } else {
-                    return defaultCell;
+                    return this.defaultCell;
                 }
             },
             render: function() {
@@ -223,7 +223,13 @@ var ngReactGridComponent = (function() {
                 var cellStyle = {};
                 setCellWidth(this.props.grid, this.props.cell, cellStyle, this.props.last, true);
 
-                var defaultCell = (
+                if(this.props.grid.singleLineCell) {
+                    cellStyle.overflow = "hidden";
+                    cellStyle.textOverflow = "ellipsis";
+                    cellStyle.whiteSpace = "nowrap";
+                }
+
+                this.defaultCell = (
                         <td style={cellStyle} title={cellText}>
                             <div>{cellText}</div>
                         </td>
@@ -236,7 +242,7 @@ var ngReactGridComponent = (function() {
                     cellText = this.props.cell.render(this.props.row);
                     return this.cell(cellText, cellStyle);
                 } else {
-                    return defaultCell;
+                    return this.defaultCell;
                 }
 
                 

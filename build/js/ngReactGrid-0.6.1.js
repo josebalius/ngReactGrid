@@ -216,7 +216,7 @@ var ngReactGridComponent = (function() {
                         )
                     );
                 } else {
-                    return defaultCell;
+                    return this.defaultCell;
                 }
             },
             render: function() {
@@ -224,7 +224,13 @@ var ngReactGridComponent = (function() {
                 var cellStyle = {};
                 setCellWidth(this.props.grid, this.props.cell, cellStyle, this.props.last, true);
 
-                var defaultCell = (
+                if(this.props.grid.singleLineCell) {
+                    cellStyle.overflow = "hidden";
+                    cellStyle.textOverflow = "ellipsis";
+                    cellStyle.whiteSpace = "nowrap";
+                }
+
+                this.defaultCell = (
                         React.DOM.td( {style:cellStyle, title:cellText}, 
                             React.DOM.div(null, cellText)
                         )
@@ -237,7 +243,7 @@ var ngReactGridComponent = (function() {
                     cellText = this.props.cell.render(this.props.row);
                     return this.cell(cellText, cellStyle);
                 } else {
-                    return defaultCell;
+                    return this.defaultCell;
                 }
 
                 
@@ -629,6 +635,7 @@ var NgReactGrid = function (scope, element, attrs, $rootScope) {
     this.height = 400;
     this.localMode = true;
     this.editing = false;
+    this.singleLineCell = false;
     this.totalCount = 0;
     this.totalPages = 0;
     this.currentPage = 1;

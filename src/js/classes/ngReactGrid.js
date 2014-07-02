@@ -17,6 +17,7 @@ var NgReactGrid = function (scope, element, attrs, $rootScope) {
     this.height = 400;
     this.localMode = true;
     this.editing = false;
+    this.singleLineCell = false;
     this.totalCount = 0;
     this.totalPages = 0;
     this.currentPage = 1;
