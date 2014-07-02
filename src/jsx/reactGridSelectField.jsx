@@ -3,12 +3,14 @@ var ngReactGridSelectFieldComponent = (function() {
     var ngReactGridSelectFieldComponent = React.createClass({
         render: function() {
 
-            var options = this.props.referenceData.map(function(data) {
+            if(!this.props.referenceData) {}
+
+            var options = this.props.referenceData.map(function(option) {
                 return (
-                    <option value={data.id}>{data.name}</option>
+                    <option value={option.id}>{option.name}</option>
                 )
             });
-
+        
             return (
                 <select className="ngReactGridSelectField">
                     {options}

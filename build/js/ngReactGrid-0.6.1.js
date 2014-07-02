@@ -550,12 +550,14 @@ var ngReactGridSelectFieldComponent = (function() {
     var ngReactGridSelectFieldComponent = React.createClass({displayName: 'ngReactGridSelectFieldComponent',
         render: function() {
 
-            var options = this.props.referenceData.map(function(data) {
+            if(!this.props.referenceData) {}
+
+            var options = this.props.referenceData.map(function(option) {
                 return (
-                    React.DOM.option( {value:data.id}, data.name)
+                    React.DOM.option( {value:option.id}, option.name)
                 )
             });
-
+        
             return (
                 React.DOM.select( {className:"ngReactGridSelectField"}, 
                     options
@@ -1335,7 +1337,7 @@ var ngReactGridSelectFieldFactory = function() {
     var ngReactGridSelectField = function(record, field, referenceData) {
         this.record = record;
         this.field = field;
-        return ngReactGridSelectFieldComponent({value: this.record[field], updateValue: this.updateValue.bind(this)});
+        return ngReactGridSelectFieldComponent({value: this.record[field], updateValue: this.updateValue.bind(this), referenceData: referenceData});
     };
 
     ngReactGridSelectField.prototype.updateValue = function(newValue) {
