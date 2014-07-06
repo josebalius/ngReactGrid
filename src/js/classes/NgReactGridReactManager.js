@@ -234,6 +234,14 @@ NgReactGridReactManager.prototype.goToPage = function (page) {
 };
 
 /**
+ * Row click callback
+ * @param row
+ */
+NgReactGridReactManager.prototype.rowClick = function(row) {
+    this.ngReactGrid.rowClick(row);
+};
+
+/**
  * This function is called from React to make sure that any callbacks being passed into react cell components, update the
  * angular scope
  * @param cell

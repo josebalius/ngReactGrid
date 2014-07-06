@@ -250,6 +250,9 @@ var ngReactGridComponent = (function() {
         });
 
         var ngReactGridBodyRow = React.createClass({
+            handleClick: function() {
+                this.props.grid.react.rowClick(this.props.row);
+            },
             render: function() {
 
                 var columnsLength = this.props.grid.columnDefs.length;
@@ -259,7 +262,7 @@ var ngReactGridComponent = (function() {
                 }.bind(this));
 
                 return (
-                    <tr>
+                    <tr onClick={this.handleClick}>
                         {cells}
                     </tr>
                 )

@@ -251,6 +251,9 @@ var ngReactGridComponent = (function() {
         });
 
         var ngReactGridBodyRow = React.createClass({displayName: 'ngReactGridBodyRow',
+            handleClick: function() {
+                this.props.grid.react.rowClick(this.props.row);
+            },
             render: function() {
 
                 var columnsLength = this.props.grid.columnDefs.length;
@@ -260,7 +263,7 @@ var ngReactGridComponent = (function() {
                 }.bind(this));
 
                 return (
-                    React.DOM.tr(null, 
+                    React.DOM.tr( {onClick:this.handleClick}, 
                         cells
                     )
                 )
@@ -699,7 +702,7 @@ NgReactGrid.prototype.init = function () {
     /**
      * If we are in server mode, perform the first call to load the data, and add refresh API
      */
-    if(this.isServerMode()) {
+    if (this.isServerMode()) {
         this.getData();
         this.addRefreshAPI();
     } else {
@@ -724,11 +727,11 @@ NgReactGrid.prototype.getData = function () {
 /**
  * This function mixes in the "refresh" API method that can be used in server mode grids.
  */
-NgReactGrid.prototype.addRefreshAPI = function() {
+NgReactGrid.prototype.addRefreshAPI = function () {
     var self = this;
 
-    this.scope.grid.refresh = function() {
-          self.getData.call(self);
+    this.scope.grid.refresh = function () {
+        self.getData.call(self);
     };
 };
 
@@ -817,7 +820,7 @@ NgReactGrid.prototype.setupUpdateEvents = function () {
 NgReactGrid.prototype.initWatchers = function () {
     this.scope.$watch("grid.data", function (newValue, oldValue) {
         if (newValue !== oldValue) {
-            if(this.isServerMode() && this.react.loading) {
+            if (this.isServerMode() && this.react.loading) {
                 this.react.loading = false;
             }
 
@@ -840,8 +843,7 @@ NgReactGrid.prototype.initWatchers = function () {
  * @param updates
  */
 NgReactGrid.prototype.update = function (updateEvent, updates) {
-
-    switch(updateEvent) {
+    switch (updateEvent) {
         case this.events.DATA:
             this.updateData(updates);
             break;
@@ -877,13 +879,13 @@ NgReactGrid.prototype.update = function (updateEvent, updates) {
  * @param updates
  * @param updateContainsData
  */
-NgReactGrid.prototype.updateData = function(updates, updateContainsData) {
+NgReactGrid.prototype.updateData = function (updates, updateContainsData) {
 
     this.react.startIndex = (this.currentPage - 1) * this.pageSize;
     this.react.endIndex = (this.pageSize * this.currentPage);
 
-    if(this.isLocalMode()) {
-        if(updateContainsData) {
+    if (this.isLocalMode()) {
+        if (updateContainsData) {
 
             this.data = updates.data.slice(this.react.startIndex, this.react.endIndex);
             this.totalCount = updates.data.length;
@@ -907,7 +909,7 @@ NgReactGrid.prototype.updateData = function(updates, updateContainsData) {
  * This function updates the necessary properties for a successful page size update
  * @param updates
  */
-NgReactGrid.prototype.updatePageSize = function(updates) {
+NgReactGrid.prototype.updatePageSize = function (updates) {
     this.pageSize = updates.pageSize;
     this.currentPage = updates.currentPage;
     this.updateData({
@@ -919,7 +921,7 @@ NgReactGrid.prototype.updatePageSize = function(updates) {
  * This function updates the necessary properties for a successful pagination update
  * @param updates
  */
-NgReactGrid.prototype.updatePagination = function(updates) {
+NgReactGrid.prototype.updatePagination = function (updates) {
     this.currentPage = updates.currentPage;
     this.updateData({
         data: (this.isSearching()) ? this.react.filteredData : this.react.originalData
@@ -930,7 +932,7 @@ NgReactGrid.prototype.updatePagination = function(updates) {
  * This function updates the necessary properties for a successful search update
  * @param updates
  */
-NgReactGrid.prototype.updateSearch = function(updates) {
+NgReactGrid.prototype.updateSearch = function (updates) {
     this.search = updates.search;
     this.currentPage = 1;
     this.updateData({
@@ -942,10 +944,10 @@ NgReactGrid.prototype.updateSearch = function(updates) {
  * This function updates the necessary properties for a successful sorting update
  * @param updates
  */
-NgReactGrid.prototype.updateSorting = function(updates) {
+NgReactGrid.prototype.updateSorting = function (updates) {
     this.sortInfo = updates.sortInfo;
 
-    if(updates.data) {
+    if (updates.data) {
         this.currentPage = 1;
         this.updateData({
             data: updates.data
@@ -957,7 +959,7 @@ NgReactGrid.prototype.updateSorting = function(updates) {
  * This function updates the necessary properties for a successful total count update
  * @param updates
  */
-NgReactGrid.prototype.updateTotalCount = function(updates) {
+NgReactGrid.prototype.updateTotalCount = function (updates) {
     this.totalCount = updates.totalCount;
     this.totalPages = Math.ceil(this.totalCount / this.pageSize);
 };
@@ -965,7 +967,7 @@ NgReactGrid.prototype.updateTotalCount = function(updates) {
 /**
  * Calls React to render the grid component on the given element
  */
-NgReactGrid.prototype.render = function() {
+NgReactGrid.prototype.render = function () {
     React.renderComponent(ngReactGridComponent({grid: this}), this.element[0]);
 };
 
@@ -1280,6 +1282,14 @@ NgReactGridReactManager.prototype.goToPage = function (page) {
     if (this.ngReactGrid.isServerMode()) {
         this.ngReactGrid.getData();
     }
+};
+
+/**
+ * Row click callback
+ * @param row
+ */
+NgReactGridReactManager.prototype.rowClick = function(row) {
+    this.ngReactGrid.rowClick(row);
 };
 
 /**
