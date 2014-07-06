@@ -642,6 +642,7 @@ var NgReactGrid = function (scope, element, attrs, $rootScope) {
     this.totalCount = 0;
     this.totalPages = 0;
     this.currentPage = 1;
+    this.rowClick = function() {};
     this.pageSize = 25;
     this.pageSizes = [25, 50, 100, 500];
     this.sortInfo = {field: "", dir: ""};
