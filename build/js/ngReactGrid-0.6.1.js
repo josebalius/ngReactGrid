@@ -1096,6 +1096,12 @@ var NgReactGridReactManager = function (ngReactGrid) {
      * @type {boolean}
      */
     this.loading = false;
+
+    /**
+     * Instance pointer to a static function
+     * @type {Function}
+     */
+    this.getObjectPropertyByString = NgReactGridReactManager.getObjectPropertyByString;
 };
 
 /**
@@ -1336,11 +1342,13 @@ NgReactGridReactManager.prototype.wrapWithRootScope = function (func) {
 
 /**
  * This function allows you to get a property from any object, no matter how many levels deep it is
+ * MOVE THIS FUNCTION INTO ITS OWN CLASS
  * @param object
  * @param str
+ * @static
  * @returns {*}
  */
-NgReactGridReactManager.prototype.getObjectPropertyByString = function (object, str) {
+NgReactGridReactManager.getObjectPropertyByString = function (object, str) {
 
     /**
      * Convert indexes to properties
@@ -1361,6 +1369,28 @@ NgReactGridReactManager.prototype.getObjectPropertyByString = function (object, 
         }
     }
     return object;
+};
+
+/**
+ * Updates an object property given a specified path, it will create the object if it doesn't exist
+ * @static
+ * @param obj
+ * @param path
+ * @param value
+ */
+NgReactGridReactManager.updateObjectPropertyByString = function(obj, path, value) {
+    var a = path.split('.');
+    var o = obj;
+    for (var i = 0; i < a.length - 1; i++) {
+        var n = a[i];
+        if (n in o) {
+            o = o[n];
+        } else {
+            o[n] = {};
+            o = o[n];
+        }
+    }
+    o[a[a.length - 1]] = value;
 };
 
 module.exports = NgReactGridReactManager;
@@ -1408,16 +1438,25 @@ var ngReactGridCheckboxFactory = function() {
 
 module.exports = ngReactGridCheckboxFactory;
 },{}],6:[function(require,module,exports){
+var NgReactGridReactManager = require("../classes/NgReactGridReactManager");
+
 var ngReactGridCheckboxFieldFactory = function() {
 
-    var ngReactGridCheckboxField = function(record, field) {
+    var ngReactGridCheckboxField = function(record, field, updateNotification) {
         this.record = record;
         this.field = field;
-        return ngReactGridCheckboxFieldComponent({value: this.record[field], updateValue: this.updateValue.bind(this)});
+        this.updateNotification = updateNotification;
+
+        var value = NgReactGridReactManager.getObjectPropertyByString(this.record, this.field);
+        return ngReactGridCheckboxFieldComponent({value: value, updateValue: this.updateValue.bind(this)});
     };
 
     ngReactGridCheckboxField.prototype.updateValue = function(newValue) {
-        this.record[this.field] = newValue;
+        NgReactGridReactManager.updateObjectPropertyByString(this.record, this.field, newValue);
+
+        if(this.updateNotification) {
+            this.updateNotification(this.record);
+        }
     };
 
     return ngReactGridCheckboxField;
@@ -1425,7 +1464,7 @@ var ngReactGridCheckboxFieldFactory = function() {
 };
 
 module.exports = ngReactGridCheckboxFieldFactory;
-},{}],7:[function(require,module,exports){
+},{"../classes/NgReactGridReactManager":3}],7:[function(require,module,exports){
 var ngReactGridSelectFieldFactory = function() {
 
     var ngReactGridSelectField = function(record, field, referenceData) {
