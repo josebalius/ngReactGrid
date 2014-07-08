@@ -237,14 +237,11 @@
 
 .ngReactTextField {
     margin:0;
-    width: 95%;
+    width: calc(90% - 4px);
     outline: none;
-    border: none;
     padding: 4px;
-    background: transparent;
-    font-weight: bold;
 }
 
 .ngReactGridSelectField {
-    width: 95%;
+    width: calc(100% - 4px);
 }

@@ -563,9 +563,29 @@ var ngReactGridCheckboxFieldComponent = (function() {
 var ngReactGridSelectFieldComponent = (function() {
 
     var ngReactGridSelectFieldComponent = React.createClass({displayName: 'ngReactGridSelectFieldComponent',
+        getInitialState: function() {
+            return {
+                defaultValue: {
+                    id: "",
+                    name: ""
+                }
+            };
+        },
+        componentWillReceiveProps: function(nextProps) {
+            this.setState({
+                defaultValue: nextProps.value
+            });
+        },
+        componentWillMount: function() {
+            this.setState({
+                defaultValue: this.props.value
+            });
+        },
         render: function() {
 
-            if(!this.props.referenceData) {}
+            if(!this.props.referenceData) {
+                this.props.referenceData = [];
+            }
 
             var options = this.props.referenceData.map(function(option) {
                 return (
@@ -574,7 +594,7 @@ var ngReactGridSelectFieldComponent = (function() {
             });
         
             return (
-                React.DOM.select( {className:"ngReactGridSelectField"}, 
+                React.DOM.select( {className:"ngReactGridSelectField", value:this.state.defaultValue.id}, 
                     options
                 )
             )
@@ -1465,16 +1485,32 @@ var ngReactGridCheckboxFieldFactory = function() {
 
 module.exports = ngReactGridCheckboxFieldFactory;
 },{"../classes/NgReactGridReactManager":3}],7:[function(require,module,exports){
-var ngReactGridSelectFieldFactory = function() {
+var NgReactGridReactManager = require("../classes/NgReactGridReactManager");
 
-    var ngReactGridSelectField = function(record, field, referenceData) {
+var ngReactGridSelectFieldFactory = function($rootScope) {
+
+    var ngReactGridSelectField = function(record, field, referenceData, updateNotification) {
         this.record = record;
         this.field = field;
-        return ngReactGridSelectFieldComponent({value: this.record[field], updateValue: this.updateValue.bind(this), referenceData: referenceData});
+        this.updateNotification = updateNotification;
+
+        var value = NgReactGridReactManager.getObjectPropertyByString(this.record, this.field);
+
+        return ngReactGridSelectFieldComponent({value: value, updateValue: this.updateValue.bind(this), referenceData: (referenceData || [])});
     };
 
     ngReactGridSelectField.prototype.updateValue = function(newValue) {
-        this.record[this.field] = newValue;
+        NgReactGridReactManager.updateObjectPropertyByString(this.record, this.field, newValue);
+
+        if(this.updateNotification) {
+            if($rootScope.$$phase) {
+                this.updateNotification(this.record);
+            } else {
+                $rootScope.$apply(function () {
+                    this.updateNotification(this.record);
+                }.bind(this));
+            }
+        }
     };
 
     return ngReactGridSelectField;
@@ -1482,17 +1518,33 @@ var ngReactGridSelectFieldFactory = function() {
 };
 
 module.exports = ngReactGridSelectFieldFactory;
-},{}],8:[function(require,module,exports){
-var ngReactGridTextFieldFactory = function() {
+},{"../classes/NgReactGridReactManager":3}],8:[function(require,module,exports){
+var NgReactGridReactManager = require("../classes/NgReactGridReactManager");
 
-    var ngReactGridTextField = function(record, field) {
+var ngReactGridTextFieldFactory = function($rootScope) {
+
+    var ngReactGridTextField = function(record, field, updateNotification) {
         this.record = record;
         this.field = field;
-        return ngReactGridTextFieldComponent({value: this.record[field], updateValue: this.updateValue.bind(this)});
+        this.updateNotification = updateNotification;
+
+        var value = NgReactGridReactManager.getObjectPropertyByString(this.record, this.field);
+
+        return ngReactGridTextFieldComponent({value: value, updateValue: this.updateValue.bind(this)});
     };
 
     ngReactGridTextField.prototype.updateValue = function(newValue) {
-        this.record[this.field] = newValue;
+        NgReactGridReactManager.updateObjectPropertyByString(this.record, this.field, newValue);
+
+        if(this.updateNotification) {
+            if($rootScope.$$phase) {
+                this.updateNotification(this.record);
+            } else {
+                $rootScope.$apply(function () {
+                    this.updateNotification(this.record);
+                }.bind(this));
+            }
+        }
     };
 
     return ngReactGridTextField;
@@ -1500,7 +1552,7 @@ var ngReactGridTextFieldFactory = function() {
 };
 
 module.exports = ngReactGridTextFieldFactory;
-},{}],9:[function(require,module,exports){
+},{"../classes/NgReactGridReactManager":3}],9:[function(require,module,exports){
 'use strict';
 
 var ngReactGridDirective = require('./directives/ngReactGridDirective');
@@ -1511,9 +1563,9 @@ var ngReactGridSelectFieldFactory = require("./factories/ngReactGridSelectFieldF
 
 angular.module('ngReactGrid', [])
     .factory("ngReactGridCheckbox", [ngReactGridCheckboxFactory])
-    .factory("ngReactGridTextField", [ngReactGridTextFieldFactory])
+    .factory("ngReactGridTextField", ['$rootScope', ngReactGridTextFieldFactory])
     .factory("ngReactGridCheckboxField", [ngReactGridCheckboxFieldFactory])
-    .factory("ngReactGridSelectField", [ngReactGridSelectFieldFactory])
+    .factory("ngReactGridSelectField", ['$rootScope', ngReactGridSelectFieldFactory])
     .directive("ngReactGrid", ['$rootScope', ngReactGridDirective]);
 
 },{"./directives/ngReactGridDirective":4,"./factories/ngReactGridCheckboxFactory":5,"./factories/ngReactGridCheckboxFieldFactory":6,"./factories/ngReactGridSelectFieldFactory":7,"./factories/ngReactGridTextFieldFactory":8}],10:[function(require,module,exports){

@@ -8,7 +8,7 @@ var ngReactGridSelectFieldFactory = require("./factories/ngReactGridSelectFieldF
 
 angular.module('ngReactGrid', [])
     .factory("ngReactGridCheckbox", [ngReactGridCheckboxFactory])
-    .factory("ngReactGridTextField", [ngReactGridTextFieldFactory])
+    .factory("ngReactGridTextField", ['$rootScope', ngReactGridTextFieldFactory])
     .factory("ngReactGridCheckboxField", [ngReactGridCheckboxFieldFactory])
-    .factory("ngReactGridSelectField", [ngReactGridSelectFieldFactory])
+    .factory("ngReactGridSelectField", ['$rootScope', ngReactGridSelectFieldFactory])
     .directive("ngReactGrid", ['$rootScope', ngReactGridDirective]);
