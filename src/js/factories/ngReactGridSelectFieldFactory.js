@@ -6,6 +6,7 @@ var ngReactGridSelectFieldFactory = function($rootScope) {
         this.record = record;
         this.field = field;
         this.updateNotification = updateNotification;
+        this.referenceData = referenceData;
 
         var value = NgReactGridReactManager.getObjectPropertyByString(this.record, this.field);
 
@@ -13,7 +14,20 @@ var ngReactGridSelectFieldFactory = function($rootScope) {
     };
 
     ngReactGridSelectField.prototype.updateValue = function(newValue) {
-        NgReactGridReactManager.updateObjectPropertyByString(this.record, this.field, newValue);
+
+        var updateValue = {};
+
+        for(var i in this.referenceData) {
+            var option = this.referenceData[i];
+
+            if(option.id == newValue) {
+                updateValue = option;
+            }
+        }
+
+        console.debug(this.record, this.field, updateValue);
+
+        NgReactGridReactManager.updateObjectPropertyByString(this.record, this.field, updateValue);
 
         if(this.updateNotification) {
             if($rootScope.$$phase) {

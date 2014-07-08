@@ -9,14 +9,23 @@ var ngReactGridSelectFieldComponent = (function() {
                 }
             };
         },
+        handleChange: function(e) {
+            var value = e.target.value;
+            this.props.updateValue(value);
+            this.setState({
+                defaultValue: {
+                    id: value
+                }
+            });
+        },
         componentWillReceiveProps: function(nextProps) {
             this.setState({
-                defaultValue: nextProps.value
+                defaultValue: nextProps.value || {}
             });
         },
         componentWillMount: function() {
             this.setState({
-                defaultValue: this.props.value
+                defaultValue: this.props.value || {}
             });
         },
         render: function() {
@@ -32,7 +41,7 @@ var ngReactGridSelectFieldComponent = (function() {
             });
         
             return (
-                <select className="ngReactGridSelectField" value={this.state.defaultValue.id}>
+                <select className="ngReactGridSelectField" value={this.state.defaultValue.id} onChange={this.handleChange}>
                     {options}
                 </select>
             )

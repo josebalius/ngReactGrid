@@ -571,14 +571,23 @@ var ngReactGridSelectFieldComponent = (function() {
                 }
             };
         },
+        handleChange: function(e) {
+            var value = e.target.value;
+            this.props.updateValue(value);
+            this.setState({
+                defaultValue: {
+                    id: value
+                }
+            });
+        },
         componentWillReceiveProps: function(nextProps) {
             this.setState({
-                defaultValue: nextProps.value
+                defaultValue: nextProps.value || {}
             });
         },
         componentWillMount: function() {
             this.setState({
-                defaultValue: this.props.value
+                defaultValue: this.props.value || {}
             });
         },
         render: function() {
@@ -594,7 +603,7 @@ var ngReactGridSelectFieldComponent = (function() {
             });
         
             return (
-                React.DOM.select( {className:"ngReactGridSelectField", value:this.state.defaultValue.id}, 
+                React.DOM.select( {className:"ngReactGridSelectField", value:this.state.defaultValue.id, onChange:this.handleChange}, 
                     options
                 )
             )
@@ -1493,6 +1502,7 @@ var ngReactGridSelectFieldFactory = function($rootScope) {
         this.record = record;
         this.field = field;
         this.updateNotification = updateNotification;
+        this.referenceData = referenceData;
 
         var value = NgReactGridReactManager.getObjectPropertyByString(this.record, this.field);
 
@@ -1500,7 +1510,20 @@ var ngReactGridSelectFieldFactory = function($rootScope) {
     };
 
     ngReactGridSelectField.prototype.updateValue = function(newValue) {
-        NgReactGridReactManager.updateObjectPropertyByString(this.record, this.field, newValue);
+
+        var updateValue = {};
+
+        for(var i in this.referenceData) {
+            var option = this.referenceData[i];
+
+            if(option.id == newValue) {
+                updateValue = option;
+            }
+        }
+
+        console.debug(this.record, this.field, updateValue);
+
+        NgReactGridReactManager.updateObjectPropertyByString(this.record, this.field, updateValue);
 
         if(this.updateNotification) {
             if($rootScope.$$phase) {
