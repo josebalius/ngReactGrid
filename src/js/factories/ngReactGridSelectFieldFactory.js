@@ -1,13 +1,43 @@
-var ngReactGridSelectFieldFactory = function() {
+var NgReactGridReactManager = require("../classes/NgReactGridReactManager");
 
-    var ngReactGridSelectField = function(record, field, referenceData) {
+var ngReactGridSelectFieldFactory = function($rootScope) {
+
+    var ngReactGridSelectField = function(record, field, referenceData, updateNotification) {
         this.record = record;
         this.field = field;
-        return ngReactGridSelectFieldComponent({value: this.record[field], updateValue: this.updateValue.bind(this), referenceData: referenceData});
+        this.updateNotification = updateNotification;
+        this.referenceData = referenceData;
+
+        var value = NgReactGridReactManager.getObjectPropertyByString(this.record, this.field);
+
+        return ngReactGridSelectFieldComponent({value: value, updateValue: this.updateValue.bind(this), referenceData: (referenceData || [])});
     };
 
     ngReactGridSelectField.prototype.updateValue = function(newValue) {
-        this.record[this.field] = newValue;
+
+        var updateValue = {};
+
+        for(var i in this.referenceData) {
+            var option = this.referenceData[i];
+
+            if(option.id == newValue) {
+                updateValue = option;
+            }
+        }
+
+        console.debug(this.record, this.field, updateValue);
+
+        NgReactGridReactManager.updateObjectPropertyByString(this.record, this.field, updateValue);
+
+        if(this.updateNotification) {
+            if($rootScope.$$phase) {
+                this.updateNotification(this.record);
+            } else {
+                $rootScope.$apply(function () {
+                    this.updateNotification(this.record);
+                }.bind(this));
+            }
+        }
     };
 
     return ngReactGridSelectField;
