@@ -25,8 +25,6 @@ var ngReactGridSelectFieldFactory = function($rootScope) {
             }
         }
 
-        console.debug(this.record, this.field, updateValue);
-
         NgReactGridReactManager.updateObjectPropertyByString(this.record, this.field, updateValue);
 
         if(this.updateNotification) {
