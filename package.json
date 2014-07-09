@@ -1,6 +1,6 @@
 {
   "name": "ngReactGrid",
-  "version": "0.6.1",
+  "version": "0.6.5",
   "description": "A really fast Angular grid using the power of React to render",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

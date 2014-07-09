@@ -10,7 +10,7 @@ var packageJSON = require('./package.json');
 
 gulp.task('css', function () {
     return gulp.src('./src/css/**.css')
-        .pipe(concat('ngReactGrid-' + packageJSON.version + '.css'))
+        .pipe(concat('ngReactGrid.css'))
         .pipe(gulp.dest('./build/css'));
 });
 
@@ -29,17 +29,17 @@ gulp.task('build-grid', function () {
         .pipe(jsxFilter)
         .pipe(react())
         .pipe(jsxFilter.restore())
-        .pipe(concat('ngReactGrid-' + packageJSON.version + '.js'))
+        .pipe(concat('ngReactGrid.js'))
         .pipe(replace(/{\$version}/g, packageJSON.version))
         .pipe(gulp.dest('./build/js/'))
 });
 
 gulp.task('uglify-build', ['build-grid'], function () {
-    return gulp.src(['./build/js/ngReactGrid-' + packageJSON.version + '.js'])
+    return gulp.src(['./build/js/ngReactGrid.js'])
         .pipe(uglify({
             preserveComments: 'some'
         }))
-        .pipe(rename('ngReactGrid-' + packageJSON.version + '.min.js'))
+        .pipe(rename('ngReactGrid.min.js'))
         .pipe(gulp.dest('./build/js'))
 });
 
