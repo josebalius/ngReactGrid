@@ -132,11 +132,15 @@ var ngReactGridComponent = (function() {
                     return (<option value={pageSize} key={key}>{pageSize}</option>)
                 }.bind(this));
 
-                return (
-                    <div className="ngReactGridShowPerPage">
-                        Show <select onChange={this.handleChange} ref="showPerPage" value={this.props.grid.pageSize}>{options}</select> entries
-                    </div>
-                )
+                if (this.props.grid.showGridShowPerPage) {
+                  return (
+                      <div className="ngReactGridShowPerPage">
+                          Show <select onChange={this.handleChange} ref="showPerPage" value={this.props.grid.pageSize}>{options}</select> entries
+                      </div>
+                  )
+                } else {
+                  return (<div/>)
+                }
             }
         });
 
@@ -145,11 +149,15 @@ var ngReactGridComponent = (function() {
                 this.props.grid.react.setSearch(this.refs.searchField.getDOMNode().value);
             },
             render: function() {
-                return (
-                    <div className="ngReactGridSearch">
-                        <input type="input" placeholder="Search..." ref="searchField" onKeyUp={this.handleSearch} />
-                    </div>
-                )
+                if (this.props.grid.showGridSearch) {
+                  return (
+                      <div className="ngReactGridSearch">
+                          <input type="input" placeholder="Search..." ref="searchField" onKeyUp={this.handleSearch} />
+                      </div>
+                  )
+                } else {
+                  return (<div/>)
+                }
             }
         });
 
