@@ -2,7 +2,7 @@
 <html ng-app="example">
 <head>
     <title>ngReactGrid Basic Example</title>
-    <link rel="stylesheet" type="text/css" href="../build/css/ngReactGrid-0.6.1.css">
+    <link rel="stylesheet" type="text/css" href="../build/css/ngReactGrid.css">
 </head>
 <body>
 <div ng-controller="BasicExampleController" style="width: 100%">
@@ -19,7 +19,7 @@
         src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.10/angular.min.js"></script>
 <script src="http://fb.me/react-0.10.0.js"></script>
 <script src="./dataSet.js"></script>
-<script src="../build/js/ngReactGrid-0.6.1.js"></script>
+<script src="../build/js/ngReactGrid.js"></script>
 <script type="text/javascript">
 
     angular.module("example", ['ngReactGrid'])
@@ -62,58 +62,79 @@
                     return {
                         user: {
                             firstName: rec.firstName,
-                            lastName: rec.lastName
+                            lastName: rec.lastName,
+                            state: rec.state,
+                            phone: rec.phone,
+                            city: rec.city
                         }
                     };
                 });
 
-                /*$scope.grid = {
-                 data: dataSet,
-                 columnDefs: [
-                 {
-                 field: "user.firstName",
-                 displayName: "First Name",
-                 edit: function (row) {
-                 return new ngReactGridSelectField(row, 'firstName', referenceData);
-                 }
-                 },
-                 {
-                 field: "user.lastName",
-                 displayName: "Last Name"
-                 }
-                 ]
-                 };*/
-
                 $scope.grid = {
-                    data: [],
-                    columnDefs: [
-                        {
-                            field: "user.firstName",
-                            displayName: "First Name"
-                        },
-                        {
-                            field: "user.lastName",
-                            displayName: "Last Name"
-                        }
-                    ],
-                    /*rowClick: function(row) {
-                        console.debug(row);
-                    },*/
-                    localMode: false,
-                    getData: function () {
-                        var grid = this;
-                        $timeout(function () {
-                            if (grid.search) {
-                                $scope.grid.data = [];
-                            } else {
-                                $scope.grid.data = dataSet.slice((grid.currentPage - 1) * grid.pageSize, (grid.pageSize * grid.currentPage));
-                            }
-                            $scope.grid.totalCount = dataSet.length;
-                        }, 2000);
-                    }
-                };
+                   data: dataSet,
+                   columnDefs: [
+                     {
+                       field: "user.firstName",
+                       displayName: "First Name",
+                       edit: function (row) {
+                         return new ngReactGridSelectField(row, 'firstName', referenceData);
+                       },
+                       columnSearch: true
+                     },
+                     {
+                       field: "user.lastName",
+                       displayName: "Last Name",
+                       columnSearch: true
+                     },
+                     {
+                       field: "user.state",
+                       displayName: "State",
+                       columnSearch: true
+                     },
+                     {
+                       field: "user.phone",
+                       displayName: "Phone",
+                       //columnSearch: true
+                     },
+                     {
+                       field: "user.city",
+                       displayName: "City",
+                       columnSearch: true
+                     }
+                   ]
+                 };
+
+                //$scope.grid = {
+                //    data: [],
+                //    columnDefs: [
+                //        {
+                //            field: "user.firstName",
+                //            displayName: "First Name"
+                //        },
+                //        {
+                //            field: "user.lastName",
+                //            displayName: "Last Name"
+                //        }
+                //    ],
+                //    rowClick: function(row) {
+                //        console.debug(row);
+                //    },
+                //    localMode: false,
+                //    getData: function () {
+                //        var grid = this;
+                //        $timeout(function () {
+                //            if (grid.search) {
+                //                $scope.grid.data = [];
+                //            } else {
+                //                $scope.grid.data = dataSet.slice((grid.currentPage - 1) * grid.pageSize, (grid.pageSize * grid.currentPage));
+                //            }
+                //            $scope.grid.totalCount = dataSet.length;
+                //        }, 2000);
+                //    }
+                //};
             });
 
 </script>
 </body>
 </html>
+

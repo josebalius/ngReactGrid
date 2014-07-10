@@ -33,6 +33,22 @@ var ngReactGridComponent = (function() {
     };
 
     var ngReactGridHeader = (function() {
+        var ngGridColumnSearchCell = React.createClass({
+            handleSearchInputChange: function() {
+              this.props.onSearchInput(this.refs[this.props.cell.field].getDOMNode().value,
+                                       this.props.cell.field);
+            },
+            render: function() {
+                return (
+                    <th title={this.props.cell.field + " Search"}>
+                        <input type="input" 
+                            placeholder={"Search " + this.props.cell.displayName}
+                            ref={this.props.cell.field}
+                            onKeyUp={this.handleSearchInputChange} />
+                    </th>
+                )
+            }
+        });          
 
         var ngGridHeaderCell = React.createClass({
             getInitialState: function() {
@@ -161,6 +177,36 @@ var ngReactGridComponent = (function() {
             }
         });
 
+        var ngReactGridColumnSearch = React.createClass({
+            handleSearch: function(search, column) {
+                this.props.grid.react.setSearch(search, column);
+            },
+            render: function() {
+                var hasColumnSearch = 
+                    this.props.grid.columnDefs.some(function(cell) { 
+                        return cell.columnSearch;
+                    });
+                var cells = hasColumnSearch ? 
+                    this.props.grid.columnDefs.map(function(cell, key) {
+                        if (cell.columnSearch) { 
+                          return (<ngGridColumnSearchCell cell={cell} onSearchInput={this.handleSearch} />)
+                        } else {
+                          return (<th/>)
+                        }
+                    }.bind(this)) : null;
+
+                if (hasColumnSearch && this.props.grid.localMode) { 
+                  return (
+                      <tr className="ngReactGridColumnSearch">
+                          {cells}
+                      </tr>
+                  )
+                } else {
+                  return (<div/>)
+                }
+            }
+        });
+
         var ngReactGridHeader = React.createClass({
             render: function() {
 
@@ -192,6 +238,7 @@ var ngReactGridComponent = (function() {
                                             <tr>
                                                 {cells}
                                             </tr>
+                                            <ngReactGridColumnSearch grid={this.props.grid} />
                                         </thead>
                                     </table>
                                 </div>
