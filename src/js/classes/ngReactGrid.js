@@ -282,8 +282,6 @@ NgReactGrid.prototype.updateData = function (updates, updateContainsData) {
         this.data = updates.data;
     }
 
-    this.react.searchValues = {};
-
     this.react.showingRecords = this.data.length;
 
     this.totalPages = Math.ceil(this.totalCount / this.pageSize);
