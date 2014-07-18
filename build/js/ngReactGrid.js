@@ -133,11 +133,15 @@ var ngReactGridComponent = (function() {
                     return (React.DOM.option( {value:pageSize, key:key}, pageSize))
                 }.bind(this));
 
-                return (
-                    React.DOM.div( {className:"ngReactGridShowPerPage"}, 
-                        "Show ", React.DOM.select( {onChange:this.handleChange, ref:"showPerPage", value:this.props.grid.pageSize}, options), " entries"
-                    )
-                )
+                if (this.props.grid.showGridShowPerPage) {
+                  return (
+                      React.DOM.div( {className:"ngReactGridShowPerPage"}, 
+                          "Show ", React.DOM.select( {onChange:this.handleChange, ref:"showPerPage", value:this.props.grid.pageSize}, options), " entries"
+                      )
+                  )
+                } else {
+                  return (React.DOM.div(null))
+                }
             }
         });
 
@@ -146,11 +150,15 @@ var ngReactGridComponent = (function() {
                 this.props.grid.react.setSearch(this.refs.searchField.getDOMNode().value);
             },
             render: function() {
-                return (
-                    React.DOM.div( {className:"ngReactGridSearch"}, 
-                        React.DOM.input( {type:"input", placeholder:"Search...", ref:"searchField", onKeyUp:this.handleSearch} )
-                    )
-                )
+                if (this.props.grid.showGridSearch) {
+                  return (
+                      React.DOM.div( {className:"ngReactGridSearch"}, 
+                          React.DOM.input( {type:"input", placeholder:"Search...", ref:"searchField", onKeyUp:this.handleSearch} )
+                      )
+                  )
+                } else {
+                  return (React.DOM.div(null))
+                }
             }
         });
 
@@ -488,6 +496,7 @@ var ngReactGridComponent = (function() {
 
     return ngReactGrid;
 })();
+
 /** @jsx React.DOM */
 var ngReactGridCheckboxComponent = (function() {
     var ngReactGridCheckboxComponent = React.createClass({displayName: 'ngReactGridCheckboxComponent',
@@ -675,6 +684,8 @@ var NgReactGrid = function (scope, element, attrs, $rootScope) {
     this.pageSize = 25;
     this.pageSizes = [25, 50, 100, 500];
     this.sortInfo = {field: "", dir: ""};
+    this.showGridSearch = true;
+    this.showGridShowPerPage = true;
     this.search = "";
     this.horizontalScroll = false;
     this.scrollbarWidth = this.getScrollbarWidth();
@@ -1002,6 +1013,7 @@ NgReactGrid.prototype.render = function () {
 };
 
 module.exports = NgReactGrid;
+
 },{"../vendors/miniUnderscore":10,"./NgReactGridEditManager":2,"./NgReactGridReactManager":3}],2:[function(require,module,exports){
 /**
  * This class manages the editing/saving/reverting functionality to ngReactGrid
@@ -1024,23 +1036,37 @@ NgReactGridEditManager.prototype.mixinAPI = function(gridObject) {
      * This is the function that puts the grid into edit mode
      */
     gridObject.edit = function() {
-        self.edit.call(self);
+        return self.edit.call(self);
     };
 
     /**
      * This is the function that will persist the modified data to the original model
      */
     gridObject.save = function() {
-        self.save.call(self);
+        return self.save.call(self);
     };
 
     /**
      * This function is called whenever the modifications need to be reverted
      */
     gridObject.cancel = function() {
-        self.cancel.call(self);
+        return self.cancel.call(self);
     };
 
+    /**
+     * This function is called whenever the modifications need to be reverted
+     */
+    gridObject.getEditedData = function() {
+        return self.getEditedData.call(self);
+    };
+
+};
+
+/**
+ * This is the function that puts the grid into edit mode
+ */
+NgReactGridEditManager.prototype.getEditedData = function() {
+    return this.ngReactGrid.react.originalData;
 };
 
 /**
@@ -1057,7 +1083,12 @@ NgReactGridEditManager.prototype.edit = function() {
  */
 NgReactGridEditManager.prototype.save = function() {
     this.ngReactGrid.editing = false;
-    this.ngReactGrid.render();
+
+    this.ngReactGrid.update(this.ngReactGrid.events.DATA, {
+        data: this.ngReactGrid.react.originalData
+    });
+
+    return this.ngReactGrid.react.originalData;
 };
 
 /**
@@ -1069,8 +1100,6 @@ NgReactGridEditManager.prototype.cancel = function() {
     this.ngReactGrid.update(this.ngReactGrid.events.DATA, {
         data: this.dataCopy
     });
-
-    this.ngReactGrid.render();
 };
 
 NgReactGridEditManager.prototype.copyData = function(data) {

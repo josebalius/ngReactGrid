@@ -2,7 +2,7 @@
 <html ng-app="example">
 <head>
     <title>ngReactGrid Basic Example</title>
-    <link rel="stylesheet" type="text/css" href="../build/css/ngReactGrid-0.6.1.css">
+    <link rel="stylesheet" type="text/css" href="../build/css/ngReactGrid.css">
 </head>
 <body>
 <div ng-controller="BasicExampleController" style="width: 100%">
@@ -19,11 +19,11 @@
         src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.10/angular.min.js"></script>
 <script src="http://fb.me/react-0.10.0.js"></script>
 <script src="./dataSet.js"></script>
-<script src="../build/js/ngReactGrid-0.6.1.js"></script>
+<script src="../build/js/ngReactGrid.js"></script>
 <script type="text/javascript">
 
     angular.module("example", ['ngReactGrid'])
-            .controller("BasicExampleController", function ($scope, $timeout, ngReactGridSelectField) {
+            .controller("BasicExampleController", function ($scope, $timeout, ngReactGridTextField) {
 
                 $scope.employee = {};
                 $scope.selections = [];
@@ -35,15 +35,14 @@
                 };
 
                 $scope.edit = function () {
-                    //$scope.grid.edit();
-                    //$scope.editingGrid = true;
-                    $scope.grid.refresh();
+                    $scope.grid.edit();
+                    $scope.editingGrid = true;
                 };
 
                 $scope.save = function () {
-                    var data = $scope.grid.data;
+                    var data = $scope.grid.save();
+                    console.debug('data', data);
                     $scope.editingGrid = false;
-                    $scope.grid.save();
                 };
 
                 $scope.cancel = function () {
@@ -67,51 +66,51 @@
                     };
                 });
 
-                /*$scope.grid = {
-                 data: dataSet,
-                 columnDefs: [
-                 {
-                 field: "user.firstName",
-                 displayName: "First Name",
-                 edit: function (row) {
-                 return new ngReactGridSelectField(row, 'firstName', referenceData);
-                 }
-                 },
-                 {
-                 field: "user.lastName",
-                 displayName: "Last Name"
-                 }
-                 ]
-                 };*/
-
                 $scope.grid = {
-                    data: [],
+                    data: dataSet,
                     columnDefs: [
                         {
                             field: "user.firstName",
-                            displayName: "First Name"
+                            displayName: "First Name",
+                            edit: function (row) {
+                                return new ngReactGridTextField(row, 'user.firstName');
+                            }
                         },
                         {
                             field: "user.lastName",
                             displayName: "Last Name"
                         }
-                    ],
-                    /*rowClick: function(row) {
-                        console.debug(row);
-                    },*/
-                    localMode: false,
-                    getData: function () {
-                        var grid = this;
-                        $timeout(function () {
-                            if (grid.search) {
-                                $scope.grid.data = [];
-                            } else {
-                                $scope.grid.data = dataSet.slice((grid.currentPage - 1) * grid.pageSize, (grid.pageSize * grid.currentPage));
-                            }
-                            $scope.grid.totalCount = dataSet.length;
-                        }, 2000);
-                    }
+                    ]
                 };
+
+                /*$scope.grid = {
+                 data: [],
+                 columnDefs: [
+                 {
+                 field: "user.firstName",
+                 displayName: "First Name"
+                 },
+                 {
+                 field: "user.lastName",
+                 displayName: "Last Name"
+                 }
+                 ],
+                 /*rowClick: function(row) {
+                 console.debug(row);
+                 },
+                 localMode: false,
+                 getData: function () {
+                 var grid = this;
+                 $timeout(function () {
+                 if (grid.search) {
+                 $scope.grid.data = [];
+                 } else {
+                 $scope.grid.data = dataSet.slice((grid.currentPage - 1) * grid.pageSize, (grid.pageSize * grid.currentPage));
+                 }
+                 $scope.grid.totalCount = dataSet.length;
+                 }, 2000);
+                 }
+                 };*/
             });
 
 </script>
