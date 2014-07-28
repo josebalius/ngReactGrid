@@ -23,7 +23,7 @@
 <script type="text/javascript">
 
     angular.module("example", ['ngReactGrid'])
-            .controller("BasicExampleController", function ($scope, $timeout, ngReactGridSelectField) {
+            .controller("BasicExampleController", function ($scope, $timeout, ngReactGridTextField) {
 
                 $scope.employee = {};
                 $scope.selections = [];
@@ -35,15 +35,14 @@
                 };
 
                 $scope.edit = function () {
-                    //$scope.grid.edit();
-                    //$scope.editingGrid = true;
-                    $scope.grid.refresh();
+                    $scope.grid.edit();
+                    $scope.editingGrid = true;
                 };
 
                 $scope.save = function () {
-                    var data = $scope.grid.data;
+                    var data = $scope.grid.save();
+                    console.debug('data', data);
                     $scope.editingGrid = false;
-                    $scope.grid.save();
                 };
 
                 $scope.cancel = function () {
@@ -62,79 +61,58 @@
                     return {
                         user: {
                             firstName: rec.firstName,
-                            lastName: rec.lastName,
-                            state: rec.state,
-                            phone: rec.phone,
-                            city: rec.city
+                            lastName: rec.lastName
                         }
                     };
                 });
 
                 $scope.grid = {
-                   data: dataSet,
-                   columnDefs: [
-                     {
-                       field: "user.firstName",
-                       displayName: "First Name",
-                       edit: function (row) {
-                         return new ngReactGridSelectField(row, 'firstName', referenceData);
-                       },
-                       columnSearch: true
-                     },
-                     {
-                       field: "user.lastName",
-                       displayName: "Last Name",
-                       columnSearch: true
-                     },
-                     {
-                       field: "user.state",
-                       displayName: "State",
-                       columnSearch: true
-                     },
-                     {
-                       field: "user.phone",
-                       displayName: "Phone",
-                       //columnSearch: true
-                     },
-                     {
-                       field: "user.city",
-                       displayName: "City",
-                       columnSearch: true
-                     }
-                   ]
-                 };
+                    data: dataSet,
+                    columnDefs: [
+                        {
+                            field: "user.firstName",
+                            displayName: "First Name",
+                            edit: function (row) {
+                                return new ngReactGridTextField(row, 'user.firstName');
+                            }
+                        },
+                        {
+                            field: "user.lastName",
+                            displayName: "Last Name"
+                        }
+                    ]
+                };
 
-                //$scope.grid = {
-                //    data: [],
-                //    columnDefs: [
-                //        {
-                //            field: "user.firstName",
-                //            displayName: "First Name"
-                //        },
-                //        {
-                //            field: "user.lastName",
-                //            displayName: "Last Name"
-                //        }
-                //    ],
-                //    rowClick: function(row) {
-                //        console.debug(row);
-                //    },
-                //    localMode: false,
-                //    getData: function () {
-                //        var grid = this;
-                //        $timeout(function () {
-                //            if (grid.search) {
-                //                $scope.grid.data = [];
-                //            } else {
-                //                $scope.grid.data = dataSet.slice((grid.currentPage - 1) * grid.pageSize, (grid.pageSize * grid.currentPage));
-                //            }
-                //            $scope.grid.totalCount = dataSet.length;
-                //        }, 2000);
-                //    }
-                //};
+                /*$scope.grid = {
+                 data: [],
+                 columnDefs: [
+                 {
+                 field: "user.firstName",
+                 displayName: "First Name"
+                 },
+                 {
+                 field: "user.lastName",
+                 displayName: "Last Name"
+                 }
+                 ],
+                 /*rowClick: function(row) {
+                 console.debug(row);
+                 },
+                 localMode: false,
+                 getData: function () {
+                 var grid = this;
+                 $timeout(function () {
+                 if (grid.search) {
+                 $scope.grid.data = [];
+                 } else {
+                 $scope.grid.data = dataSet.slice((grid.currentPage - 1) * grid.pageSize, (grid.pageSize * grid.currentPage));
+                 }
+                 $scope.grid.totalCount = dataSet.length;
+                 }, 2000);
+                 }
+                 };*/
             });
 
 </script>
 </body>
 </html>
-

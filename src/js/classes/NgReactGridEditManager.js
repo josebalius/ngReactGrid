@@ -19,23 +19,37 @@ NgReactGridEditManager.prototype.mixinAPI = function(gridObject) {
      * This is the function that puts the grid into edit mode
      */
     gridObject.edit = function() {
-        self.edit.call(self);
+        return self.edit.call(self);
     };
 
     /**
      * This is the function that will persist the modified data to the original model
      */
     gridObject.save = function() {
-        self.save.call(self);
+        return self.save.call(self);
     };
 
     /**
      * This function is called whenever the modifications need to be reverted
      */
     gridObject.cancel = function() {
-        self.cancel.call(self);
+        return self.cancel.call(self);
     };
 
+    /**
+     * This function is called whenever the modifications need to be reverted
+     */
+    gridObject.getEditedData = function() {
+        return self.getEditedData.call(self);
+    };
+
+};
+
+/**
+ * This is the function that puts the grid into edit mode
+ */
+NgReactGridEditManager.prototype.getEditedData = function() {
+    return this.ngReactGrid.react.originalData;
 };
 
 /**
@@ -52,7 +66,12 @@ NgReactGridEditManager.prototype.edit = function() {
  */
 NgReactGridEditManager.prototype.save = function() {
     this.ngReactGrid.editing = false;
-    this.ngReactGrid.render();
+
+    this.ngReactGrid.update(this.ngReactGrid.events.DATA, {
+        data: this.ngReactGrid.react.originalData
+    });
+
+    return this.ngReactGrid.react.originalData;
 };
 
 /**
@@ -64,8 +83,6 @@ NgReactGridEditManager.prototype.cancel = function() {
     this.ngReactGrid.update(this.ngReactGrid.events.DATA, {
         data: this.dataCopy
     });
-
-    this.ngReactGrid.render();
 };
 
 NgReactGridEditManager.prototype.copyData = function(data) {

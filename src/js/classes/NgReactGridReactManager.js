@@ -276,7 +276,7 @@ NgReactGridReactManager.prototype.rowClick = function(row) {
 NgReactGridReactManager.prototype.wrapFunctionsInAngular = function (cell) {
     for (var key in cell.props) {
         if (cell.props.hasOwnProperty(key)) {
-            if (key === "children") {
+            if (key === "children" && cell.props[key]) {
                 this.wrapFunctionsInAngular(cell.props[key]);
             } else if (typeof cell.props[key] === 'function') {
                 cell.props[key] = this.wrapWithRootScope(cell.props[key]);
