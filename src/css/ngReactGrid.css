@@ -26,7 +26,6 @@
     overflow-x: hidden;
     position: relative;
     overflow-y: hidden;
-    /* height: 27px; */
 }
 
 .ngReactGrid .ngGridHeaderCellText {
