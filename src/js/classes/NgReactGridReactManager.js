@@ -40,11 +40,11 @@ var NgReactGridReactManager = function (ngReactGrid) {
     this.filteredData = [];
 
     /**
-     * This is a copy of the untruncated viewable data in table that can be
-     *    affected by filter and sort
+     * This is a copy of the pagination-independent viewable data in table that
+     *     can be affected by filter and sort
      * @type {Array}
      */
-    this.tableData = [];
+    this.filteredAndSortedData = [];
 
     /**
      * Loading indicator
@@ -67,18 +67,18 @@ NgReactGridReactManager.prototype.mixinAPI = function(gridObject) {
     var self = this;
 
     /**
-     * Get table data
+     * Get filtered and sorted data
      */
-    gridObject.getTableData = function() {
-        return self.getTableData.call(self);
+    gridObject.getFilteredAndSortedData = function() {
+        return self.getFilteredAndSortedData.call(self);
     };
 };
 
 /**
  * Get table data wrapper
  */
-NgReactGridReactManager.prototype.getTableData = function() {
-    return this.tableData;
+NgReactGridReactManager.prototype.getFilteredAndSortedData = function() {
+    return this.filteredAndSortedData;
 };
 
 /**

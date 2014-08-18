@@ -271,19 +271,19 @@ NgReactGrid.prototype.updateData = function (updates, updateContainsData) {
         if (updateContainsData) {
 
             this.data = updates.data.slice(this.react.startIndex, this.react.endIndex);
-            this.react.tableData = this.data.slice(0);
+            this.react.filteredAndSortedData = this.data.slice(0);
             this.totalCount = updates.data.length;
 
         } else {
             this.react.originalData = updates.data.slice(0);
             this.totalCount = this.react.originalData.length;
             this.data = this.react.originalData.slice(this.react.startIndex, this.react.endIndex);
-            this.react.tableData = this.react.originalData.slice(0);
+            this.react.filteredAndSortedData = this.react.originalData.slice(0);
         }
 
     } else {
         this.data = updates.data;
-        this.react.tableData = this.data.slice(0);
+        this.react.filteredAndSortedData = this.data.slice(0);
     }
 
     this.react.showingRecords = this.data.length;
