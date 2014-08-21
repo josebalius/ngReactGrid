@@ -33,6 +33,28 @@ var ngReactGridComponent = (function() {
     };
 
     var ngReactGridHeader = (function() {
+        var hasColumnSearch = function(grid) {
+            return grid.columnDefs.some(function(cell) {
+                return cell.columnSearch;
+            });
+        };
+
+        var ngGridColumnSearchCell = React.createClass({
+            handleSearchInputChange: function() {
+              this.props.onSearchInput(this.refs[this.props.cell.field].getDOMNode().value,
+                                       this.props.cell.field);
+            },
+            render: function() {
+                return (
+                    <th title={this.props.cell.field + " Search"}>
+                        <input type="input"
+                            placeholder={"Search " + this.props.cell.displayName}
+                            ref={this.props.cell.field}
+                            onKeyUp={this.handleSearchInputChange} />
+                    </th>
+                )
+            }
+        });
 
         var ngGridHeaderCell = React.createClass({
             getInitialState: function() {
@@ -161,6 +183,31 @@ var ngReactGridComponent = (function() {
             }
         });
 
+        var ngReactGridColumnSearch = React.createClass({
+            handleSearch: function(search, column) {
+                this.props.grid.react.setSearch(search, column);
+            },
+            render: function() {
+                if (hasColumnSearch(this.props.grid) && this.props.grid.localMode) {
+                    var cells = this.props.grid.columnDefs.map(function(cell, key) {
+                        if (cell.columnSearch) {
+                            return (<ngGridColumnSearchCell key={key} cell={cell} onSearchInput={this.handleSearch} />)
+                        } else {
+                            return (<th key={key}/>)
+                        }
+                    }.bind(this));
+
+                  return (
+                      <tr className="ngReactGridColumnSearch">
+                          {cells}
+                      </tr>
+                  )
+                } else {
+                    return (<tr/>)
+                }
+            }
+        });
+
         var ngReactGridHeader = React.createClass({
             render: function() {
 
@@ -175,7 +222,8 @@ var ngReactGridComponent = (function() {
                 };
 
                 var ngReactGridHeader = {
-                    paddingRight: (this.props.grid.horizontalScroll) ? this.props.grid.scrollbarWidth : 0
+                    paddingRight: (this.props.grid.horizontalScroll) ? this.props.grid.scrollbarWidth : 0,
+                    height: hasColumnSearch(this.props.grid) ? "auto" : "27px"
                 };
 
                 return (
@@ -192,6 +240,7 @@ var ngReactGridComponent = (function() {
                                             <tr>
                                                 {cells}
                                             </tr>
+                                            <ngReactGridColumnSearch grid={this.props.grid} />
                                         </thead>
                                     </table>
                                 </div>
@@ -253,7 +302,7 @@ var ngReactGridComponent = (function() {
                     return this.defaultCell;
                 }
 
-                
+
             }
         });
 
@@ -307,7 +356,7 @@ var ngReactGridComponent = (function() {
             },
             componentWillReceiveProps: function() {
                 this.calculateIfNeedsUpdate();
-            }, 
+            },
             componentDidMount: function() {
                 var domNode = this.getDOMNode();
                 var header = document.querySelector(".ngReactGridHeaderInner");
@@ -364,8 +413,8 @@ var ngReactGridComponent = (function() {
                         )
                     }
                 }
-                
-                
+
+
                 var ngReactGridViewPortStyle = {
                     maxHeight: this.props.grid.height,
                     minHeight: this.props.grid.height
@@ -384,7 +433,7 @@ var ngReactGridComponent = (function() {
                         <div className="ngReactGridViewPort" style={ngReactGridViewPortStyle}>
                             <div className="ngReactGridInnerViewPort">
                                 <table style={tableStyle}>
-                                    <tbody> 
+                                    <tbody>
                                         {rows}
                                     </tbody>
                                 </table>
