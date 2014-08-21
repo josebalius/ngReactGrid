@@ -34,6 +34,28 @@ var ngReactGridComponent = (function() {
     };
 
     var ngReactGridHeader = (function() {
+        var hasColumnSearch = function(grid) {
+            return grid.columnDefs.some(function(cell) {
+                return cell.columnSearch;
+            });
+        };
+
+        var ngGridColumnSearchCell = React.createClass({displayName: 'ngGridColumnSearchCell',
+            handleSearchInputChange: function() {
+              this.props.onSearchInput(this.refs[this.props.cell.field].getDOMNode().value,
+                                       this.props.cell.field);
+            },
+            render: function() {
+                return (
+                    React.DOM.th( {title:this.props.cell.field + " Search"}, 
+                        React.DOM.input( {type:"input",
+                            placeholder:"Search " + this.props.cell.displayName,
+                            ref:this.props.cell.field,
+                            onKeyUp:this.handleSearchInputChange} )
+                    )
+                )
+            }
+        });
 
         var ngGridHeaderCell = React.createClass({displayName: 'ngGridHeaderCell',
             getInitialState: function() {
@@ -162,6 +184,31 @@ var ngReactGridComponent = (function() {
             }
         });
 
+        var ngReactGridColumnSearch = React.createClass({displayName: 'ngReactGridColumnSearch',
+            handleSearch: function(search, column) {
+                this.props.grid.react.setSearch(search, column);
+            },
+            render: function() {
+                if (hasColumnSearch(this.props.grid) && this.props.grid.localMode) {
+                    var cells = this.props.grid.columnDefs.map(function(cell, key) {
+                        if (cell.columnSearch) {
+                            return (ngGridColumnSearchCell( {key:key, cell:cell, onSearchInput:this.handleSearch} ))
+                        } else {
+                            return (React.DOM.th( {key:key}))
+                        }
+                    }.bind(this));
+
+                  return (
+                      React.DOM.tr( {className:"ngReactGridColumnSearch"}, 
+                          cells
+                      )
+                  )
+                } else {
+                    return (React.DOM.tr(null))
+                }
+            }
+        });
+
         var ngReactGridHeader = React.createClass({displayName: 'ngReactGridHeader',
             render: function() {
 
@@ -176,7 +223,8 @@ var ngReactGridComponent = (function() {
                 };
 
                 var ngReactGridHeader = {
-                    paddingRight: (this.props.grid.horizontalScroll) ? this.props.grid.scrollbarWidth : 0
+                    paddingRight: (this.props.grid.horizontalScroll) ? this.props.grid.scrollbarWidth : 0,
+                    height: hasColumnSearch(this.props.grid) ? "auto" : "27px"
                 };
 
                 return (
@@ -192,7 +240,8 @@ var ngReactGridComponent = (function() {
                                         React.DOM.thead(null, 
                                             React.DOM.tr(null, 
                                                 cells
-                                            )
+                                            ),
+                                            ngReactGridColumnSearch( {grid:this.props.grid} )
                                         )
                                     )
                                 )
@@ -254,7 +303,7 @@ var ngReactGridComponent = (function() {
                     return this.defaultCell;
                 }
 
-                
+
             }
         });
 
@@ -308,7 +357,7 @@ var ngReactGridComponent = (function() {
             },
             componentWillReceiveProps: function() {
                 this.calculateIfNeedsUpdate();
-            }, 
+            },
             componentDidMount: function() {
                 var domNode = this.getDOMNode();
                 var header = document.querySelector(".ngReactGridHeaderInner");
@@ -365,8 +414,8 @@ var ngReactGridComponent = (function() {
                         )
                     }
                 }
-                
-                
+
+
                 var ngReactGridViewPortStyle = {
                     maxHeight: this.props.grid.height,
                     minHeight: this.props.grid.height
@@ -385,7 +434,7 @@ var ngReactGridComponent = (function() {
                         React.DOM.div( {className:"ngReactGridViewPort", style:ngReactGridViewPortStyle}, 
                             React.DOM.div( {className:"ngReactGridInnerViewPort"}, 
                                 React.DOM.table( {style:tableStyle}, 
-                                    React.DOM.tbody(null,  
+                                    React.DOM.tbody(null, 
                                         rows
                                     )
                                 )
@@ -1150,6 +1199,12 @@ var NgReactGridReactManager = function (ngReactGrid) {
     this.filteredData = [];
 
     /**
+     * Values of all search fields
+     * @type {Object}
+     */
+    this.searchValues = {};
+
+    /**
      * Loading indicator
      * @type {boolean}
      */
@@ -1274,21 +1329,25 @@ NgReactGridReactManager.prototype.performLocalSort = function (update) {
  * This is a recursive search function that will transverse an object searching for an index of a string
  * @param obj
  * @param search
+ * @param (Optional) column
  * @returns {boolean}
  */
-NgReactGridReactManager.prototype.deepSearch = function(obj, search) {
+NgReactGridReactManager.prototype.deepSearch = function(obj, search, column) {
     var found = false;
 
-    if(obj) {
+    if (obj) {
         for (var i in obj) {
             if (obj.hasOwnProperty(i)) {
 
                 var prop = obj[i];
 
-                if(typeof prop === "object") {
-                    found = this.deepSearch(prop, search);
-                    if(found === true) break;
+                if (typeof prop === "object") {
+                    found = this.deepSearch(prop, search, column);
+                    if (found === true) break;
                 } else {
+                    if (column && column !== '_global') {
+                      if (i !== column.split('.').pop()) continue;
+                    }
                     if (String(obj[i]).toLowerCase().indexOf(search) !== -1) {
                         found = true;
                         break;
@@ -1304,10 +1363,15 @@ NgReactGridReactManager.prototype.deepSearch = function(obj, search) {
 };
 
 /**
- * Search callback for everytime the user updates the search box, supports local mode and server mode
+ * Search callback for everytime the user updates the search box.
+ *   Supports local mode and server mode; local mode only for column search.
  * @param search
+ * @param (Optional) column
  */
-NgReactGridReactManager.prototype.setSearch = function (search) {
+NgReactGridReactManager.prototype.setSearch = function (search, column) {
+    var key = column ? column : '_global';
+    this.searchValues[key] = search;
+
     var update = {
         search: search
     };
@@ -1315,11 +1379,16 @@ NgReactGridReactManager.prototype.setSearch = function (search) {
     if (this.ngReactGrid.isLocalMode()) {
         search = String(search).toLowerCase();
 
-        this.filteredData = this.originalData.slice(0).filter(function (obj) {
-            var found = false;
-            found = this.deepSearch(obj, search);
-            return found;
-        }.bind(this));
+        this.filteredData = this.originalData.slice(0);
+        for (var key in this.searchValues) {
+            if (this.searchValues.hasOwnProperty(key)) {
+                this.filteredData = this.filteredData.filter(function (obj) {
+                    var found = false;
+                    found = this.deepSearch(obj, this.searchValues[key], key);
+                    return found;
+                }.bind(this));
+            }
+        }
 
         update.data = this.filteredData;
         update.currentPage = 1;
@@ -1452,6 +1521,7 @@ NgReactGridReactManager.updateObjectPropertyByString = function(obj, path, value
 };
 
 module.exports = NgReactGridReactManager;
+
 },{}],4:[function(require,module,exports){
 var ngReactGrid = require("../classes/NgReactGrid");
 

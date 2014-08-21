@@ -223,7 +223,7 @@ var ngReactGridComponent = (function() {
 
                 var ngReactGridHeader = {
                     paddingRight: (this.props.grid.horizontalScroll) ? this.props.grid.scrollbarWidth : 0,
-                    height: hasColumnSearch(this.props.grid) ? "60px" : "27px"
+                    height: hasColumnSearch(this.props.grid) ? "auto" : "27px"
                 };
 
                 return (
