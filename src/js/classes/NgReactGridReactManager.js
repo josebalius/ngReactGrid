@@ -40,6 +40,13 @@ var NgReactGridReactManager = function (ngReactGrid) {
     this.filteredData = [];
 
     /**
+     * This is a copy of the pagination-independent viewable data in table that
+     *     can be affected by filter and sort
+     * @type {Array}
+     */
+    this.filteredAndSortedData = [];
+
+    /**
      * Loading indicator
      * @type {boolean}
      */
@@ -50,6 +57,28 @@ var NgReactGridReactManager = function (ngReactGrid) {
      * @type {Function}
      */
     this.getObjectPropertyByString = NgReactGridReactManager.getObjectPropertyByString;
+};
+
+/**
+ * This function is used to add API to the grid object created by the user.
+ * @param gridObject
+ */
+NgReactGridReactManager.prototype.mixinAPI = function(gridObject) {
+    var self = this;
+
+    /**
+     * Get filtered and sorted data
+     */
+    gridObject.getFilteredAndSortedData = function() {
+        return self.getFilteredAndSortedData.call(self);
+    };
+};
+
+/**
+ * Get table data wrapper
+ */
+NgReactGridReactManager.prototype.getFilteredAndSortedData = function() {
+    return this.filteredAndSortedData;
 };
 
 /**
