@@ -5,6 +5,12 @@ var ngReactGridCheckboxComponent = (function() {
                 checked: false
             };
         },
+        getDefaultProps: function() {
+            var disableCheckboxField = this.props.disableCheckboxField;
+            return {
+                disabled: this.props.row.hasOwnProperty(disableCheckboxField) ? this.props.row[disableCheckboxField] : false
+            };
+        },
         handleClick: function() {
             this.setState({
                 checked: (this.state.checked) ? false : true
@@ -24,7 +30,7 @@ var ngReactGridCheckboxComponent = (function() {
 
             return (
                 <div style={checkboxStyle}>
-                    <input type="checkbox" onChange={this.handleClick} checked={this.state.checked} />
+                    <input type="checkbox" onChange={this.handleClick} checked={this.state.checked} disabled={this.props.disabled} />
                 </div>
             )
         }
