@@ -20,7 +20,7 @@ var ngReactGridCheckboxFactory = function() {
                     }
                 };
 
-                return ngReactGridCheckboxComponent({selectionTarget: selectionTarget, handleClick: handleClick, row: row, disableCheckboxField: _options.disableCheckboxField});;
+                return ngReactGridCheckboxComponent({selectionTarget: selectionTarget, handleClick: handleClick, row: row, options: _options});;
             },
             sort: false,
             width: 1
