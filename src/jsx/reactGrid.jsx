@@ -47,7 +47,7 @@ var ngReactGridComponent = (function() {
             render: function() {
                 return (
                     <th title={this.props.cell.field + " Search"}>
-                        <input type="input"
+                        <input type="text"
                             placeholder={"Search " + this.props.cell.displayName}
                             ref={this.props.cell.field}
                             onKeyUp={this.handleSearchInputChange} />
@@ -174,7 +174,7 @@ var ngReactGridComponent = (function() {
                 if (this.props.grid.showGridSearch) {
                   return (
                       <div className="ngReactGridSearch">
-                          <input type="input" placeholder="Search..." ref="searchField" onKeyUp={this.handleSearch} />
+                          <input type="text" placeholder="Search..." ref="searchField" onKeyUp={this.handleSearch} />
                       </div>
                   )
                 } else {
