@@ -1369,7 +1369,7 @@ NgReactGridReactManager.prototype.deepSearch = function(obj, search, column) {
                     if (column && column !== '_global') {
                       if (i !== column.split('.').pop()) continue;
                     }
-                    if (String(obj[i]).toLowerCase().indexOf(search) !== -1) {
+                    if (String(obj[i]).toLowerCase().indexOf(search.toLowerCase()) !== -1) {
                         found = true;
                         break;
                     }
@@ -1398,8 +1398,6 @@ NgReactGridReactManager.prototype.setSearch = function (search, column) {
     };
 
     if (this.ngReactGrid.isLocalMode()) {
-        search = String(search).toLowerCase();
-
         this.filteredData = this.originalData.slice(0);
         for (var key in this.searchValues) {
             if (this.searchValues.hasOwnProperty(key)) {
@@ -1415,7 +1413,6 @@ NgReactGridReactManager.prototype.setSearch = function (search, column) {
         update.currentPage = 1;
 
         this.ngReactGrid.update(this.ngReactGrid.events.SEARCH, update);
-
     } else {
         this.ngReactGrid.search = search;
         this.ngReactGrid.getData();
