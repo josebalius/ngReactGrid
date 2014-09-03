@@ -502,11 +502,13 @@ var ngReactGridCheckboxComponent = (function() {
     var ngReactGridCheckboxComponent = React.createClass({displayName: 'ngReactGridCheckboxComponent',
         getInitialState: function() {
             var disableCheckboxField = this.props.options.disableCheckboxField;
+            var disableCheckboxFieldValue = this.props.options.getObjectPropertyByStringFn(this.props.row, disableCheckboxField);
             return {
                 checked: false,
-                disabled: this.props.row.hasOwnProperty(disableCheckboxField) ? this.props.row[disableCheckboxField] : false
-            };
+                disabled: disableCheckboxFieldValue ? disableCheckboxFieldValue : false
+            }
         },
+
         handleClick: function() {
             this.setState({
                 checked: (this.state.checked) ? false : true
@@ -516,9 +518,10 @@ var ngReactGridCheckboxComponent = (function() {
         },
         componentWillReceiveProps: function(nextProps) {
             var disableCheckboxField = nextProps.options.disableCheckboxField;
+            var disableCheckboxFieldValue = nextProps.options.getObjectPropertyByStringFn(nextProps.row, disableCheckboxField);
             this.setState({
                 checked: (nextProps.selectionTarget.indexOf(nextProps.row) === -1) ? false : true,
-                disabled: nextProps.row.hasOwnProperty(disableCheckboxField) ? nextProps.row[disableCheckboxField] : false
+                disabled: disableCheckboxFieldValue ? disableCheckboxFieldValue : false
             });
         },
         render: function() {
@@ -1515,19 +1518,22 @@ module.exports = ngReactGridDirective;
 
 },{"../classes/NgReactGrid":1}],5:[function(require,module,exports){
 var _ = require('../vendors/miniUnderscore');
+var NgReactGridReactManager = require("../classes/NgReactGridReactManager");
 
 var ngReactGridCheckboxFactory = function() {
     var ngReactGridCheckbox = function(selectionTarget, options) {
         var defaultOptions = {
           disableCheckboxField: '',
-          hideDisabledCheckboxField: false
-        },
-        _options = _.extend({}, defaultOptions, options);
+          hideDisabledCheckboxField: false,
+          getObjectPropertyByStringFn: NgReactGridReactManager.getObjectPropertyByString
+
+        };
+        var _options = _.extend({}, defaultOptions, options);
+
         return {
             field: "",
             fieldName: "",
             render: function(row) {
-
                 var handleClick = function() {
                     var index = selectionTarget.indexOf(row);
                     if(index === -1) {
@@ -1549,7 +1555,7 @@ var ngReactGridCheckboxFactory = function() {
 
 module.exports = ngReactGridCheckboxFactory;
 
-},{"../vendors/miniUnderscore":10}],6:[function(require,module,exports){
+},{"../classes/NgReactGridReactManager":3,"../vendors/miniUnderscore":10}],6:[function(require,module,exports){
 var NgReactGridReactManager = require("../classes/NgReactGridReactManager");
 
 var ngReactGridCheckboxFieldFactory = function() {

@@ -1,17 +1,20 @@
 var _ = require('../vendors/miniUnderscore');
+var NgReactGridReactManager = require("../classes/NgReactGridReactManager");
 
 var ngReactGridCheckboxFactory = function() {
     var ngReactGridCheckbox = function(selectionTarget, options) {
         var defaultOptions = {
           disableCheckboxField: '',
-          hideDisabledCheckboxField: false
-        },
-        _options = _.extend({}, defaultOptions, options);
+          hideDisabledCheckboxField: false,
+          getObjectPropertyByStringFn: NgReactGridReactManager.getObjectPropertyByString
+
+        };
+        var _options = _.extend({}, defaultOptions, options);
+
         return {
             field: "",
             fieldName: "",
             render: function(row) {
-
                 var handleClick = function() {
                     var index = selectionTarget.indexOf(row);
                     if(index === -1) {
