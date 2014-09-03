@@ -25,12 +25,19 @@ var ngReactGridCheckboxComponent = (function() {
             var checkboxStyle = {
                 textAlign: "center"
             };
+            var hideDisabledCheckboxField = this.props.options.hideDisabledCheckboxField;
 
-            return (
-                <div style={checkboxStyle}>
-                    <input type="checkbox" onChange={this.handleClick} checked={this.state.checked} disabled={this.state.disabled} />
-                </div>
-            )
+            if (this.state.disabled && hideDisabledCheckboxField) {
+              return (
+                    <div style={checkboxStyle} />
+              )
+            } else {
+                return (
+                    <div style={checkboxStyle}>
+                        <input type="checkbox" onChange={this.handleClick} checked={this.state.checked} disabled={this.state.disabled} />
+                    </div>
+                )
+            }
         }
     });
 

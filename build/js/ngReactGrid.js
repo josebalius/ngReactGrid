@@ -525,12 +525,19 @@ var ngReactGridCheckboxComponent = (function() {
             var checkboxStyle = {
                 textAlign: "center"
             };
+            var hideDisabledCheckboxField = this.props.options.hideDisabledCheckboxField;
 
-            return (
-                React.DOM.div( {style:checkboxStyle}, 
-                    React.DOM.input( {type:"checkbox", onChange:this.handleClick, checked:this.state.checked, disabled:this.state.disabled} )
+            if (this.state.disabled && hideDisabledCheckboxField) {
+              return (
+                    React.DOM.div( {style:checkboxStyle} )
+              )
+            } else {
+                return (
+                    React.DOM.div( {style:checkboxStyle}, 
+                        React.DOM.input( {type:"checkbox", onChange:this.handleClick, checked:this.state.checked, disabled:this.state.disabled} )
+                    )
                 )
-            )
+            }
         }
     });
 
@@ -1512,7 +1519,8 @@ var _ = require('../vendors/miniUnderscore');
 var ngReactGridCheckboxFactory = function() {
     var ngReactGridCheckbox = function(selectionTarget, options) {
         var defaultOptions = {
-          disableCheckboxField: ''
+          disableCheckboxField: '',
+          hideDisabledCheckboxField: false
         },
         _options = _.extend({}, defaultOptions, options);
         return {

@@ -3,7 +3,8 @@ var _ = require('../vendors/miniUnderscore');
 var ngReactGridCheckboxFactory = function() {
     var ngReactGridCheckbox = function(selectionTarget, options) {
         var defaultOptions = {
-          disableCheckboxField: ''
+          disableCheckboxField: '',
+          hideDisabledCheckboxField: false
         },
         _options = _.extend({}, defaultOptions, options);
         return {
