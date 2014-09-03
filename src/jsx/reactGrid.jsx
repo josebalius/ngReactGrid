@@ -237,10 +237,10 @@ var ngReactGridComponent = (function() {
                                 <div className="ngReactGridHeaderInner">
                                     <table style={tableStyle}>
                                         <thead>
-                                            <ngReactGridColumnSearch grid={this.props.grid} />
                                             <tr>
                                                 {cells}
                                             </tr>
+                                            <ngReactGridColumnSearch grid={this.props.grid} />
                                         </thead>
                                     </table>
                                 </div>
