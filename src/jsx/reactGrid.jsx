@@ -42,7 +42,9 @@ var ngReactGridComponent = (function() {
             },
             cellStyle: {},
             handleClick: function() {
-                this.props.grid.react.setSortField(this.props.cell.field);
+                if (this.props.cell.sort !== false) {
+                    this.props.grid.react.setSortField(this.props.cell.field);
+                }
             },
             componentWillReceiveProps: function() {
                 setCellWidth(this.props.grid, this.props.cell, this.cellStyle, this.props.last);
@@ -63,7 +65,7 @@ var ngReactGridComponent = (function() {
                 // resize functionality coming soon
             },
             render: function() {
-
+                this.cellStyle.cursor = (this.props.cell.sort !== false) ? "pointer" : "default";
                 var cellStyle = this.cellStyle;
 
                 var sortStyle = {
@@ -109,11 +111,11 @@ var ngReactGridComponent = (function() {
                 };
 
                 return (
-                    <th title={this.props.cell.displayName} style={cellStyle}>
-                        <div className="ngGridHeaderCellText" onClick={this.handleClick}>
+                    <th title={this.props.cell.displayName} onClick={this.handleClick} style={cellStyle}>
+                        <div className="ngGridHeaderCellText">
                             {this.props.cell.displayName}
                         </div>
-                        <div style={sortStyle}><i className={sortClassName} style={arrowStyle}></i></div>
+                        <div style={sortStyle} ><i className={sortClassName} style={arrowStyle}></i></div>
                         <div style={resizeWrapperStyle} className="ngGridHeaderResizeControl">
                             <div className="ngGridHeaderCellResize" style={resizeStyle}></div>
                         </div>
@@ -253,7 +255,7 @@ var ngReactGridComponent = (function() {
                     return this.defaultCell;
                 }
 
-                
+
             }
         });
 
@@ -307,7 +309,7 @@ var ngReactGridComponent = (function() {
             },
             componentWillReceiveProps: function() {
                 this.calculateIfNeedsUpdate();
-            }, 
+            },
             componentDidMount: function() {
                 var domNode = this.getDOMNode();
                 var header = document.querySelector(".ngReactGridHeaderInner");
@@ -364,8 +366,8 @@ var ngReactGridComponent = (function() {
                         )
                     }
                 }
-                
-                
+
+
                 var ngReactGridViewPortStyle = {
                     maxHeight: this.props.grid.height,
                     minHeight: this.props.grid.height
@@ -384,7 +386,7 @@ var ngReactGridComponent = (function() {
                         <div className="ngReactGridViewPort" style={ngReactGridViewPortStyle}>
                             <div className="ngReactGridInnerViewPort">
                                 <table style={tableStyle}>
-                                    <tbody> 
+                                    <tbody>
                                         {rows}
                                     </tbody>
                                 </table>
