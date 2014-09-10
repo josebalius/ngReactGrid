@@ -271,7 +271,7 @@ NgReactGrid.prototype.updateData = function (updates, updateContainsData) {
         if (updateContainsData) {
 
             this.data = updates.data.slice(this.react.startIndex, this.react.endIndex);
-            this.react.filteredAndSortedData = this.data.slice(0);
+            this.react.filteredAndSortedData = updates.data.slice(0);
             this.totalCount = updates.data.length;
 
         } else {
