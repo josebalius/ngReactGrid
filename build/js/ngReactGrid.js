@@ -43,7 +43,9 @@ var ngReactGridComponent = (function() {
             },
             cellStyle: {},
             handleClick: function() {
-                this.props.grid.react.setSortField(this.props.cell.field);
+                if (this.props.cell.sort !== false) {
+                    this.props.grid.react.setSortField(this.props.cell.field);
+                }
             },
             componentWillReceiveProps: function() {
                 setCellWidth(this.props.grid, this.props.cell, this.cellStyle, this.props.last);
@@ -64,7 +66,7 @@ var ngReactGridComponent = (function() {
                 // resize functionality coming soon
             },
             render: function() {
-
+                this.cellStyle.cursor = (this.props.cell.sort !== false) ? "pointer" : "default";
                 var cellStyle = this.cellStyle;
 
                 var sortStyle = {
@@ -110,11 +112,11 @@ var ngReactGridComponent = (function() {
                 };
 
                 return (
-                    React.DOM.th( {title:this.props.cell.displayName, style:cellStyle}, 
-                        React.DOM.div( {className:"ngGridHeaderCellText", onClick:this.handleClick}, 
+                    React.DOM.th( {title:this.props.cell.displayName, onClick:this.handleClick, style:cellStyle}, 
+                        React.DOM.div( {className:"ngGridHeaderCellText"}, 
                             this.props.cell.displayName
                         ),
-                        React.DOM.div( {style:sortStyle}, React.DOM.i( {className:sortClassName, style:arrowStyle})),
+                        React.DOM.div( {style:sortStyle} , React.DOM.i( {className:sortClassName, style:arrowStyle})),
                         React.DOM.div( {style:resizeWrapperStyle, className:"ngGridHeaderResizeControl"}, 
                             React.DOM.div( {className:"ngGridHeaderCellResize", style:resizeStyle})
                         )
@@ -254,7 +256,7 @@ var ngReactGridComponent = (function() {
                     return this.defaultCell;
                 }
 
-                
+
             }
         });
 
@@ -308,7 +310,7 @@ var ngReactGridComponent = (function() {
             },
             componentWillReceiveProps: function() {
                 this.calculateIfNeedsUpdate();
-            }, 
+            },
             componentDidMount: function() {
                 var domNode = this.getDOMNode();
                 var header = document.querySelector(".ngReactGridHeaderInner");
@@ -365,8 +367,8 @@ var ngReactGridComponent = (function() {
                         )
                     }
                 }
-                
-                
+
+
                 var ngReactGridViewPortStyle = {
                     maxHeight: this.props.grid.height,
                     minHeight: this.props.grid.height
@@ -385,7 +387,7 @@ var ngReactGridComponent = (function() {
                         React.DOM.div( {className:"ngReactGridViewPort", style:ngReactGridViewPortStyle}, 
                             React.DOM.div( {className:"ngReactGridInnerViewPort"}, 
                                 React.DOM.table( {style:tableStyle}, 
-                                    React.DOM.tbody(null,  
+                                    React.DOM.tbody(null, 
                                         rows
                                     )
                                 )
@@ -736,8 +738,9 @@ NgReactGrid.prototype.init = function () {
     _.extend(this, this.scope.grid);
 
     /**
-     * Provide the editing API interface
+     * Provide API interfaces
      */
+    this.react.mixinAPI(this.scope.grid);
     this.editManager.mixinAPI(this.scope.grid);
 
     /**
@@ -929,16 +932,19 @@ NgReactGrid.prototype.updateData = function (updates, updateContainsData) {
         if (updateContainsData) {
 
             this.data = updates.data.slice(this.react.startIndex, this.react.endIndex);
+            this.react.filteredAndSortedData = this.data.slice(0);
             this.totalCount = updates.data.length;
 
         } else {
             this.react.originalData = updates.data.slice(0);
             this.totalCount = this.react.originalData.length;
             this.data = this.react.originalData.slice(this.react.startIndex, this.react.endIndex);
+            this.react.filteredAndSortedData = this.react.originalData.slice(0);
         }
 
     } else {
         this.data = updates.data;
+        this.react.filteredAndSortedData = this.data.slice(0);
     }
 
     this.react.showingRecords = this.data.length;
@@ -1150,6 +1156,13 @@ var NgReactGridReactManager = function (ngReactGrid) {
     this.filteredData = [];
 
     /**
+     * This is a copy of the pagination-independent viewable data in table that
+     *     can be affected by filter and sort
+     * @type {Array}
+     */
+    this.filteredAndSortedData = [];
+
+    /**
      * Loading indicator
      * @type {boolean}
      */
@@ -1160,6 +1173,28 @@ var NgReactGridReactManager = function (ngReactGrid) {
      * @type {Function}
      */
     this.getObjectPropertyByString = NgReactGridReactManager.getObjectPropertyByString;
+};
+
+/**
+ * This function is used to add API to the grid object created by the user.
+ * @param gridObject
+ */
+NgReactGridReactManager.prototype.mixinAPI = function(gridObject) {
+    var self = this;
+
+    /**
+     * Get filtered and sorted data
+     */
+    gridObject.getFilteredAndSortedData = function() {
+        return self.getFilteredAndSortedData.call(self);
+    };
+};
+
+/**
+ * Get table data wrapper
+ */
+NgReactGridReactManager.prototype.getFilteredAndSortedData = function() {
+    return this.filteredAndSortedData;
 };
 
 /**
@@ -1452,6 +1487,7 @@ NgReactGridReactManager.updateObjectPropertyByString = function(obj, path, value
 };
 
 module.exports = NgReactGridReactManager;
+
 },{}],4:[function(require,module,exports){
 var ngReactGrid = require("../classes/NgReactGrid");
 
