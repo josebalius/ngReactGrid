@@ -1,11 +1,34 @@
+var _ = require('../vendors/miniUnderscore');
+
 var ngReactGridCheckboxFactory = function() {
-    var ngReactGridCheckbox = function(selectionTarget) {
+    var ngReactGridCheckbox = function(selectionTarget, options) {
+        var defaultOptions = {
+          batchToggle: false,
+          headerStyle: {
+              textAlign: "center"
+          }
+        };
+        var _options = _.extend({}, defaultOptions, options);
+
         return {
             field: "",
             fieldName: "",
+            displayName: "",
+            title: "Select/Deselect All",
+            options: _options,
+            inputType: (_options.batchToggle) ? "checkbox" : undefined,
+            handleHeaderClick: function(checkedValue, data) {
+                window.dispatchEvent(new CustomEvent("setNgReactGridCheckboxStateFromEvent", {detail: {checked: checkedValue}}));
+                while (selectionTarget.length) {selectionTarget.pop();}
+                if (checkedValue) {
+                  data.forEach(function(row) {
+                      selectionTarget.push(row);
+                  });
+                }
+            },
             render: function(row) {
-
                 var handleClick = function() {
+                    window.dispatchEvent(new CustomEvent("setNgReactGridCheckboxHeaderStateFromEvent", {detail: {checked: false}}));
                     var index = selectionTarget.indexOf(row);
                     if(index === -1) {
                         selectionTarget.push(row);
@@ -13,8 +36,7 @@ var ngReactGridCheckboxFactory = function() {
                         selectionTarget.splice(index, 1);
                     }
                 };
-
-                return ngReactGridCheckboxComponent({selectionTarget: selectionTarget, handleClick: handleClick, row: row});;
+                return ngReactGridCheckboxComponent({selectionTarget: selectionTarget, handleClick: handleClick, row: row, options: _options});;
             },
             sort: false,
             width: 1

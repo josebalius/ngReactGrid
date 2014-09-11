@@ -12,18 +12,25 @@ var ngReactGridCheckboxComponent = (function() {
 
             this.props.handleClick();
         },
+        setNgReactGridCheckboxStateFromEvent: function(event) {
+            this.setState({
+                checked: event.detail.checked
+            });
+        },
         componentWillReceiveProps: function(nextProps) {
             this.setState({
                 checked: (nextProps.selectionTarget.indexOf(nextProps.row) === -1) ? false : true
             });
         },
+        componentDidMount: function() {
+            window.addEventListener("setNgReactGridCheckboxStateFromEvent", this.setNgReactGridCheckboxStateFromEvent);
+        },
+        componentWillUnmount: function() {
+            window.removeEventListener("setNgReactGridCheckboxStateFromEvent", this.setNgReactGridCheckboxStateFromEvent);
+        },
         render: function() {
-            var checkboxStyle = {
-                textAlign: "center"
-            };
-
             return (
-                <div style={checkboxStyle}>
+                <div style={this.props.options.headerStyle}>
                     <input type="checkbox" onChange={this.handleClick} checked={this.state.checked} />
                 </div>
             )

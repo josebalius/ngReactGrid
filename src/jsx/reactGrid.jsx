@@ -34,6 +34,52 @@ var ngReactGridComponent = (function() {
 
     var ngReactGridHeader = (function() {
 
+        // For input in header. Expandable to additional types.
+        var ngGridHeaderCellInput = React.createClass({
+            getInitialState: function() {
+                return {
+                    checked: false
+                };
+            },
+            setNgReactGridCheckboxHeaderStateFromEvent: function(e) {
+                this.setState({
+                    checked: e.detail.checked
+                });
+            },
+            componentDidMount: function() {
+                window.addEventListener("setNgReactGridCheckboxHeaderStateFromEvent", this.setNgReactGridCheckboxHeaderStateFromEvent);
+            },
+            componentWillUnmount: function() {
+                window.removeEventListener("setNgReactGridCheckboxHeaderStateFromEvent", this.setNgReactGridCheckboxHeaderStateFromEvent);
+            },
+            handleCheckboxClick: function() {
+                var newCheckedValue = (this.state.checked) ? false : true;
+                this.props.cell.handleHeaderClick(newCheckedValue, this.props.grid.react.getFilteredAndSortedData());
+                this.setState({
+                    checked: newCheckedValue
+                });
+            },
+            render: function() {
+                var headerStyle = this.props.cell.options ?
+                        (this.props.cell.options.headerStyle || {}) : {};
+                if (this.props.cell.inputType !== undefined) {
+                    switch (this.props.cell.inputType) {
+                        case "checkbox":
+                            return (
+                                <div title={this.props.cell.title} className="ngGridHeaderCellCheckboxInput" style={headerStyle}>
+                                    <input type={this.props.cell.inputType} onChange={this.handleCheckboxClick} checked={this.state.checked}/>
+                                </div>
+                            );
+                            break;
+                        default:
+                            return (<div/>);
+                    }
+                } else {
+                    return (<div/>);
+                }
+            }
+        });
+
         var ngGridHeaderCell = React.createClass({
             getInitialState: function() {
                 return {
@@ -115,6 +161,7 @@ var ngReactGridComponent = (function() {
                         <div className="ngGridHeaderCellText">
                             {this.props.cell.displayName}
                         </div>
+                        <ngGridHeaderCellInput cell={this.props.cell} grid={this.props.grid} />
                         <div style={sortStyle} ><i className={sortClassName} style={arrowStyle}></i></div>
                         <div style={resizeWrapperStyle} className="ngGridHeaderResizeControl">
                             <div className="ngGridHeaderCellResize" style={resizeStyle}></div>
