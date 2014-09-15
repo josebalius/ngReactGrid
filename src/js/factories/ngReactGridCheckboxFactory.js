@@ -1,6 +1,6 @@
 var _ = require('../vendors/miniUnderscore');
 
-var ngReactGridCheckboxFactory = function() {
+var ngReactGridCheckboxFactory = function($rootScope) {
     var ngReactGridCheckbox = function(selectionTarget, options) {
         var defaultOptions = {
           batchToggle: false,
@@ -19,12 +19,14 @@ var ngReactGridCheckboxFactory = function() {
             inputType: (_options.batchToggle) ? "checkbox" : undefined,
             handleHeaderClick: function(checkedValue, data) {
                 window.dispatchEvent(new CustomEvent("setNgReactGridCheckboxStateFromEvent", {detail: {checked: checkedValue}}));
-                while (selectionTarget.length) {selectionTarget.pop();}
-                if (checkedValue) {
-                  data.forEach(function(row) {
-                      selectionTarget.push(row);
-                  });
-                }
+                $rootScope.$apply(function() {
+                  while (selectionTarget.length) {selectionTarget.pop();}
+                  if (checkedValue) {
+                    data.forEach(function(row) {
+                        selectionTarget.push(row);
+                    });
+                  }
+                });
             },
             render: function(row) {
                 var handleClick = function() {
