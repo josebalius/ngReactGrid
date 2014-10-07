@@ -11,15 +11,17 @@ var ngReactGridCheckboxComponent = (function() {
 
         handleClick: function() {
             this.setState({
-                checked: (this.state.checked) ? false : true
+                checked: this.state.checked ? false : true
             });
 
             this.props.handleClick();
         },
         setNgReactGridCheckboxStateFromEvent: function(event) {
-            this.setState({
-                checked: event.detail.checked
-            });
+            if (!this.state.disabled) {
+                this.setState({
+                    checked: event.detail.checked
+                });
+            }
         },
         componentWillReceiveProps: function(nextProps) {
             var disableCheckboxField = nextProps.options.disableCheckboxField;

@@ -58,20 +58,25 @@
                     }
                 });
 
-                dataSet = dataSet.map(function (rec) {
+                var isOddRow = function(index) {
+                    return (index % 2) === 0;
+                };
+                dataSet = dataSet.map(function (rec, index) {
                     return {
                         user: {
                             firstName: rec.firstName,
                             lastName: rec.lastName
-                        }
+                        },
+                        disableCheckbox: isOddRow(index)
                     };
                 });
 
                 $scope.grid = {
                     data: dataSet,
                     columnDefs: [
-                      new ngReactGridCheckbox($scope.selections, {batchToggle:
-                          true}),
+                      new ngReactGridCheckbox($scope.selections, 
+                          {batchToggle: true,
+                           disableCheckboxField: 'disableCheckbox'}),
                         {
                             field: "user.firstName",
                             displayName: "First Name",

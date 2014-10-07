@@ -560,15 +560,17 @@ var ngReactGridCheckboxComponent = (function() {
 
         handleClick: function() {
             this.setState({
-                checked: (this.state.checked) ? false : true
+                checked: this.state.checked ? false : true
             });
 
             this.props.handleClick();
         },
         setNgReactGridCheckboxStateFromEvent: function(event) {
-            this.setState({
-                checked: event.detail.checked
-            });
+            if (!this.state.disabled) {
+                this.setState({
+                    checked: event.detail.checked
+                });
+            }
         },
         componentWillReceiveProps: function(nextProps) {
             var disableCheckboxField = nextProps.options.disableCheckboxField;
@@ -1598,7 +1600,11 @@ var ngReactGridCheckboxFactory = function($rootScope) {
             options: _options,
             inputType: (_options.batchToggle) ? "checkbox" : undefined,
             handleHeaderClick: function(checkedValue, data) {
+                // Sends header 'batch toggle' checkbox value to rows
                 window.dispatchEvent(new CustomEvent("setNgReactGridCheckboxStateFromEvent", {detail: {checked: checkedValue}}));
+
+                // Empties bounded selected target or populates with
+                //   non-disabled checkbox rows data
                 $rootScope.$apply(function() {
                   while (selectionTarget.length) {selectionTarget.pop();}
                   if (checkedValue) {
@@ -1612,7 +1618,9 @@ var ngReactGridCheckboxFactory = function($rootScope) {
             },
             render: function(row) {
                 var handleClick = function() {
+                    // Sends event to uncheck header 'batch toggle' checkbox
                     window.dispatchEvent(new CustomEvent("setNgReactGridCheckboxHeaderStateFromEvent", {detail: {checked: false}}));
+
                     var index = selectionTarget.indexOf(row);
                     if(index === -1) {
                         selectionTarget.push(row);
