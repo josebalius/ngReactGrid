@@ -7,7 +7,7 @@ var ngReactGridCheckboxFieldFactory = require("./factories/ngReactGridCheckboxFi
 var ngReactGridSelectFieldFactory = require("./factories/ngReactGridSelectFieldFactory");
 
 angular.module('ngReactGrid', [])
-    .factory("ngReactGridCheckbox", [ngReactGridCheckboxFactory])
+    .factory("ngReactGridCheckbox", ['$rootScope', ngReactGridCheckboxFactory])
     .factory("ngReactGridTextField", ['$rootScope', ngReactGridTextFieldFactory])
     .factory("ngReactGridCheckboxField", [ngReactGridCheckboxFieldFactory])
     .factory("ngReactGridSelectField", ['$rootScope', ngReactGridSelectFieldFactory])

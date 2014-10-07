@@ -16,6 +16,11 @@ var ngReactGridCheckboxComponent = (function() {
 
             this.props.handleClick();
         },
+        setNgReactGridCheckboxStateFromEvent: function(event) {
+            this.setState({
+                checked: event.detail.checked
+            });
+        },
         componentWillReceiveProps: function(nextProps) {
             var disableCheckboxField = nextProps.options.disableCheckboxField;
             var disableCheckboxFieldValue = nextProps.options.getObjectPropertyByStringFn(nextProps.row, disableCheckboxField);
@@ -24,19 +29,22 @@ var ngReactGridCheckboxComponent = (function() {
                 disabled: disableCheckboxFieldValue ? disableCheckboxFieldValue : false
             });
         },
+        componentDidMount: function() {
+            window.addEventListener("setNgReactGridCheckboxStateFromEvent", this.setNgReactGridCheckboxStateFromEvent);
+        },
+        componentWillUnmount: function() {
+            window.removeEventListener("setNgReactGridCheckboxStateFromEvent", this.setNgReactGridCheckboxStateFromEvent);
+        },
         render: function() {
-            var checkboxStyle = {
-                textAlign: "center"
-            };
             var hideDisabledCheckboxField = this.props.options.hideDisabledCheckboxField;
 
             if (this.state.disabled && hideDisabledCheckboxField) {
               return (
-                    <div style={checkboxStyle} />
+                    <div style={this.props.options.headerStyle} />
               )
             } else {
                 return (
-                    <div style={checkboxStyle}>
+                    <div style={this.props.options.headerStyle}>
                         <input type="checkbox" onChange={this.handleClick} checked={this.state.checked} disabled={this.state.disabled} />
                     </div>
                 )

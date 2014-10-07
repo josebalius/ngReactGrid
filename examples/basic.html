@@ -23,7 +23,8 @@
 <script type="text/javascript">
 
     angular.module("example", ['ngReactGrid'])
-            .controller("BasicExampleController", function ($scope, $timeout, ngReactGridTextField) {
+            .controller("BasicExampleController", function ($scope, $timeout,
+                  ngReactGridCheckbox, ngReactGridTextField) {
 
                 $scope.employee = {};
                 $scope.selections = [];
@@ -69,6 +70,8 @@
                 $scope.grid = {
                     data: dataSet,
                     columnDefs: [
+                      new ngReactGridCheckbox($scope.selections, {batchToggle:
+                          true}),
                         {
                             field: "user.firstName",
                             displayName: "First Name",
