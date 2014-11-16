@@ -193,7 +193,8 @@ NgReactGrid.prototype.setupUpdateEvents = function () {
         SEARCH: "SEARCH",
         PAGINATION: "PAGINATION",
         DATA: "DATA",
-        TOTALCOUNT: "TOTALCOUNT"
+        TOTALCOUNT: "TOTALCOUNT",
+        COLUMNS: "COLUMNS"
     };
 };
 
@@ -216,6 +217,12 @@ NgReactGrid.prototype.initWatchers = function () {
     this.scope.$watch("grid.totalCount", function (newValue) {
         if (newValue) {
             this.update(this.events.TOTALCOUNT, {totalCount: newValue});
+        }
+    }.bind(this));
+
+    this.scope.$watch("grid.columnDefs", function (newValue ,oldValue) {
+        if (newValue && newValue != oldValue ) {
+            this.update(this.events.COLUMNS, {columnDefs: newValue});
         }
     }.bind(this));
 };
@@ -249,6 +256,10 @@ NgReactGrid.prototype.update = function (updateEvent, updates) {
 
         case this.events.TOTALCOUNT:
             this.updateTotalCount(updates);
+            break;
+
+        case this.events.COLUMNS:
+            this.updateColumns(updates);
             break;
     }
 
@@ -348,6 +359,14 @@ NgReactGrid.prototype.updateSorting = function (updates) {
 NgReactGrid.prototype.updateTotalCount = function (updates) {
     this.totalCount = updates.totalCount;
     this.totalPages = Math.ceil(this.totalCount / this.pageSize);
+};
+
+/**
+ * This function updates requested visible columns ( columnDefs object )
+ * @param updates
+ */
+NgReactGrid.prototype.updateColumns = function (updates) {
+    this.columnDefs = updates.columnDefs;
 };
 
 /**
