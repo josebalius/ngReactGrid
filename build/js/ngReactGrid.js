@@ -1000,20 +1000,16 @@ NgReactGrid.prototype.initWatchers = function () {
     this.scope.$watch("grid.columnDefs", function (newValue, oldValue) {
         if (newValue !== oldValue) {
             this.update(this.events.COLUMN_DEF, {
-                searchValues: {}
+                // Resets column filter fields
+                filterValues: {}
             });
+            this.update(this.events.COLUMNS, {columnDefs: newValue});
         }
     }.bind(this), true);
 
     this.scope.$watch("grid.totalCount", function (newValue) {
         if (newValue) {
             this.update(this.events.TOTALCOUNT, {totalCount: newValue});
-        }
-    }.bind(this));
-
-    this.scope.$watch("grid.columnDefs", function (newValue ,oldValue) {
-        if (newValue && newValue != oldValue ) {
-            this.update(this.events.COLUMNS, {columnDefs: newValue});
         }
     }.bind(this));
 };
@@ -1067,7 +1063,7 @@ NgReactGrid.prototype.update = function (updateEvent, updates) {
  * @param updates
  */
 NgReactGrid.prototype.updateColumnDef = function (updates) {
-    this.react.searchValues = updates.searchValues;
+    this.react.filterValues = updates.filterValues;
 };
 
 /**
