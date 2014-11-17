@@ -308,8 +308,11 @@ var ngReactGridComponent = (function() {
         });
 
         var ngReactGridBodyRow = React.createClass({displayName: 'ngReactGridBodyRow',
-            handleClick: function() {
-                this.props.grid.react.rowClick(this.props.row);
+            handleClick: function(e) {
+                // Prevents triggering 'rowClick' event when toggling checkboxes
+                if (e.target.type !== 'checkbox') {
+                  this.props.grid.react.rowClick(this.props.row);
+                }
             },
             render: function() {
 
