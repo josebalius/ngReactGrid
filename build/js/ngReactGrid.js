@@ -49,7 +49,7 @@ var ngReactGridComponent = (function() {
                 return (
                     React.DOM.th( {title:this.props.cell.field + " Search"}, 
                         React.DOM.input( {type:"text",
-                            placeholder:"Search " + this.props.cell.displayName,
+                            placeholder:"Filter " + this.props.cell.displayName,
                             ref:this.props.cell.field,
                             onKeyUp:this.handleSearchInputChange} )
                     )
