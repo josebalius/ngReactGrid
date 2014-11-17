@@ -287,8 +287,8 @@ var ngReactGridComponent = (function() {
                 }
 
                 this.defaultCell = (
-                        <td style={cellStyle} title={cellText}>
-                            <div>{cellText}</div>
+                        <td style={cellStyle} title={String(cellText)}>
+                            <div>{String(cellText)}</div>
                         </td>
                     );
 
