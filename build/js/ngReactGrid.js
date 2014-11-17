@@ -3,7 +3,6 @@
  * ngReactGridComponent - React Component
  **/
 var ngReactGridComponent = (function() {
-
     var windowInnerWidth = window.innerWidth, windowInnerHeight = window.innerHeight;
 
     var setCellWidthPixels = function(cell) {
@@ -53,7 +52,8 @@ var ngReactGridComponent = (function() {
             componentWillUnmount: function() {
                 window.removeEventListener("setNgReactGridCheckboxHeaderStateFromEvent", this.setNgReactGridCheckboxHeaderStateFromEvent);
             },
-            handleCheckboxClick: function() {
+            handleCheckboxClick: function(e) {
+                e.stopPropagation();
                 var newCheckedValue = (this.state.checked) ? false : true;
                 this.props.cell.handleHeaderClick(newCheckedValue, this.props.grid.react.getFilteredAndSortedData());
                 this.setState({
@@ -558,12 +558,12 @@ var ngReactGridCheckboxComponent = (function() {
             }
         },
 
-        handleClick: function() {
+        handleClick: function(e) {
             this.setState({
                 checked: this.state.checked ? false : true
             });
 
-            this.props.handleClick();
+            this.props.handleClick(e);
         },
         setNgReactGridCheckboxStateFromEvent: function(event) {
             if (!this.state.disabled) {
@@ -1099,7 +1099,6 @@ NgReactGrid.prototype.updateTotalCount = function (updates) {
  * @param updates
  */
 NgReactGrid.prototype.updateColumns = function (updates) {
-    console.log("SDF");
     this.columnDefs = updates.columnDefs;
 };
 
@@ -1640,7 +1639,8 @@ var ngReactGridCheckboxFactory = function($rootScope) {
                 });
             },
             render: function(row) {
-                var handleClick = function() {
+                var handleClick = function(e) {
+                    e.stopPropagation();
                     // Sends event to uncheck header 'batch toggle' checkbox
                     window.dispatchEvent(new CustomEvent("setNgReactGridCheckboxHeaderStateFromEvent", {detail: {checked: false}}));
 
