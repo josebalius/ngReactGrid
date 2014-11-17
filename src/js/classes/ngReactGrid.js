@@ -77,8 +77,9 @@ NgReactGrid.prototype.init = function () {
     _.extend(this, this.scope.grid);
 
     /**
-     * Provide the editing API interface
+     * Provide API interfaces
      */
+    this.react.mixinAPI(this.scope.grid);
     this.editManager.mixinAPI(this.scope.grid);
 
     /**
@@ -193,7 +194,8 @@ NgReactGrid.prototype.setupUpdateEvents = function () {
         SEARCH: "SEARCH",
         PAGINATION: "PAGINATION",
         DATA: "DATA",
-        TOTALCOUNT: "TOTALCOUNT"
+        TOTALCOUNT: "TOTALCOUNT",
+        COLUMNS: "COLUMNS"
     };
 };
 
@@ -224,6 +226,12 @@ NgReactGrid.prototype.initWatchers = function () {
     this.scope.$watch("grid.totalCount", function (newValue) {
         if (newValue) {
             this.update(this.events.TOTALCOUNT, {totalCount: newValue});
+        }
+    }.bind(this));
+
+    this.scope.$watch("grid.columnDefs", function (newValue ,oldValue) {
+        if (newValue && newValue != oldValue ) {
+            this.update(this.events.COLUMNS, {columnDefs: newValue});
         }
     }.bind(this));
 };
@@ -262,6 +270,10 @@ NgReactGrid.prototype.update = function (updateEvent, updates) {
         case this.events.TOTALCOUNT:
             this.updateTotalCount(updates);
             break;
+
+        case this.events.COLUMNS:
+            this.updateColumns(updates);
+            break;
     }
 
     this.render();
@@ -291,16 +303,19 @@ NgReactGrid.prototype.updateData = function (updates, updateContainsData) {
         if (updateContainsData) {
 
             this.data = updates.data.slice(this.react.startIndex, this.react.endIndex);
+            this.react.filteredAndSortedData = updates.data.slice(0);
             this.totalCount = updates.data.length;
 
         } else {
             this.react.originalData = updates.data.slice(0);
             this.totalCount = this.react.originalData.length;
             this.data = this.react.originalData.slice(this.react.startIndex, this.react.endIndex);
+            this.react.filteredAndSortedData = this.react.originalData.slice(0);
         }
 
     } else {
         this.data = updates.data;
+        this.react.filteredAndSortedData = this.data.slice(0);
     }
 
     this.react.showingRecords = this.data.length;
@@ -316,7 +331,7 @@ NgReactGrid.prototype.updatePageSize = function (updates) {
     this.pageSize = updates.pageSize;
     this.currentPage = updates.currentPage;
     this.updateData({
-        data: (this.isSearching()) ? this.react.filteredData : this.react.originalData
+        data: this.react.filteredAndSortedData ? this.react.filteredAndSortedData : this.react.originalData
     }, true);
 };
 
@@ -327,7 +342,7 @@ NgReactGrid.prototype.updatePageSize = function (updates) {
 NgReactGrid.prototype.updatePagination = function (updates) {
     this.currentPage = updates.currentPage;
     this.updateData({
-        data: (this.isSearching()) ? this.react.filteredData : this.react.originalData
+        data: this.react.filteredAndSortedData ? this.react.filteredAndSortedData : this.react.originalData
     }, true);
 };
 
@@ -365,6 +380,14 @@ NgReactGrid.prototype.updateSorting = function (updates) {
 NgReactGrid.prototype.updateTotalCount = function (updates) {
     this.totalCount = updates.totalCount;
     this.totalPages = Math.ceil(this.totalCount / this.pageSize);
+};
+
+/**
+ * This function updates requested visible columns ( columnDefs object )
+ * @param updates
+ */
+NgReactGrid.prototype.updateColumns = function (updates) {
+    this.columnDefs = updates.columnDefs;
 };
 
 /**

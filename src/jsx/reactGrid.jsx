@@ -33,13 +33,13 @@ var ngReactGridComponent = (function() {
     };
 
     var ngReactGridHeader = (function() {
-        var hasColumnSearch = function(grid) {
+        var hasColumnFilter = function(grid) {
             return grid.columnDefs.some(function(cell) {
-                return cell.columnSearch;
+                return cell.columnFilter;
             });
         };
 
-        var ngGridColumnSearchCell = React.createClass({
+        var ngGridColumnFilterCell = React.createClass({
             handleSearchInputChange: function() {
               this.props.onSearchInput(this.refs[this.props.cell.field].getDOMNode().value,
                                        this.props.cell.field);
@@ -56,6 +56,52 @@ var ngReactGridComponent = (function() {
             }
         });
 
+        // For input in header. Expandable to additional types.
+        var ngGridHeaderCellInput = React.createClass({
+            getInitialState: function() {
+                return {
+                    checked: false
+                };
+            },
+            setNgReactGridCheckboxHeaderStateFromEvent: function(e) {
+                this.setState({
+                    checked: e.detail.checked
+                });
+            },
+            componentDidMount: function() {
+                window.addEventListener("setNgReactGridCheckboxHeaderStateFromEvent", this.setNgReactGridCheckboxHeaderStateFromEvent);
+            },
+            componentWillUnmount: function() {
+                window.removeEventListener("setNgReactGridCheckboxHeaderStateFromEvent", this.setNgReactGridCheckboxHeaderStateFromEvent);
+            },
+            handleCheckboxClick: function() {
+                var newCheckedValue = (this.state.checked) ? false : true;
+                this.props.cell.handleHeaderClick(newCheckedValue, this.props.grid.react.getFilteredAndSortedData());
+                this.setState({
+                    checked: newCheckedValue
+                });
+            },
+            render: function() {
+                var headerStyle = this.props.cell.options ?
+                        (this.props.cell.options.headerStyle || {}) : {};
+                if (this.props.cell.inputType !== undefined) {
+                    switch (this.props.cell.inputType) {
+                        case "checkbox":
+                            return (
+                                <div title={this.props.cell.title} className="ngGridHeaderCellCheckboxInput" style={headerStyle}>
+                                    <input type={this.props.cell.inputType} onChange={this.handleCheckboxClick} checked={this.state.checked}/>
+                                </div>
+                            );
+                            break;
+                        default:
+                            return (<div/>);
+                    }
+                } else {
+                    return (<div/>);
+                }
+            }
+        });
+
         var ngGridHeaderCell = React.createClass({
             getInitialState: function() {
                 return {
@@ -64,7 +110,9 @@ var ngReactGridComponent = (function() {
             },
             cellStyle: {},
             handleClick: function() {
-                this.props.grid.react.setSortField(this.props.cell.field);
+                if (this.props.cell.sort !== false) {
+                    this.props.grid.react.setSortField(this.props.cell.field);
+                }
             },
             componentWillReceiveProps: function() {
                 setCellWidth(this.props.grid, this.props.cell, this.cellStyle, this.props.last);
@@ -85,7 +133,7 @@ var ngReactGridComponent = (function() {
                 // resize functionality coming soon
             },
             render: function() {
-
+                this.cellStyle.cursor = (this.props.cell.sort !== false) ? "pointer" : "default";
                 var cellStyle = this.cellStyle;
 
                 var sortStyle = {
@@ -131,11 +179,12 @@ var ngReactGridComponent = (function() {
                 };
 
                 return (
-                    <th title={this.props.cell.displayName} style={cellStyle}>
-                        <div className="ngGridHeaderCellText" onClick={this.handleClick}>
+                    <th title={this.props.cell.displayName} onClick={this.handleClick} style={cellStyle}>
+                        <div className="ngGridHeaderCellText">
                             {this.props.cell.displayName}
                         </div>
-                        <div style={sortStyle}><i className={sortClassName} style={arrowStyle}></i></div>
+                        <ngGridHeaderCellInput cell={this.props.cell} grid={this.props.grid} />
+                        <div style={sortStyle} ><i className={sortClassName} style={arrowStyle}></i></div>
                         <div style={resizeWrapperStyle} className="ngGridHeaderResizeControl">
                             <div className="ngGridHeaderCellResize" style={resizeStyle}></div>
                         </div>
@@ -183,22 +232,22 @@ var ngReactGridComponent = (function() {
             }
         });
 
-        var ngReactGridColumnSearch = React.createClass({
+        var ngReactGridColumnFilter = React.createClass({
             handleSearch: function(search, column) {
                 this.props.grid.react.setSearch(search, column);
             },
             render: function() {
-                if (hasColumnSearch(this.props.grid) && this.props.grid.localMode) {
+                if (hasColumnFilter(this.props.grid) && this.props.grid.localMode) {
                     var cells = this.props.grid.columnDefs.map(function(cell, key) {
-                        if (cell.columnSearch) {
-                            return (<ngGridColumnSearchCell key={key} cell={cell} onSearchInput={this.handleSearch} />)
+                        if (cell.columnFilter) {
+                            return (<ngGridColumnFilterCell key={key} cell={cell} onSearchInput={this.handleSearch} />)
                         } else {
                             return (<th key={key}/>)
                         }
                     }.bind(this));
 
                   return (
-                      <tr className="ngReactGridColumnSearch">
+                      <tr className="ngReactGridColumnFilter">
                           {cells}
                       </tr>
                   )
@@ -223,7 +272,7 @@ var ngReactGridComponent = (function() {
 
                 var ngReactGridHeader = {
                     paddingRight: (this.props.grid.horizontalScroll) ? this.props.grid.scrollbarWidth : 0,
-                    height: hasColumnSearch(this.props.grid) ? "auto" : "27px"
+                    height: hasColumnFilter(this.props.grid) ? "auto" : "27px"
                 };
 
                 return (
@@ -240,7 +289,7 @@ var ngReactGridComponent = (function() {
                                             <tr>
                                                 {cells}
                                             </tr>
-                                            <ngReactGridColumnSearch grid={this.props.grid} />
+                                            <ngReactGridColumnFilter grid={this.props.grid} />
                                         </thead>
                                     </table>
                                 </div>

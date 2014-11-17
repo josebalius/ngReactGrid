@@ -40,10 +40,17 @@ var NgReactGridReactManager = function (ngReactGrid) {
     this.filteredData = [];
 
     /**
-     * Values of all search fields
+     * Values of all filter fields
      * @type {Object}
      */
-    this.searchValues = {};
+    this.filterValues = {};
+
+    /**
+     * This is a copy of the pagination-independent viewable data in table that
+     *     can be affected by filter and sort
+     * @type {Array}
+     */
+    this.filteredAndSortedData = [];
 
     /**
      * Loading indicator
@@ -56,6 +63,28 @@ var NgReactGridReactManager = function (ngReactGrid) {
      * @type {Function}
      */
     this.getObjectPropertyByString = NgReactGridReactManager.getObjectPropertyByString;
+};
+
+/**
+ * This function is used to add API to the grid object created by the user.
+ * @param gridObject
+ */
+NgReactGridReactManager.prototype.mixinAPI = function(gridObject) {
+    var self = this;
+
+    /**
+     * Get filtered and sorted data
+     */
+    gridObject.getFilteredAndSortedData = function() {
+        return self.getFilteredAndSortedData.call(self);
+    };
+};
+
+/**
+ * Get table data wrapper
+ */
+NgReactGridReactManager.prototype.getFilteredAndSortedData = function() {
+    return this.filteredAndSortedData;
 };
 
 /**
@@ -210,8 +239,8 @@ NgReactGridReactManager.prototype.deepSearch = function(obj, search, column) {
  * @param (Optional) column
  */
 NgReactGridReactManager.prototype.setSearch = function (search, column) {
-    var key = column ? column : '_global';
-    this.searchValues[key] = search;
+    var column = column ? column : '_global';
+    this.filterValues[column] = search;
 
     var update = {
         search: search
@@ -219,11 +248,11 @@ NgReactGridReactManager.prototype.setSearch = function (search, column) {
 
     if (this.ngReactGrid.isLocalMode()) {
         this.filteredData = this.originalData.slice(0);
-        for (var key in this.searchValues) {
-            if (this.searchValues.hasOwnProperty(key)) {
+        for (var column in this.filterValues) {
+            if (this.filterValues.hasOwnProperty(column)) {
                 this.filteredData = this.filteredData.filter(function (obj) {
                     var found = false;
-                    found = this.deepSearch(obj, this.searchValues[key], key);
+                    found = this.deepSearch(obj, this.filterValues[column], column);
                     return found;
                 }.bind(this));
             }
