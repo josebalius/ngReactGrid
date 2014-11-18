@@ -3,7 +3,6 @@
  * ngReactGridComponent - React Component
  **/
 var ngReactGridComponent = (function() {
-
     var windowInnerWidth = window.innerWidth, windowInnerHeight = window.innerHeight;
 
     var setCellWidthPixels = function(cell) {
@@ -75,7 +74,8 @@ var ngReactGridComponent = (function() {
             componentWillUnmount: function() {
                 window.removeEventListener("setNgReactGridCheckboxHeaderStateFromEvent", this.setNgReactGridCheckboxHeaderStateFromEvent);
             },
-            handleCheckboxClick: function() {
+            handleCheckboxClick: function(e) {
+                e.stopPropagation();
                 var newCheckedValue = (this.state.checked) ? false : true;
                 this.props.cell.handleHeaderClick(newCheckedValue, this.props.grid.react.getFilteredAndSortedData());
                 this.setState({
@@ -357,8 +357,11 @@ var ngReactGridComponent = (function() {
         });
 
         var ngReactGridBodyRow = React.createClass({displayName: 'ngReactGridBodyRow',
-            handleClick: function() {
-                this.props.grid.react.rowClick(this.props.row);
+            handleClick: function(e) {
+                // Prevents triggering 'rowClick' event when toggling checkboxes
+                if (e.target.type !== 'checkbox') {
+                  this.props.grid.react.rowClick(this.props.row);
+                }
             },
             render: function() {
 
@@ -607,12 +610,12 @@ var ngReactGridCheckboxComponent = (function() {
             }
         },
 
-        handleClick: function() {
+        handleClick: function(e) {
             this.setState({
                 checked: this.state.checked ? false : true
             });
 
-            this.props.handleClick();
+            this.props.handleClick(e);
         },
         setNgReactGridCheckboxStateFromEvent: function(event) {
             if (!this.state.disabled) {
@@ -1722,7 +1725,8 @@ var ngReactGridCheckboxFactory = function($rootScope) {
                 });
             },
             render: function(row) {
-                var handleClick = function() {
+                var handleClick = function(e) {
+                    e.stopPropagation();
                     // Sends event to uncheck header 'batch toggle' checkbox
                     window.dispatchEvent(new CustomEvent("setNgReactGridCheckboxHeaderStateFromEvent", {detail: {checked: false}}));
 

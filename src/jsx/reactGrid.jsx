@@ -2,7 +2,6 @@
  * ngReactGridComponent - React Component
  **/
 var ngReactGridComponent = (function() {
-
     var windowInnerWidth = window.innerWidth, windowInnerHeight = window.innerHeight;
 
     var setCellWidthPixels = function(cell) {
@@ -74,7 +73,8 @@ var ngReactGridComponent = (function() {
             componentWillUnmount: function() {
                 window.removeEventListener("setNgReactGridCheckboxHeaderStateFromEvent", this.setNgReactGridCheckboxHeaderStateFromEvent);
             },
-            handleCheckboxClick: function() {
+            handleCheckboxClick: function(e) {
+                e.stopPropagation();
                 var newCheckedValue = (this.state.checked) ? false : true;
                 this.props.cell.handleHeaderClick(newCheckedValue, this.props.grid.react.getFilteredAndSortedData());
                 this.setState({
@@ -356,8 +356,11 @@ var ngReactGridComponent = (function() {
         });
 
         var ngReactGridBodyRow = React.createClass({
-            handleClick: function() {
-                this.props.grid.react.rowClick(this.props.row);
+            handleClick: function(e) {
+                // Prevents triggering 'rowClick' event when toggling checkboxes
+                if (e.target.type !== 'checkbox') {
+                  this.props.grid.react.rowClick(this.props.row);
+                }
             },
             render: function() {
 
