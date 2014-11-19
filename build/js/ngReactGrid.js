@@ -33,6 +33,28 @@ var ngReactGridComponent = (function() {
     };
 
     var ngReactGridHeader = (function() {
+        var hasColumnFilter = function(grid) {
+            return grid.columnDefs.some(function(cell) {
+                return cell.columnFilter;
+            });
+        };
+
+        var ngGridColumnFilterCell = React.createClass({displayName: 'ngGridColumnFilterCell',
+            handleSearchInputChange: function() {
+              this.props.onSearchInput(this.refs[this.props.cell.field].getDOMNode().value,
+                                       this.props.cell.field);
+            },
+            render: function() {
+                return (
+                    React.DOM.th( {title:this.props.cell.field + " Search"}, 
+                        React.DOM.input( {type:"text",
+                            placeholder:"Filter " + this.props.cell.displayName,
+                            ref:this.props.cell.field,
+                            onKeyUp:this.handleSearchInputChange} )
+                    )
+                )
+            }
+        });
 
         // For input in header. Expandable to additional types.
         var ngGridHeaderCellInput = React.createClass({displayName: 'ngGridHeaderCellInput',
@@ -202,11 +224,36 @@ var ngReactGridComponent = (function() {
                 if (this.props.grid.showGridSearch) {
                   return (
                       React.DOM.div( {className:"ngReactGridSearch"}, 
-                          React.DOM.input( {type:"input", placeholder:"Search...", ref:"searchField", onKeyUp:this.handleSearch} )
+                          React.DOM.input( {type:"text", placeholder:"Search...", ref:"searchField", onKeyUp:this.handleSearch} )
                       )
                   )
                 } else {
                   return (React.DOM.div(null))
+                }
+            }
+        });
+
+        var ngReactGridColumnFilter = React.createClass({displayName: 'ngReactGridColumnFilter',
+            handleSearch: function(search, column) {
+                this.props.grid.react.setSearch(search, column);
+            },
+            render: function() {
+                if (hasColumnFilter(this.props.grid) && this.props.grid.localMode) {
+                    var cells = this.props.grid.columnDefs.map(function(cell, key) {
+                        if (cell.columnFilter) {
+                            return (ngGridColumnFilterCell( {key:key, cell:cell, onSearchInput:this.handleSearch} ))
+                        } else {
+                            return (React.DOM.th( {key:key}))
+                        }
+                    }.bind(this));
+
+                  return (
+                      React.DOM.tr( {className:"ngReactGridColumnFilter"}, 
+                          cells
+                      )
+                  )
+                } else {
+                    return (React.DOM.tr(null))
                 }
             }
         });
@@ -225,7 +272,8 @@ var ngReactGridComponent = (function() {
                 };
 
                 var ngReactGridHeader = {
-                    paddingRight: (this.props.grid.horizontalScroll) ? this.props.grid.scrollbarWidth : 0
+                    paddingRight: (this.props.grid.horizontalScroll) ? this.props.grid.scrollbarWidth : 0,
+                    height: hasColumnFilter(this.props.grid) ? "auto" : "27px"
                 };
 
                 return (
@@ -241,7 +289,8 @@ var ngReactGridComponent = (function() {
                                         React.DOM.thead(null, 
                                             React.DOM.tr(null, 
                                                 cells
-                                            )
+                                            ),
+                                            ngReactGridColumnFilter( {grid:this.props.grid} )
                                         )
                                     )
                                 )
@@ -924,6 +973,7 @@ NgReactGrid.prototype.isServerMode = function () {
  */
 NgReactGrid.prototype.setupUpdateEvents = function () {
     this.events = {
+        COLUMN_DEF: "COLUMN_DEF",
         PAGESIZE: "PAGESIZE",
         SORTING: "SORTING",
         SEARCH: "SEARCH",
@@ -950,15 +1000,19 @@ NgReactGrid.prototype.initWatchers = function () {
         }
     }.bind(this));
 
+    this.scope.$watch("grid.columnDefs", function (newValue, oldValue) {
+        if (newValue !== oldValue) {
+            this.update(this.events.COLUMN_DEF, {
+                // Resets column filter fields
+                filterValues: {}
+            });
+            this.update(this.events.COLUMNS, {columnDefs: newValue});
+        }
+    }.bind(this), true);
+
     this.scope.$watch("grid.totalCount", function (newValue) {
         if (newValue) {
             this.update(this.events.TOTALCOUNT, {totalCount: newValue});
-        }
-    }.bind(this));
-
-    this.scope.$watch("grid.columnDefs", function (newValue ,oldValue) {
-        if (newValue && newValue != oldValue ) {
-            this.update(this.events.COLUMNS, {columnDefs: newValue});
         }
     }.bind(this));
 };
@@ -970,6 +1024,10 @@ NgReactGrid.prototype.initWatchers = function () {
  */
 NgReactGrid.prototype.update = function (updateEvent, updates) {
     switch (updateEvent) {
+        case this.events.COLUMN_DEF:
+            this.updateColumnDef(updates);
+            break;
+
         case this.events.DATA:
             this.updateData(updates);
             break;
@@ -1001,6 +1059,14 @@ NgReactGrid.prototype.update = function (updateEvent, updates) {
 
     this.render();
 
+};
+
+/**
+ * This function updates the necessary properties for a successful column def update
+ * @param updates
+ */
+NgReactGrid.prototype.updateColumnDef = function (updates) {
+    this.react.filterValues = updates.filterValues;
 };
 
 /**
@@ -1250,6 +1316,12 @@ var NgReactGridReactManager = function (ngReactGrid) {
     this.filteredData = [];
 
     /**
+     * Values of all filter fields
+     * @type {Object}
+     */
+    this.filterValues = {};
+
+    /**
      * This is a copy of the pagination-independent viewable data in table that
      *     can be affected by filter and sort
      * @type {Array}
@@ -1403,22 +1475,26 @@ NgReactGridReactManager.prototype.performLocalSort = function (update) {
  * This is a recursive search function that will transverse an object searching for an index of a string
  * @param obj
  * @param search
+ * @param (Optional) column
  * @returns {boolean}
  */
-NgReactGridReactManager.prototype.deepSearch = function(obj, search) {
+NgReactGridReactManager.prototype.deepSearch = function(obj, search, column) {
     var found = false;
 
-    if(obj) {
+    if (obj) {
         for (var i in obj) {
             if (obj.hasOwnProperty(i)) {
 
                 var prop = obj[i];
 
-                if(typeof prop === "object") {
-                    found = this.deepSearch(prop, search);
-                    if(found === true) break;
+                if (typeof prop === "object") {
+                    found = this.deepSearch(prop, search, column);
+                    if (found === true) break;
                 } else {
-                    if (String(obj[i]).toLowerCase().indexOf(search) !== -1) {
+                    if (column && column !== '_global') {
+                      if (i !== column.split('.').pop()) continue;
+                    }
+                    if (String(obj[i]).toLowerCase().indexOf(search.toLowerCase()) !== -1) {
                         found = true;
                         break;
                     }
@@ -1433,28 +1509,35 @@ NgReactGridReactManager.prototype.deepSearch = function(obj, search) {
 };
 
 /**
- * Search callback for everytime the user updates the search box, supports local mode and server mode
+ * Search callback for everytime the user updates the search box.
+ *   Supports local mode and server mode; local mode only for column search.
  * @param search
+ * @param (Optional) column
  */
-NgReactGridReactManager.prototype.setSearch = function (search) {
+NgReactGridReactManager.prototype.setSearch = function (search, column) {
+    var column = column ? column : '_global';
+    this.filterValues[column] = search;
+
     var update = {
         search: search
     };
 
     if (this.ngReactGrid.isLocalMode()) {
-        search = String(search).toLowerCase();
-
-        this.filteredData = this.originalData.slice(0).filter(function (obj) {
-            var found = false;
-            found = this.deepSearch(obj, search);
-            return found;
-        }.bind(this));
+        this.filteredData = this.originalData.slice(0);
+        for (var column in this.filterValues) {
+            if (this.filterValues.hasOwnProperty(column)) {
+                this.filteredData = this.filteredData.filter(function (obj) {
+                    var found = false;
+                    found = this.deepSearch(obj, this.filterValues[column], column);
+                    return found;
+                }.bind(this));
+            }
+        }
 
         update.data = this.filteredData;
         update.currentPage = 1;
 
         this.ngReactGrid.update(this.ngReactGrid.events.SEARCH, update);
-
     } else {
         this.ngReactGrid.search = search;
         this.ngReactGrid.getData();

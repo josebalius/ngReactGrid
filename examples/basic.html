@@ -79,6 +79,7 @@
                            disableCheckboxField: 'disableCheckbox'}),
                         {
                             field: "user.firstName",
+                            columnFilter: true,
                             displayName: "First Name",
                             edit: function (row) {
                                 return new ngReactGridTextField(row, 'user.firstName');
@@ -86,6 +87,7 @@
                         },
                         {
                             field: "user.lastName",
+                            columnFilter: true,
                             displayName: "Last Name"
                         }
                     ]

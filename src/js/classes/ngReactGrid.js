@@ -188,6 +188,7 @@ NgReactGrid.prototype.isServerMode = function () {
  */
 NgReactGrid.prototype.setupUpdateEvents = function () {
     this.events = {
+        COLUMN_DEF: "COLUMN_DEF",
         PAGESIZE: "PAGESIZE",
         SORTING: "SORTING",
         SEARCH: "SEARCH",
@@ -214,15 +215,19 @@ NgReactGrid.prototype.initWatchers = function () {
         }
     }.bind(this));
 
+    this.scope.$watch("grid.columnDefs", function (newValue, oldValue) {
+        if (newValue !== oldValue) {
+            this.update(this.events.COLUMN_DEF, {
+                // Resets column filter fields
+                filterValues: {}
+            });
+            this.update(this.events.COLUMNS, {columnDefs: newValue});
+        }
+    }.bind(this), true);
+
     this.scope.$watch("grid.totalCount", function (newValue) {
         if (newValue) {
             this.update(this.events.TOTALCOUNT, {totalCount: newValue});
-        }
-    }.bind(this));
-
-    this.scope.$watch("grid.columnDefs", function (newValue ,oldValue) {
-        if (newValue && newValue != oldValue ) {
-            this.update(this.events.COLUMNS, {columnDefs: newValue});
         }
     }.bind(this));
 };
@@ -234,6 +239,10 @@ NgReactGrid.prototype.initWatchers = function () {
  */
 NgReactGrid.prototype.update = function (updateEvent, updates) {
     switch (updateEvent) {
+        case this.events.COLUMN_DEF:
+            this.updateColumnDef(updates);
+            break;
+
         case this.events.DATA:
             this.updateData(updates);
             break;
@@ -265,6 +274,14 @@ NgReactGrid.prototype.update = function (updateEvent, updates) {
 
     this.render();
 
+};
+
+/**
+ * This function updates the necessary properties for a successful column def update
+ * @param updates
+ */
+NgReactGrid.prototype.updateColumnDef = function (updates) {
+    this.react.filterValues = updates.filterValues;
 };
 
 /**

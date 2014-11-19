@@ -40,6 +40,12 @@ var NgReactGridReactManager = function (ngReactGrid) {
     this.filteredData = [];
 
     /**
+     * Values of all filter fields
+     * @type {Object}
+     */
+    this.filterValues = {};
+
+    /**
      * This is a copy of the pagination-independent viewable data in table that
      *     can be affected by filter and sort
      * @type {Array}
@@ -193,22 +199,26 @@ NgReactGridReactManager.prototype.performLocalSort = function (update) {
  * This is a recursive search function that will transverse an object searching for an index of a string
  * @param obj
  * @param search
+ * @param (Optional) column
  * @returns {boolean}
  */
-NgReactGridReactManager.prototype.deepSearch = function(obj, search) {
+NgReactGridReactManager.prototype.deepSearch = function(obj, search, column) {
     var found = false;
 
-    if(obj) {
+    if (obj) {
         for (var i in obj) {
             if (obj.hasOwnProperty(i)) {
 
                 var prop = obj[i];
 
-                if(typeof prop === "object") {
-                    found = this.deepSearch(prop, search);
-                    if(found === true) break;
+                if (typeof prop === "object") {
+                    found = this.deepSearch(prop, search, column);
+                    if (found === true) break;
                 } else {
-                    if (String(obj[i]).toLowerCase().indexOf(search) !== -1) {
+                    if (column && column !== '_global') {
+                      if (i !== column.split('.').pop()) continue;
+                    }
+                    if (String(obj[i]).toLowerCase().indexOf(search.toLowerCase()) !== -1) {
                         found = true;
                         break;
                     }
@@ -223,28 +233,35 @@ NgReactGridReactManager.prototype.deepSearch = function(obj, search) {
 };
 
 /**
- * Search callback for everytime the user updates the search box, supports local mode and server mode
+ * Search callback for everytime the user updates the search box.
+ *   Supports local mode and server mode; local mode only for column search.
  * @param search
+ * @param (Optional) column
  */
-NgReactGridReactManager.prototype.setSearch = function (search) {
+NgReactGridReactManager.prototype.setSearch = function (search, column) {
+    var column = column ? column : '_global';
+    this.filterValues[column] = search;
+
     var update = {
         search: search
     };
 
     if (this.ngReactGrid.isLocalMode()) {
-        search = String(search).toLowerCase();
-
-        this.filteredData = this.originalData.slice(0).filter(function (obj) {
-            var found = false;
-            found = this.deepSearch(obj, search);
-            return found;
-        }.bind(this));
+        this.filteredData = this.originalData.slice(0);
+        for (var column in this.filterValues) {
+            if (this.filterValues.hasOwnProperty(column)) {
+                this.filteredData = this.filteredData.filter(function (obj) {
+                    var found = false;
+                    found = this.deepSearch(obj, this.filterValues[column], column);
+                    return found;
+                }.bind(this));
+            }
+        }
 
         update.data = this.filteredData;
         update.currentPage = 1;
 
         this.ngReactGrid.update(this.ngReactGrid.events.SEARCH, update);
-
     } else {
         this.ngReactGrid.search = search;
         this.ngReactGrid.getData();

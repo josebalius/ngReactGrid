@@ -32,6 +32,28 @@ var ngReactGridComponent = (function() {
     };
 
     var ngReactGridHeader = (function() {
+        var hasColumnFilter = function(grid) {
+            return grid.columnDefs.some(function(cell) {
+                return cell.columnFilter;
+            });
+        };
+
+        var ngGridColumnFilterCell = React.createClass({
+            handleSearchInputChange: function() {
+              this.props.onSearchInput(this.refs[this.props.cell.field].getDOMNode().value,
+                                       this.props.cell.field);
+            },
+            render: function() {
+                return (
+                    <th title={this.props.cell.field + " Search"}>
+                        <input type="text"
+                            placeholder={"Filter " + this.props.cell.displayName}
+                            ref={this.props.cell.field}
+                            onKeyUp={this.handleSearchInputChange} />
+                    </th>
+                )
+            }
+        });
 
         // For input in header. Expandable to additional types.
         var ngGridHeaderCellInput = React.createClass({
@@ -201,11 +223,36 @@ var ngReactGridComponent = (function() {
                 if (this.props.grid.showGridSearch) {
                   return (
                       <div className="ngReactGridSearch">
-                          <input type="input" placeholder="Search..." ref="searchField" onKeyUp={this.handleSearch} />
+                          <input type="text" placeholder="Search..." ref="searchField" onKeyUp={this.handleSearch} />
                       </div>
                   )
                 } else {
                   return (<div/>)
+                }
+            }
+        });
+
+        var ngReactGridColumnFilter = React.createClass({
+            handleSearch: function(search, column) {
+                this.props.grid.react.setSearch(search, column);
+            },
+            render: function() {
+                if (hasColumnFilter(this.props.grid) && this.props.grid.localMode) {
+                    var cells = this.props.grid.columnDefs.map(function(cell, key) {
+                        if (cell.columnFilter) {
+                            return (<ngGridColumnFilterCell key={key} cell={cell} onSearchInput={this.handleSearch} />)
+                        } else {
+                            return (<th key={key}/>)
+                        }
+                    }.bind(this));
+
+                  return (
+                      <tr className="ngReactGridColumnFilter">
+                          {cells}
+                      </tr>
+                  )
+                } else {
+                    return (<tr/>)
                 }
             }
         });
@@ -224,7 +271,8 @@ var ngReactGridComponent = (function() {
                 };
 
                 var ngReactGridHeader = {
-                    paddingRight: (this.props.grid.horizontalScroll) ? this.props.grid.scrollbarWidth : 0
+                    paddingRight: (this.props.grid.horizontalScroll) ? this.props.grid.scrollbarWidth : 0,
+                    height: hasColumnFilter(this.props.grid) ? "auto" : "27px"
                 };
 
                 return (
@@ -241,6 +289,7 @@ var ngReactGridComponent = (function() {
                                             <tr>
                                                 {cells}
                                             </tr>
+                                            <ngReactGridColumnFilter grid={this.props.grid} />
                                         </thead>
                                     </table>
                                 </div>
