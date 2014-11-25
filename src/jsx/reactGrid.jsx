@@ -335,7 +335,7 @@ var ngReactGridComponent = (function() {
                     cellStyle.whiteSpace = "nowrap";
                 }
                 
-                if (cellText === null || cellText === undefined) {
+                if (cellText === null || typeof cellText == 'undefined') {
                     cellText = '';
                 }
 
