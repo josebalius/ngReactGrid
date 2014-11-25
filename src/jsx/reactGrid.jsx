@@ -411,8 +411,9 @@ var ngReactGridComponent = (function() {
             },
             componentDidMount: function() {
                 var domNode = this.getDOMNode();
-                var header = document.querySelector(".ngReactGridHeaderInner");
-                var viewPort = document.querySelector(".ngReactGridViewPort");
+                var domContainer = domNode.parentNode;
+                var header = domContainer.querySelector(".ngReactGridHeaderInner");
+                var viewPort = domContainer.querySelector(".ngReactGridViewPort");
 
                 domNode.firstChild.addEventListener('scroll', function(e) {
                     header.scrollLeft = viewPort.scrollLeft;
