@@ -334,6 +334,10 @@ var ngReactGridComponent = (function() {
                     cellStyle.textOverflow = "ellipsis";
                     cellStyle.whiteSpace = "nowrap";
                 }
+                
+                if (cellText === null || cellText === undefined) {
+                    cellText = '';
+                }
 
                 this.defaultCell = (
                         <td style={cellStyle} title={String(cellText)}>
