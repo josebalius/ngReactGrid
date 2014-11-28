@@ -575,6 +575,9 @@ var ngReactGridComponent = (function() {
 
         var ngReactGridFooter = React.createClass({
             render: function() {
+                if (this.props.grid.totalCount == 0) {
+                    return null;
+                }
                 return (
                     <div className="ngReactGridFooter">
                         <ngReactGridStatus grid={this.props.grid} />
