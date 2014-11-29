@@ -1,5 +1,5 @@
-var ngReactGridCheckboxComponent = (function() {
-    var ngReactGridCheckboxComponent = React.createClass({
+var NgReactGridCheckboxComponent = (function() {
+    var NgReactGridCheckboxComponent = React.createClass({
         getInitialState: function() {
             var disableCheckboxField = this.props.options.disableCheckboxField;
             var disableCheckboxFieldValue = this.props.options.getObjectPropertyByStringFn(this.props.row, disableCheckboxField);
@@ -54,5 +54,5 @@ var ngReactGridCheckboxComponent = (function() {
         }
     });
 
-    return ngReactGridCheckboxComponent;
+    return NgReactGridCheckboxComponent;
 })();

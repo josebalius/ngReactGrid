@@ -1,5 +1,5 @@
-var ngReactGridTextFieldComponent = (function() {
-    var ngReactGridTextFieldComponent = React.createClass({
+var NgReactGridTextFieldComponent = (function() {
+    var NgReactGridTextFieldComponent = React.createClass({
         getInitialState: function() {
             return {
                 defaultValue: ""
@@ -29,5 +29,5 @@ var ngReactGridTextFieldComponent = (function() {
         }
     });
 
-    return ngReactGridTextFieldComponent;
+    return NgReactGridTextFieldComponent;
 })();

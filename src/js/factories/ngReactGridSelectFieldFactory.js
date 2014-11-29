@@ -10,7 +10,9 @@ var ngReactGridSelectFieldFactory = function($rootScope) {
 
         var value = NgReactGridReactManager.getObjectPropertyByString(this.record, this.field);
 
-        return ngReactGridSelectFieldComponent({value: value, updateValue: this.updateValue.bind(this), referenceData: (referenceData || [])});
+        var ngReactGridSelectFieldElement = React.createFactory(NgReactGridSelectFieldComponent);
+
+        return ngReactGridSelectFieldElement({value: value, updateValue: this.updateValue.bind(this), referenceData: (referenceData || [])});
     };
 
     ngReactGridSelectField.prototype.updateValue = function(newValue) {

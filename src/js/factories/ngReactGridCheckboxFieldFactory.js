@@ -8,7 +8,8 @@ var ngReactGridCheckboxFieldFactory = function() {
         this.updateNotification = updateNotification;
 
         var value = NgReactGridReactManager.getObjectPropertyByString(this.record, this.field);
-        return ngReactGridCheckboxFieldComponent({value: value, updateValue: this.updateValue.bind(this)});
+        var ngReactGridCheckboxFieldElement = React.createFactory(NgReactGridCheckboxFieldComponent);
+        return ngReactGridCheckboxFieldElement({value: value, updateValue: this.updateValue.bind(this)});
     };
 
     ngReactGridCheckboxField.prototype.updateValue = function(newValue) {
