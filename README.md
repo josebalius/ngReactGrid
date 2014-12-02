@@ -44,12 +44,11 @@ Develop
 git clone https://github.com/josebalius/ngReactGrid.git
 cd ngReactGrid
 
-# Install all the the dev dependencies, Gulp, etc.
+# Install all the the dev dependencies
 npm install
-npm install -g gulp
 
 # Run gulp inside the ngReactGrid to watch your files and build
-gulp
+npm run gulp
 ```
 
 I use examples/basic.html to implement features, it is my "sandbox" environment. This file however is always changing (with whatever it is that I am working on) so beware. I suggest you copy this file and set it up your way. I will be creating more examples when I have some time.
