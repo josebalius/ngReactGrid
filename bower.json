@@ -1,6 +1,6 @@
 {
   "name": "ngReactGrid",
-  "version": "0.6.6",
+  "version": "0.7.0",
   "description": "A really fast Angular grid using the power of React to render",
   "homepage": "https://github.com/josebalius/ngReactGrid",
   "authors": [
