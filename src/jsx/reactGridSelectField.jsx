@@ -1,6 +1,6 @@
-var ngReactGridSelectFieldComponent = (function() {
+var NgReactGridSelectFieldComponent = (function() {
 
-    var ngReactGridSelectFieldComponent = React.createClass({
+    var NgReactGridSelectFieldComponent = React.createClass({
         getInitialState: function() {
             return {
                 defaultValue: {
@@ -48,6 +48,6 @@ var ngReactGridSelectFieldComponent = (function() {
         }
     });
 
-    return ngReactGridSelectFieldComponent;
+    return NgReactGridSelectFieldComponent;
 
 })();

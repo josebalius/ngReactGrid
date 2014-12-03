@@ -390,7 +390,9 @@ NgReactGrid.prototype.updateColumns = function (updates) {
  * Calls React to render the grid component on the given element
  */
 NgReactGrid.prototype.render = function () {
-    React.renderComponent(ngReactGridComponent({grid: this}), this.element[0]);
+    // React.renderComponent(ngReactGridComponent({grid: this}), this.element[0]);
+    var ngReactGridElement = React.createFactory(NgReactGridComponent);
+    React.render(ngReactGridElement({grid: this}), this.element[0]);
 };
 
 module.exports = NgReactGrid;

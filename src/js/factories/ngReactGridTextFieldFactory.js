@@ -9,7 +9,8 @@ var ngReactGridTextFieldFactory = function($rootScope) {
 
         var value = NgReactGridReactManager.getObjectPropertyByString(this.record, this.field);
 
-        return ngReactGridTextFieldComponent({value: value, updateValue: this.updateValue.bind(this)});
+        var ngReactGridTextFieldElement = React.createFactory(NgReactGridTextFieldComponent);
+        return ngReactGridTextFieldElement({value: value, updateValue: this.updateValue.bind(this)});
     };
 
     ngReactGridTextField.prototype.updateValue = function(newValue) {

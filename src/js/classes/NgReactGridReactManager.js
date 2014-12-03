@@ -88,7 +88,7 @@ NgReactGridReactManager.prototype.getFilteredAndSortedData = function() {
 };
 
 /**
- * Page size setter, this is called for the ngReactGridComponent (React class)
+ * Page size setter, this is called for the NgReactGridComponent (React class)
  * @param pageSize
  */
 NgReactGridReactManager.prototype.setPageSize = function (pageSize) {
@@ -119,7 +119,7 @@ NgReactGridReactManager.prototype.setPageSize = function (pageSize) {
 };
 
 /**
- * Sorting callback, this is called from the ngReactGridComponent whenever a header cell is clicked (and is sortable)
+ * Sorting callback, this is called from the NgReactGridComponent whenever a header cell is clicked (and is sortable)
  * @param field
  */
 NgReactGridReactManager.prototype.setSortField = function (field) {

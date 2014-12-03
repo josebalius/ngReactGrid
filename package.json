@@ -1,6 +1,6 @@
 {
   "name": "ngReactGrid",
-  "version": "0.6.5",
+  "version": "0.7.0",
   "description": "A really fast Angular grid using the power of React to render",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -18,7 +18,7 @@
   "homepage": "http://josebalius.github.io/ngReactGrid/",
   "devDependencies": {
     "gulp": "^3.6.2",
-    "gulp-react": "0.3.3",
+    "gulp-react": "2.0.0",
     "gulp-concat": "2.2.0",
     "gulp-filter": "0.4.1",
     "gulp-uglify": "0.3.0",

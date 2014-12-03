@@ -1,8 +1,7 @@
-/** @jsx React.DOM */
 /**
- * ngReactGridComponent - React Component
+ * NgReactGridComponent - React Component
  **/
-var ngReactGridComponent = (function() {
+var NgReactGridComponent = (function() {
     var windowInnerWidth = window.innerWidth, windowInnerHeight = window.innerHeight;
 
     var setCellWidthPixels = function(cell) {
@@ -32,32 +31,32 @@ var ngReactGridComponent = (function() {
         cellStyle.width = cell.width;
     };
 
-    var ngReactGridHeader = (function() {
+    var NgReactGridHeader = (function() {
         var hasColumnFilter = function(grid) {
             return grid.columnDefs.some(function(cell) {
                 return cell.columnFilter;
             });
         };
 
-        var ngGridColumnFilterCell = React.createClass({displayName: 'ngGridColumnFilterCell',
+        var NgGridColumnFilterCell = React.createClass({displayName: 'NgGridColumnFilterCell',
             handleSearchInputChange: function() {
               this.props.onSearchInput(this.refs[this.props.cell.field].getDOMNode().value,
                                        this.props.cell.field);
             },
             render: function() {
                 return (
-                    React.DOM.th( {title:this.props.cell.field + " Search"}, 
-                        React.DOM.input( {type:"text",
-                            placeholder:"Filter " + this.props.cell.displayName,
-                            ref:this.props.cell.field,
-                            onKeyUp:this.handleSearchInputChange} )
+                    React.createElement("th", {title: this.props.cell.field + " Search"}, 
+                        React.createElement("input", {type: "text", 
+                            placeholder: "Filter " + this.props.cell.displayName, 
+                            ref: this.props.cell.field, 
+                            onKeyUp: this.handleSearchInputChange})
                     )
                 )
             }
         });
 
         // For input in header. Expandable to additional types.
-        var ngGridHeaderCellInput = React.createClass({displayName: 'ngGridHeaderCellInput',
+        var NgGridHeaderCellInput = React.createClass({displayName: 'NgGridHeaderCellInput',
             getInitialState: function() {
                 return {
                     checked: false
@@ -89,21 +88,21 @@ var ngReactGridComponent = (function() {
                     switch (this.props.cell.inputType) {
                         case "checkbox":
                             return (
-                                React.DOM.div( {title:this.props.cell.title, className:"ngGridHeaderCellCheckboxInput", style:headerStyle}, 
-                                    React.DOM.input( {type:this.props.cell.inputType, onChange:this.handleCheckboxClick, checked:this.state.checked})
+                                React.createElement("div", {title: this.props.cell.title, className: "ngGridHeaderCellCheckboxInput", style: headerStyle}, 
+                                    React.createElement("input", {type: this.props.cell.inputType, onChange: this.handleCheckboxClick, checked: this.state.checked})
                                 )
                             );
                             break;
                         default:
-                            return (React.DOM.div(null));
+                            return (React.createElement("div", null));
                     }
                 } else {
-                    return (React.DOM.div(null));
+                    return (React.createElement("div", null));
                 }
             }
         });
 
-        var ngGridHeaderCell = React.createClass({displayName: 'ngGridHeaderCell',
+        var NgGridHeaderCell = React.createClass({displayName: 'NgGridHeaderCell',
             getInitialState: function() {
                 return {
                     width: 0
@@ -180,60 +179,60 @@ var ngReactGridComponent = (function() {
                 };
 
                 return (
-                    React.DOM.th( {title:this.props.cell.displayName, onClick:this.handleClick, style:cellStyle}, 
-                        React.DOM.div( {className:"ngGridHeaderCellText"}, 
+                    React.createElement("th", {title: this.props.cell.displayName, onClick: this.handleClick, style: cellStyle}, 
+                        React.createElement("div", {className: "ngGridHeaderCellText"}, 
                             this.props.cell.displayName
-                        ),
-                        ngGridHeaderCellInput( {cell:this.props.cell, grid:this.props.grid} ),
-                        React.DOM.div( {style:sortStyle} , React.DOM.i( {className:sortClassName, style:arrowStyle})),
-                        React.DOM.div( {style:resizeWrapperStyle, className:"ngGridHeaderResizeControl"}, 
-                            React.DOM.div( {className:"ngGridHeaderCellResize", style:resizeStyle})
+                        ), 
+                        React.createElement(NgGridHeaderCellInput, {cell: this.props.cell, grid: this.props.grid}), 
+                        React.createElement("div", {style: sortStyle}, React.createElement("i", {className: sortClassName, style: arrowStyle})), 
+                        React.createElement("div", {style: resizeWrapperStyle, className: "ngGridHeaderResizeControl"}, 
+                            React.createElement("div", {className: "ngGridHeaderCellResize", style: resizeStyle})
                         )
                     )
                 )
             }
         });
 
-        var ngReactGridShowPerPage = React.createClass({displayName: 'ngReactGridShowPerPage',
+        var NgReactGridShowPerPage = React.createClass({displayName: 'NgReactGridShowPerPage',
             handleChange: function() {
                 this.props.grid.react.setPageSize(this.refs.showPerPage.getDOMNode().value);
             },
             render: function() {
 
                 var options = this.props.grid.pageSizes.map(function(pageSize, key) {
-                    return (React.DOM.option( {value:pageSize, key:key}, pageSize))
+                    return (React.createElement("option", {value: pageSize, key: key}, pageSize))
                 }.bind(this));
 
                 if (this.props.grid.showGridShowPerPage) {
                   return (
-                      React.DOM.div( {className:"ngReactGridShowPerPage"}, 
-                          "Show ", React.DOM.select( {onChange:this.handleChange, ref:"showPerPage", value:this.props.grid.pageSize}, options), " entries"
+                      React.createElement("div", {className: "ngReactGridShowPerPage"}, 
+                          "Show ", React.createElement("select", {onChange: this.handleChange, ref: "showPerPage", value: this.props.grid.pageSize}, options), " entries"
                       )
                   )
                 } else {
-                  return (React.DOM.div(null))
+                  return (React.createElement("div", null))
                 }
             }
         });
 
-        var ngReactGridSearch = React.createClass({displayName: 'ngReactGridSearch',
+        var NgReactGridSearch = React.createClass({displayName: 'NgReactGridSearch',
             handleSearch: function() {
                 this.props.grid.react.setSearch(this.refs.searchField.getDOMNode().value);
             },
             render: function() {
                 if (this.props.grid.showGridSearch) {
                   return (
-                      React.DOM.div( {className:"ngReactGridSearch"}, 
-                          React.DOM.input( {type:"text", placeholder:"Search...", ref:"searchField", onKeyUp:this.handleSearch} )
+                      React.createElement("div", {className: "ngReactGridSearch"}, 
+                          React.createElement("input", {type: "text", placeholder: "Search...", ref: "searchField", onKeyUp: this.handleSearch})
                       )
                   )
                 } else {
-                  return (React.DOM.div(null))
+                  return (React.createElement("div", null))
                 }
             }
         });
 
-        var ngReactGridColumnFilter = React.createClass({displayName: 'ngReactGridColumnFilter',
+        var NgReactGridColumnFilter = React.createClass({displayName: 'NgReactGridColumnFilter',
             handleSearch: function(search, column) {
                 this.props.grid.react.setSearch(search, column);
             },
@@ -241,30 +240,30 @@ var ngReactGridComponent = (function() {
                 if (hasColumnFilter(this.props.grid) && this.props.grid.localMode) {
                     var cells = this.props.grid.columnDefs.map(function(cell, key) {
                         if (cell.columnFilter) {
-                            return (ngGridColumnFilterCell( {key:key, cell:cell, onSearchInput:this.handleSearch} ))
+                            return (React.createElement(NgGridColumnFilterCell, {key: key, cell: cell, onSearchInput: this.handleSearch}))
                         } else {
-                            return (React.DOM.th( {key:key}))
+                            return (React.createElement("th", {key: key}))
                         }
                     }.bind(this));
 
                   return (
-                      React.DOM.tr( {className:"ngReactGridColumnFilter"}, 
+                      React.createElement("tr", {className: "ngReactGridColumnFilter"}, 
                           cells
                       )
                   )
                 } else {
-                    return (React.DOM.tr(null))
+                    return (React.createElement("tr", null))
                 }
             }
         });
 
-        var ngReactGridHeader = React.createClass({displayName: 'ngReactGridHeader',
+        var NgReactGridHeader = React.createClass({displayName: 'NgReactGridHeader',
             render: function() {
 
                 var columnsLength = this.props.grid.columnDefs.length;
                 var cells = this.props.grid.columnDefs.map(function(cell, key) {
                     var last = (columnsLength - 1) === key;
-                    return (ngGridHeaderCell( {key:key, cell:cell, index:key, grid:this.props.grid, last:last} ))
+                    return (React.createElement(NgGridHeaderCell, {key: key, cell: cell, index: key, grid: this.props.grid, last: last}))
                 }.bind(this));
 
                 var tableStyle = {
@@ -277,20 +276,20 @@ var ngReactGridComponent = (function() {
                 };
 
                 return (
-                    React.DOM.div(null, 
-                        React.DOM.div( {className:"ngReactGridHeaderToolbarWrapper"}, 
-                            ngReactGridShowPerPage( {grid:this.props.grid, setGridState:this.props.setGridState} ),
-                            ngReactGridSearch( {grid:this.props.grid} )
-                        ),
-                        React.DOM.div( {className:"ngReactGridHeaderWrapper"}, 
-                            React.DOM.div( {className:"ngReactGridHeader", style:ngReactGridHeader}, 
-                                React.DOM.div( {className:"ngReactGridHeaderInner"}, 
-                                    React.DOM.table( {style:tableStyle}, 
-                                        React.DOM.thead(null, 
-                                            React.DOM.tr(null, 
+                    React.createElement("div", null, 
+                        React.createElement("div", {className: "ngReactGridHeaderToolbarWrapper"}, 
+                            React.createElement(NgReactGridShowPerPage, {grid: this.props.grid, setGridState: this.props.setGridState}), 
+                            React.createElement(NgReactGridSearch, {grid: this.props.grid})
+                        ), 
+                        React.createElement("div", {className: "ngReactGridHeaderWrapper"}, 
+                            React.createElement("div", {className: "ngReactGridHeader", style: ngReactGridHeader}, 
+                                React.createElement("div", {className: "ngReactGridHeaderInner"}, 
+                                    React.createElement("table", {style: tableStyle}, 
+                                        React.createElement("thead", null, 
+                                            React.createElement("tr", null, 
                                                 cells
-                                            ),
-                                            ngReactGridColumnFilter( {grid:this.props.grid} )
+                                            ), 
+                                            React.createElement(NgReactGridColumnFilter, {grid: this.props.grid})
                                         )
                                     )
                                 )
@@ -301,23 +300,23 @@ var ngReactGridComponent = (function() {
             }
         });
 
-        return ngReactGridHeader;
+        return NgReactGridHeader;
     })();
 
-    var ngReactGridBody = (function() {
+    var NgReactGridBody = (function() {
 
-        var ngReactGridBodyRowCell = React.createClass({displayName: 'ngReactGridBodyRowCell',
+        var NgReactGridBodyRowCell = React.createClass({displayName: 'NgReactGridBodyRowCell',
             cell: function(cellText, cellStyle) {
                 cellTextType = typeof cellText;
 
                 if(cellTextType === 'string') {
-                    return (React.DOM.td( {style:cellStyle}, cellText))
+                    return (React.createElement("td", {style: cellStyle}, cellText))
                 } else if(cellTextType === 'object') {
 
                     cellText = this.props.grid.react.wrapFunctionsInAngular(cellText);
 
                     return (
-                        React.DOM.td( {style:cellStyle}, 
+                        React.createElement("td", {style: cellStyle}, 
                             cellText
                         )
                     );
@@ -335,10 +334,14 @@ var ngReactGridComponent = (function() {
                     cellStyle.textOverflow = "ellipsis";
                     cellStyle.whiteSpace = "nowrap";
                 }
+                
+                if (cellText === null || typeof cellText == 'undefined') {
+                    cellText = '';
+                }
 
                 this.defaultCell = (
-                        React.DOM.td( {style:cellStyle, title:String(cellText)}, 
-                            React.DOM.div(null, String(cellText))
+                        React.createElement("td", {style: cellStyle, title: String(cellText)}, 
+                            React.createElement("div", null, String(cellText))
                         )
                     );
 
@@ -356,7 +359,7 @@ var ngReactGridComponent = (function() {
             }
         });
 
-        var ngReactGridBodyRow = React.createClass({displayName: 'ngReactGridBodyRow',
+        var NgReactGridBodyRow = React.createClass({displayName: 'NgReactGridBodyRow',
             handleClick: function(e) {
                 // Prevents triggering 'rowClick' event when toggling checkboxes
                 if (e.target.type !== 'checkbox') {
@@ -368,11 +371,11 @@ var ngReactGridComponent = (function() {
                 var columnsLength = this.props.grid.columnDefs.length;
                 var cells = this.props.grid.columnDefs.map(function(cell, key) {
                     var last = (columnsLength - 1) === key;
-                    return ngReactGridBodyRowCell( {key:key, cell:cell, row:this.props.row, grid:this.props.grid, last:last} )
+                    return React.createElement(NgReactGridBodyRowCell, {key: key, cell: cell, row: this.props.row, grid: this.props.grid, last: last})
                 }.bind(this));
 
                 return (
-                    React.DOM.tr( {onClick:this.handleClick}, 
+                    React.createElement("tr", {onClick: this.handleClick}, 
                         cells
                     )
                 )
@@ -380,7 +383,7 @@ var ngReactGridComponent = (function() {
         });
 
 
-        var ngReactGridBody = React.createClass({displayName: 'ngReactGridBody',
+        var NgReactGridBody = React.createClass({displayName: 'NgReactGridBody',
             getInitialState: function() {
                 return {
                     fullRender: false,
@@ -412,8 +415,9 @@ var ngReactGridComponent = (function() {
             },
             componentDidMount: function() {
                 var domNode = this.getDOMNode();
-                var header = document.querySelector(".ngReactGridHeaderInner");
-                var viewPort = document.querySelector(".ngReactGridViewPort");
+                var domContainer = domNode.parentNode;
+                var header = domContainer.querySelector(".ngReactGridHeaderInner");
+                var viewPort = domContainer.querySelector(".ngReactGridViewPort");
 
                 domNode.firstChild.addEventListener('scroll', function(e) {
                     header.scrollLeft = viewPort.scrollLeft;
@@ -427,7 +431,7 @@ var ngReactGridComponent = (function() {
             render: function() {
 
                 var mapRows = function(row, index) {
-                    return ngReactGridBodyRow( {key:index, row:row, columns:this.props.columnDefs, grid:this.props.grid} )
+                    return React.createElement(NgReactGridBodyRow, {key: index, row: row, columns: this.props.columnDefs, grid: this.props.grid})
                 }.bind(this);
 
                 var rows;
@@ -439,8 +443,8 @@ var ngReactGridComponent = (function() {
                     };
 
                     rows = (
-                        React.DOM.tr(null, 
-                            React.DOM.td( {colSpan:this.props.grid.columnDefs.length, style:loadingStyle}, 
+                        React.createElement("tr", null, 
+                            React.createElement("td", {colSpan: this.props.grid.columnDefs.length, style: loadingStyle}, 
                                 "Loading..."
                             )
                         )
@@ -458,8 +462,8 @@ var ngReactGridComponent = (function() {
                         };
 
                         rows = (
-                            React.DOM.tr(null, 
-                                React.DOM.td( {colSpan:this.props.grid.columnDefs.length, style:noDataStyle}, 
+                            React.createElement("tr", null, 
+                                React.createElement("td", {colSpan: this.props.grid.columnDefs.length, style: noDataStyle}, 
                                     "No records found"
                                 )
                             )
@@ -482,11 +486,11 @@ var ngReactGridComponent = (function() {
                 }
 
                 return (
-                    React.DOM.div( {className:"ngReactGridBody"}, 
-                        React.DOM.div( {className:"ngReactGridViewPort", style:ngReactGridViewPortStyle}, 
-                            React.DOM.div( {className:"ngReactGridInnerViewPort"}, 
-                                React.DOM.table( {style:tableStyle}, 
-                                    React.DOM.tbody(null, 
+                    React.createElement("div", {className: "ngReactGridBody"}, 
+                        React.createElement("div", {className: "ngReactGridViewPort", style: ngReactGridViewPortStyle}, 
+                            React.createElement("div", {className: "ngReactGridInnerViewPort"}, 
+                                React.createElement("table", {style: tableStyle}, 
+                                    React.createElement("tbody", null, 
                                         rows
                                     )
                                 )
@@ -497,23 +501,23 @@ var ngReactGridComponent = (function() {
             }
         });
 
-        return ngReactGridBody;
+        return NgReactGridBody;
     })();
 
-    var ngReactGridFooter = (function() {
+    var NgReactGridFooter = (function() {
 
-        var ngReactGridStatus = React.createClass({displayName: 'ngReactGridStatus',
+        var NgReactGridStatus = React.createClass({displayName: 'NgReactGridStatus',
             render: function() {
 
                 return (
-                    React.DOM.div( {className:"ngReactGridStatus"}, 
-                        React.DOM.div(null, "Page ", React.DOM.strong(null, this.props.grid.currentPage), " of ", React.DOM.strong(null, this.props.grid.totalPages), " - Showing ", React.DOM.strong(null, this.props.grid.react.showingRecords), " of ", React.DOM.strong(null, this.props.grid.totalCount), " records")
+                    React.createElement("div", {className: "NgReactGridStatus"}, 
+                        React.createElement("div", null, "Page ", React.createElement("strong", null, this.props.grid.currentPage), " of ", React.createElement("strong", null, this.props.grid.totalPages), " - Showing ", React.createElement("strong", null, this.props.grid.react.showingRecords), " of ", React.createElement("strong", null, this.props.grid.totalCount), " records")
                     )
                 )
             }
         });
 
-        var ngReactGridPagination = React.createClass({displayName: 'ngReactGridPagination',
+        var NgReactGridPagination = React.createClass({displayName: 'NgReactGridPagination',
             goToPage: function(page) {
                 this.props.grid.react.goToPage(page);
             },
@@ -552,55 +556,57 @@ var ngReactGridComponent = (function() {
 
                 pages = pages.map(function(page, key) {
                     var pageClass = (page === this.props.grid.currentPage) ? "active" : "";
-                    return React.DOM.li( {key:key, className:pageClass, dataPage:page}, React.DOM.a( {href:"javascript:", onClick:this.goToPage.bind(null, page)}, page));
+                    return React.createElement("li", {key: key, className: pageClass, dataPage: page}, React.createElement("a", {href: "javascript:", onClick: this.goToPage.bind(null, page)}, page));
                 }.bind(this));
 
                 return (
-                    React.DOM.div( {className:"ngReactGridPagination"}, 
-                        React.DOM.ul(null, 
-                            React.DOM.li(null, React.DOM.a( {href:"javascript:", onClick:this.goToPrevPage}, "Prev")),
-                            React.DOM.li(null, React.DOM.a( {href:"javascript:", onClick:this.goToFirstPage}, "First")),
-                            pages,
-                            React.DOM.li(null, React.DOM.a( {href:"javascript:", onClick:this.goToLastPage}, "Last")),
-                            React.DOM.li(null, React.DOM.a( {href:"javascript:", onClick:this.goToNextPage}, "Next"))
+                    React.createElement("div", {className: "ngReactGridPagination"}, 
+                        React.createElement("ul", null, 
+                            React.createElement("li", null, React.createElement("a", {href: "javascript:", onClick: this.goToPrevPage}, "Prev")), 
+                            React.createElement("li", null, React.createElement("a", {href: "javascript:", onClick: this.goToFirstPage}, "First")), 
+                            pages, 
+                            React.createElement("li", null, React.createElement("a", {href: "javascript:", onClick: this.goToLastPage}, "Last")), 
+                            React.createElement("li", null, React.createElement("a", {href: "javascript:", onClick: this.goToNextPage}, "Next"))
                         )
                     )
                 )
             }
         });
 
-        var ngReactGridFooter = React.createClass({displayName: 'ngReactGridFooter',
+        var NgReactGridFooter = React.createClass({displayName: 'NgReactGridFooter',
             render: function() {
+                if (this.props.grid.totalCount == 0) {
+                    return null;
+                }
                 return (
-                    React.DOM.div( {className:"ngReactGridFooter"}, 
-                        ngReactGridStatus( {grid:this.props.grid} ),
-                        ngReactGridPagination( {grid:this.props.grid} )
+                    React.createElement("div", {className: "ngReactGridFooter"}, 
+                        React.createElement(NgReactGridStatus, {grid: this.props.grid}), 
+                        React.createElement(NgReactGridPagination, {grid: this.props.grid})
                     )
                 )
             }
         });
 
-        return ngReactGridFooter;
+        return NgReactGridFooter;
     })();
 
-    var ngReactGrid = React.createClass({displayName: 'ngReactGrid',
+    var NgReactGrid = React.createClass({displayName: 'NgReactGrid',
         render: function() {
             return (
-                React.DOM.div( {className:"ngReactGrid"}, 
-                    ngReactGridHeader( {grid:this.props.grid} ),
-                    ngReactGridBody( {grid:this.props.grid} ),
-                    ngReactGridFooter( {grid:this.props.grid} )
+                React.createElement("div", {className: "ngReactGrid"}, 
+                    React.createElement(NgReactGridHeader, {grid: this.props.grid}), 
+                    React.createElement(NgReactGridBody, {grid: this.props.grid}), 
+                    React.createElement(NgReactGridFooter, {grid: this.props.grid})
                 )
             )
         }
     });
 
-    return ngReactGrid;
+    return NgReactGrid;
 })();
 
-/** @jsx React.DOM */
-var ngReactGridCheckboxComponent = (function() {
-    var ngReactGridCheckboxComponent = React.createClass({displayName: 'ngReactGridCheckboxComponent',
+var NgReactGridCheckboxComponent = (function() {
+    var NgReactGridCheckboxComponent = React.createClass({displayName: 'NgReactGridCheckboxComponent',
         getInitialState: function() {
             var disableCheckboxField = this.props.options.disableCheckboxField;
             var disableCheckboxFieldValue = this.props.options.getObjectPropertyByStringFn(this.props.row, disableCheckboxField);
@@ -643,24 +649,23 @@ var ngReactGridCheckboxComponent = (function() {
 
             if (this.state.disabled && hideDisabledCheckboxField) {
               return (
-                    React.DOM.div( {style:this.props.options.headerStyle} )
+                    React.createElement("div", {style: this.props.options.headerStyle})
               )
             } else {
                 return (
-                    React.DOM.div( {style:this.props.options.headerStyle}, 
-                        React.DOM.input( {type:"checkbox", onChange:this.handleClick, checked:this.state.checked, disabled:this.state.disabled} )
+                    React.createElement("div", {style: this.props.options.headerStyle}, 
+                        React.createElement("input", {type: "checkbox", onChange: this.handleClick, checked: this.state.checked, disabled: this.state.disabled})
                     )
                 )
             }
         }
     });
 
-    return ngReactGridCheckboxComponent;
+    return NgReactGridCheckboxComponent;
 })();
 
-/** @jsx React.DOM */
-var ngReactGridCheckboxFieldComponent = (function() {
-    var ngReactGridCheckboxFieldComponent = React.createClass({displayName: 'ngReactGridCheckboxFieldComponent',
+var NgReactGridCheckboxFieldComponent = (function() {
+    var NgReactGridCheckboxFieldComponent = React.createClass({displayName: 'NgReactGridCheckboxFieldComponent',
         getInitialState: function() {
             return {
                 checked: false
@@ -687,17 +692,16 @@ var ngReactGridCheckboxFieldComponent = (function() {
         },
         render: function() {
             return (
-                React.DOM.input( {type:"checkbox", checked:this.state.checked, onChange:this.handleClick} )
+                React.createElement("input", {type: "checkbox", checked: this.state.checked, onChange: this.handleClick})
             )
         }
     });
 
-    return ngReactGridCheckboxFieldComponent;
+    return NgReactGridCheckboxFieldComponent;
 })();
-/** @jsx React.DOM */
-var ngReactGridSelectFieldComponent = (function() {
+var NgReactGridSelectFieldComponent = (function() {
 
-    var ngReactGridSelectFieldComponent = React.createClass({displayName: 'ngReactGridSelectFieldComponent',
+    var NgReactGridSelectFieldComponent = React.createClass({displayName: 'NgReactGridSelectFieldComponent',
         getInitialState: function() {
             return {
                 defaultValue: {
@@ -733,24 +737,23 @@ var ngReactGridSelectFieldComponent = (function() {
 
             var options = this.props.referenceData.map(function(option) {
                 return (
-                    React.DOM.option( {value:option.id}, option.name)
+                    React.createElement("option", {value: option.id}, option.name)
                 )
             });
         
             return (
-                React.DOM.select( {className:"ngReactGridSelectField", value:this.state.defaultValue.id, onChange:this.handleChange}, 
+                React.createElement("select", {className: "ngReactGridSelectField", value: this.state.defaultValue.id, onChange: this.handleChange}, 
                     options
                 )
             )
         }
     });
 
-    return ngReactGridSelectFieldComponent;
+    return NgReactGridSelectFieldComponent;
 
 })();
-/** @jsx React.DOM */
-var ngReactGridTextFieldComponent = (function() {
-    var ngReactGridTextFieldComponent = React.createClass({displayName: 'ngReactGridTextFieldComponent',
+var NgReactGridTextFieldComponent = (function() {
+    var NgReactGridTextFieldComponent = React.createClass({displayName: 'NgReactGridTextFieldComponent',
         getInitialState: function() {
             return {
                 defaultValue: ""
@@ -775,12 +778,12 @@ var ngReactGridTextFieldComponent = (function() {
         },
         render: function() {
             return (
-                React.DOM.input( {type:"text", value:this.state.defaultValue, className:"ngReactTextField", ref:"textField", onChange:this.handleChange} )
+                React.createElement("input", {type: "text", value: this.state.defaultValue, className: "ngReactTextField", ref: "textField", onChange: this.handleChange})
             )
         }
     });
 
-    return ngReactGridTextFieldComponent;
+    return NgReactGridTextFieldComponent;
 })();
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var _ = require('../vendors/miniUnderscore');
@@ -1175,7 +1178,9 @@ NgReactGrid.prototype.updateColumns = function (updates) {
  * Calls React to render the grid component on the given element
  */
 NgReactGrid.prototype.render = function () {
-    React.renderComponent(ngReactGridComponent({grid: this}), this.element[0]);
+    // React.renderComponent(ngReactGridComponent({grid: this}), this.element[0]);
+    var ngReactGridElement = React.createFactory(NgReactGridComponent);
+    React.render(ngReactGridElement({grid: this}), this.element[0]);
 };
 
 module.exports = NgReactGrid;
@@ -1364,7 +1369,7 @@ NgReactGridReactManager.prototype.getFilteredAndSortedData = function() {
 };
 
 /**
- * Page size setter, this is called for the ngReactGridComponent (React class)
+ * Page size setter, this is called for the NgReactGridComponent (React class)
  * @param pageSize
  */
 NgReactGridReactManager.prototype.setPageSize = function (pageSize) {
@@ -1395,7 +1400,7 @@ NgReactGridReactManager.prototype.setPageSize = function (pageSize) {
 };
 
 /**
- * Sorting callback, this is called from the ngReactGridComponent whenever a header cell is clicked (and is sortable)
+ * Sorting callback, this is called from the NgReactGridComponent whenever a header cell is clicked (and is sortable)
  * @param field
  */
 NgReactGridReactManager.prototype.setSortField = function (field) {
@@ -1737,7 +1742,8 @@ var ngReactGridCheckboxFactory = function($rootScope) {
                         selectionTarget.splice(index, 1);
                     }
                 };
-                return ngReactGridCheckboxComponent({selectionTarget: selectionTarget, handleClick: handleClick, row: row, options: _options});;
+                var ngReactGridCheckboxElement = React.createFactory(NgReactGridCheckboxComponent);
+                return ngReactGridCheckboxElement({selectionTarget: selectionTarget, handleClick: handleClick, row: row, options: _options});;
             },
             sort: false,
             width: 1
@@ -1760,7 +1766,8 @@ var ngReactGridCheckboxFieldFactory = function() {
         this.updateNotification = updateNotification;
 
         var value = NgReactGridReactManager.getObjectPropertyByString(this.record, this.field);
-        return ngReactGridCheckboxFieldComponent({value: value, updateValue: this.updateValue.bind(this)});
+        var ngReactGridCheckboxFieldElement = React.createFactory(NgReactGridCheckboxFieldComponent);
+        return ngReactGridCheckboxFieldElement({value: value, updateValue: this.updateValue.bind(this)});
     };
 
     ngReactGridCheckboxField.prototype.updateValue = function(newValue) {
@@ -1789,7 +1796,9 @@ var ngReactGridSelectFieldFactory = function($rootScope) {
 
         var value = NgReactGridReactManager.getObjectPropertyByString(this.record, this.field);
 
-        return ngReactGridSelectFieldComponent({value: value, updateValue: this.updateValue.bind(this), referenceData: (referenceData || [])});
+        var ngReactGridSelectFieldElement = React.createFactory(NgReactGridSelectFieldComponent);
+
+        return ngReactGridSelectFieldElement({value: value, updateValue: this.updateValue.bind(this), referenceData: (referenceData || [])});
     };
 
     ngReactGridSelectField.prototype.updateValue = function(newValue) {
@@ -1834,7 +1843,8 @@ var ngReactGridTextFieldFactory = function($rootScope) {
 
         var value = NgReactGridReactManager.getObjectPropertyByString(this.record, this.field);
 
-        return ngReactGridTextFieldComponent({value: value, updateValue: this.updateValue.bind(this)});
+        var ngReactGridTextFieldElement = React.createFactory(NgReactGridTextFieldComponent);
+        return ngReactGridTextFieldElement({value: value, updateValue: this.updateValue.bind(this)});
     };
 
     ngReactGridTextField.prototype.updateValue = function(newValue) {
