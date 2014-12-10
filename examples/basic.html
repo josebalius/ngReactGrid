@@ -7,6 +7,7 @@
 <body>
 <div ng-controller="BasicExampleController" style="width: 100%">
     <ng-react-grid grid="grid"></ng-react-grid>
+    <button type="button" ng-click="toggleVisibleCheckboxes()">Toggle Visible Checkboxes</button>
     <button type="button" ng-click="edit()" ng-show="!isEditing()">Edit Grid</button>
     <button type="button" ng-click="save()" ng-show="isEditing()">Save Grid</button>
     <button type="button" ng-click="cancel()" ng-show="isEditing()">Cancel</button>
@@ -33,6 +34,17 @@
 
                 $scope.isEditing = function () {
                     return $scope.editingGrid;
+                };
+
+                var checkboxGrid = 
+                    new ngReactGridCheckbox($scope.selections, 
+                        {batchToggle: true,
+                         disableCheckboxField: 'disableCheckbox'});
+                
+                var checkboxState = false;
+                $scope.toggleVisibleCheckboxes = function () {
+                    checkboxState = !checkboxState;
+                    checkboxGrid.setVisibleCheckboxState(checkboxState);
                 };
 
                 $scope.edit = function () {
@@ -74,9 +86,7 @@
                 $scope.grid = {
                     data: dataSet,
                     columnDefs: [
-                      new ngReactGridCheckbox($scope.selections, 
-                          {batchToggle: true,
-                           disableCheckboxField: 'disableCheckbox'}),
+                        checkboxGrid, 
                         {
                             field: "user.firstName",
                             columnFilter: true,

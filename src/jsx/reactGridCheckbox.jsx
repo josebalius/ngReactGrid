@@ -2,7 +2,7 @@ var NgReactGridCheckboxComponent = (function() {
     var NgReactGridCheckboxComponent = React.createClass({
         getInitialState: function() {
             var disableCheckboxField = this.props.options.disableCheckboxField;
-            var disableCheckboxFieldValue = this.props.options.getObjectPropertyByStringFn(this.props.row, disableCheckboxField);
+            var disableCheckboxFieldValue = this.props.utils.getObjectPropertyByStringFn(this.props.row, disableCheckboxField);
             return {
                 checked: false,
                 disabled: disableCheckboxFieldValue ? disableCheckboxFieldValue : false
@@ -10,22 +10,40 @@ var NgReactGridCheckboxComponent = (function() {
         },
 
         handleClick: function(e) {
+            var checkedStateValue = this.state.checked ? false : true;
             this.setState({
-                checked: this.state.checked ? false : true
+                checked: checkedStateValue
             });
-
-            this.props.handleClick(e);
+            this.props.handleToggle(e, checkedStateValue);
         },
-        setNgReactGridCheckboxStateFromEvent: function(event) {
+        setNgReactGridCheckboxStateFromEvent: function(e) {
             if (!this.state.disabled) {
-                this.setState({
-                    checked: event.detail.checked
-                });
+                 // Target rows with specified field value
+                if (e.detail.targetCheckboxes.key) {
+                    var checkedStateValue = this.state.checked;
+                    var fieldValue =
+                        this.props.utils.getObjectPropertyByStringFn(
+                            this.props.row,
+                            e.detail.targetCheckboxes.key
+                        );
+                    if (fieldValue && fieldValue === e.detail.targetCheckboxes.value) {
+                        checkedStateValue = e.detail.checked;
+                    }
+                    this.setState({
+                        checked: checkedStateValue
+                    });
+                    this.props.handleToggle(e, checkedStateValue);
+                } else { // Target all rows
+                    this.setState({
+                        checked: e.detail.checked
+                    });
+                    this.props.handleToggle(e, e.detail.checked);
+                }
             }
         },
         componentWillReceiveProps: function(nextProps) {
             var disableCheckboxField = nextProps.options.disableCheckboxField;
-            var disableCheckboxFieldValue = nextProps.options.getObjectPropertyByStringFn(nextProps.row, disableCheckboxField);
+            var disableCheckboxFieldValue = nextProps.utils.getObjectPropertyByStringFn(nextProps.row, disableCheckboxField);
             this.setState({
                 checked: (nextProps.selectionTarget.indexOf(nextProps.row) === -1) ? false : true,
                 disabled: disableCheckboxFieldValue ? disableCheckboxFieldValue : false
