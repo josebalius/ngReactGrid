@@ -203,7 +203,7 @@ NgReactGrid.prototype.setupUpdateEvents = function () {
  * Initializes the scope watchers needed for the grid
  */
 NgReactGrid.prototype.initWatchers = function () {
-    this.scope.$watch("grid.data", function (newValue, oldValue) {
+    this.scope.$watchCollection("grid.data", function (newValue, oldValue) {
         if (newValue !== oldValue) {
             if (this.isServerMode() && this.react.loading) {
                 this.react.loading = false;
@@ -215,7 +215,7 @@ NgReactGrid.prototype.initWatchers = function () {
         }
     }.bind(this));
 
-    this.scope.$watch("grid.columnDefs", function (newValue, oldValue) {
+    this.scope.$watchCollection("grid.columnDefs", function (newValue, oldValue) {
         if (newValue !== oldValue) {
             this.update(this.events.COLUMN_DEF, {
                 // Resets column filter fields
