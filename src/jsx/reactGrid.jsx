@@ -19,12 +19,8 @@ var NgReactGridComponent = (function() {
     };
 
     var setCellWidth = function(grid, cell, cellStyle, isLast, bodyCell) {
-
-        if(!cell.width) {
-            cell.width = "10%";
-        }
-
         if(grid.horizontalScroll) {
+            if(!cell.width) {cell.width = "10%";}
             setCellWidthPixels(cell);
         }
 
@@ -40,13 +36,17 @@ var NgReactGridComponent = (function() {
 
         var NgGridColumnFilterCell = React.createClass({
             handleSearchInputChange: function() {
-              this.props.onSearchInput(this.refs[this.props.cell.field].getDOMNode().value,
-                                       this.props.cell.field);
+                this.props.onSearchInput(this.refs[this.props.cell.field].getDOMNode().value,
+                                         this.props.cell.field);
             },
+            cellStyle: {textOverflow: "ellipsis",
+                        boxSizing: "border-box",
+                        width: "100%"},
             render: function() {
                 return (
                     <th title={this.props.cell.field + " Search"}>
                         <input type="text"
+                            style={this.cellStyle}
                             placeholder={"Filter " + this.props.cell.displayName}
                             ref={this.props.cell.field}
                             onKeyUp={this.handleSearchInputChange} />
@@ -334,7 +334,7 @@ var NgReactGridComponent = (function() {
                     cellStyle.textOverflow = "ellipsis";
                     cellStyle.whiteSpace = "nowrap";
                 }
-                
+
                 if (cellText === null || typeof cellText == 'undefined') {
                     cellText = '';
                 }

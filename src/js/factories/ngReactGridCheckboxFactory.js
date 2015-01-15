@@ -9,7 +9,8 @@ var ngReactGridCheckboxFactory = function($rootScope) {
             batchToggle: false,
             headerStyle: {
                 textAlign: "center"
-            }
+            },
+            width: '2%'
         };
         var _options = _.extend({}, defaultOptions, options);
         var utils = {
@@ -61,7 +62,7 @@ var ngReactGridCheckboxFactory = function($rootScope) {
                 return ngReactGridCheckboxElement({selectionTarget: selectionTarget, handleToggle: handleToggle, row: row, utils: this.utils, options: this.options});;
             },
             sort: false,
-            width: 1
+            width: _options.width
         }
     };
 
