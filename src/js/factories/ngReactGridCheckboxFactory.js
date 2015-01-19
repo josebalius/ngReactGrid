@@ -45,7 +45,7 @@ var ngReactGridCheckboxFactory = function($rootScope) {
                 });
             },
             render: function(row) {
-                var handleToggle = (function(e, checkedValue) {
+                var handleToggle = (function(e, checkedState) {
                     e.stopPropagation();
 
                     // Sends event to uncheck header 'batch toggle' checkbox
@@ -53,9 +53,9 @@ var ngReactGridCheckboxFactory = function($rootScope) {
 
                     var index = selectionTarget.indexOf(row);
                     if(index === -1) {
-                        if (checkedValue) {selectionTarget.push(row);}
+                        if (checkedState) {selectionTarget.push(row);}
                     } else {
-                        if (!checkedValue) {selectionTarget.splice(index, 1);}
+                        if (!checkedState) {selectionTarget.splice(index, 1);}
                     }
                 }).bind(this);
                 var ngReactGridCheckboxElement = React.createFactory(NgReactGridCheckboxComponent);
