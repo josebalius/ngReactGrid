@@ -179,7 +179,7 @@ var NgReactGridComponent = (function() {
                 };
 
                 return (
-                    <th title={this.props.cell.displayName} onClick={this.handleClick} style={cellStyle}>
+                    <th title={this.props.cell.displayName} onClick={this.handleClick} style={cellStyle} className={this.props.cell.cssClass}>
                         <div className="ngGridHeaderCellText">
                             {this.props.cell.displayName}
                         </div>
