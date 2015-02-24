@@ -127,13 +127,13 @@
                  getData: function () {
                  var grid = this;
                  $timeout(function () {
-                 if (grid.search) {
-                 $scope.grid.data = [];
-                 } else {
-                 $scope.grid.data = dataSet.slice((grid.currentPage - 1) * grid.pageSize, (grid.pageSize * grid.currentPage));
-                 }
-                 $scope.grid.totalCount = dataSet.length;
-                 }, 2000);
+					 if (grid.search) {
+						$scope.grid.data = [];
+					 } else {
+						$scope.grid.data = dataSet.slice((grid.currentPage - 1) * grid.pageSize, (grid.pageSize * grid.currentPage));
+					 }
+					 $scope.grid.totalCount = dataSet.length;
+					 }, 2000);
                  }
                  };
             });
