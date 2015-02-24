@@ -8,6 +8,7 @@
 <div ng-controller="BasicExampleController" style="width: 100%">
     <ng-react-grid grid="grid"></ng-react-grid>
     <button type="button" ng-click="toggleVisibleCheckboxes()">Toggle Visible Checkboxes</button>
+	<button type="button" ng-click="reloadData()">ReloadData</button>
     <button type="button" ng-click="edit()" ng-show="!isEditing()">Edit Grid</button>
     <button type="button" ng-click="save()" ng-show="isEditing()">Save Grid</button>
     <button type="button" ng-click="cancel()" ng-show="isEditing()">Cancel</button>
@@ -46,6 +47,10 @@
                     checkboxState = !checkboxState;
                     checkboxGrid.setVisibleCheckboxState(checkboxState);
                 };
+				
+				$scope.reloadData = function() {
+					$scope.grid.refresh();
+				};
 
                 $scope.edit = function () {
                     $scope.grid.edit();
@@ -82,7 +87,7 @@
                         disableCheckbox: isOddRow(index)
                     };
                 });
-
+/*
                 $scope.grid = {
                     data: dataSet,
                     columnDefs: [
@@ -102,8 +107,8 @@
                         }
                     ]
                 };
-
-                /*$scope.grid = {
+*/
+                $scope.grid = {
                  data: [],
                  columnDefs: [
                  {
@@ -117,7 +122,7 @@
                  ],
                  /*rowClick: function(row) {
                  console.debug(row);
-                 },
+                 },*/
                  localMode: false,
                  getData: function () {
                  var grid = this;
@@ -130,7 +135,7 @@
                  $scope.grid.totalCount = dataSet.length;
                  }, 2000);
                  }
-                 };*/
+                 };
             });
 
 </script>
