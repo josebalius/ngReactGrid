@@ -1,6 +1,9 @@
 ngReactGrid
 ===========
 
+NOTE: Active development of this project has stopped. All new development is being done on the https://github.com/josebalius/react-grid project which will contain most of ngReactGrid's functionality with adapters for Angular 1.x, 2.x and KnockoutJS.
+
+
 ngReactGrid is an Angular directive that can be used to render an enhanced HTML table or grid of data very fast using React as the rendering engine. 
 
 The API of the grid is similar to that of ng-grid's, and the table architecture (3 tables per grid) is similar to that of jQuery DataTables.
