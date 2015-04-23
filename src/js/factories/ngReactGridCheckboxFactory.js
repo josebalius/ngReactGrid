@@ -61,7 +61,7 @@ var ngReactGridCheckboxFactory = function($rootScope) {
                 return ngReactGridCheckboxElement({selectionTarget: selectionTarget, handleToggle: handleToggle, row: row, utils: this.utils, options: this.options});;
             },
             sort: false,
-            width: 1
+            width: 20
         }
     };
 
