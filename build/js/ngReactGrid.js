@@ -19,12 +19,8 @@ var NgReactGridComponent = (function() {
     };
 
     var setCellWidth = function(grid, cell, cellStyle, isLast, bodyCell) {
-
-        if(!cell.width) {
-            cell.width = "10%";
-        }
-
         if(grid.horizontalScroll) {
+            if(!cell.width) {cell.width = "10%";}
             setCellWidthPixels(cell);
         }
 
@@ -40,13 +36,17 @@ var NgReactGridComponent = (function() {
 
         var NgGridColumnFilterCell = React.createClass({displayName: 'NgGridColumnFilterCell',
             handleSearchInputChange: function() {
-              this.props.onSearchInput(this.refs[this.props.cell.field].getDOMNode().value,
-                                       this.props.cell.field);
+                this.props.onSearchInput(this.refs[this.props.cell.field].getDOMNode().value,
+                                         this.props.cell.field);
             },
+            cellStyle: {textOverflow: "ellipsis",
+                        boxSizing: "border-box",
+                        width: "100%"},
             render: function() {
                 return (
                     React.createElement("th", {title: this.props.cell.field + " Search"}, 
                         React.createElement("input", {type: "text", 
+                            style: this.cellStyle, 
                             placeholder: "Filter " + this.props.cell.displayName, 
                             ref: this.props.cell.field, 
                             onKeyUp: this.handleSearchInputChange})
@@ -334,7 +334,7 @@ var NgReactGridComponent = (function() {
                     cellStyle.textOverflow = "ellipsis";
                     cellStyle.whiteSpace = "nowrap";
                 }
-                
+
                 if (cellText === null || typeof cellText == 'undefined') {
                     cellText = '';
                 }
@@ -606,6 +606,9 @@ var NgReactGridComponent = (function() {
 })();
 
 var NgReactGridCheckboxComponent = (function() {
+    // Class appended to table row whose checkbox cell value is true
+    var SELECTED_ROW_CLASS = "selected";
+
     var NgReactGridCheckboxComponent = React.createClass({displayName: 'NgReactGridCheckboxComponent',
         getInitialState: function() {
             var disableCheckboxField = this.props.options.disableCheckboxField;
@@ -615,31 +618,35 @@ var NgReactGridCheckboxComponent = (function() {
                 disabled: disableCheckboxFieldValue ? disableCheckboxFieldValue : false
             }
         },
+        setSelectedRowClass: function(checkedState) {
+            var rowNode = this.getDOMNode().parentNode.parentNode;
+            rowNode.classList.toggle(SELECTED_ROW_CLASS, checkedState);
+        },
 
         handleClick: function(e) {
-            var checkedStateValue = this.state.checked ? false : true;
+            var checkedState = !this.state.checked;
             this.setState({
-                checked: checkedStateValue
+                checked: checkedState
             });
-            this.props.handleToggle(e, checkedStateValue);
+            this.props.handleToggle(e, checkedState);
         },
         setNgReactGridCheckboxStateFromEvent: function(e) {
             if (!this.state.disabled) {
                  // Target rows with specified field value
                 if (e.detail.targetCheckboxes.key) {
-                    var checkedStateValue = this.state.checked;
+                    var checkedState = this.state.checked;
                     var fieldValue =
                         this.props.utils.getObjectPropertyByStringFn(
                             this.props.row,
                             e.detail.targetCheckboxes.key
                         );
                     if (fieldValue && fieldValue === e.detail.targetCheckboxes.value) {
-                        checkedStateValue = e.detail.checked;
+                        checkedState = e.detail.checked;
                     }
                     this.setState({
-                        checked: checkedStateValue
+                        checked: checkedState
                     });
-                    this.props.handleToggle(e, checkedStateValue);
+                    this.props.handleToggle(e, checkedState);
                 } else { // Target all rows
                     this.setState({
                         checked: e.detail.checked
@@ -657,10 +664,14 @@ var NgReactGridCheckboxComponent = (function() {
             });
         },
         componentDidMount: function() {
+            this.setSelectedRowClass(this.state.checked);
             window.addEventListener("setNgReactGridCheckboxStateFromEvent", this.setNgReactGridCheckboxStateFromEvent);
         },
         componentWillUnmount: function() {
             window.removeEventListener("setNgReactGridCheckboxStateFromEvent", this.setNgReactGridCheckboxStateFromEvent);
+        },
+        componentWillUpdate: function(_nextProps, nextState) {
+          this.setSelectedRowClass(nextState.checked);
         },
         render: function() {
             var hideDisabledCheckboxField = this.props.options.hideDisabledCheckboxField;
@@ -1009,7 +1020,7 @@ NgReactGrid.prototype.setupUpdateEvents = function () {
  * Initializes the scope watchers needed for the grid
  */
 NgReactGrid.prototype.initWatchers = function () {
-    this.scope.$watch("grid.data", function (newValue, oldValue) {
+    this.scope.$watchCollection("grid.data", function (newValue, oldValue) {
         if (newValue !== oldValue) {
             if (this.isServerMode() && this.react.loading) {
                 this.react.loading = false;
@@ -1021,7 +1032,7 @@ NgReactGrid.prototype.initWatchers = function () {
         }
     }.bind(this));
 
-    this.scope.$watch("grid.columnDefs", function (newValue, oldValue) {
+    this.scope.$watchCollection("grid.columnDefs", function (newValue, oldValue) {
         if (newValue !== oldValue) {
             this.update(this.events.COLUMN_DEF, {
                 // Resets column filter fields
@@ -1718,7 +1729,8 @@ var ngReactGridCheckboxFactory = function($rootScope) {
             batchToggle: false,
             headerStyle: {
                 textAlign: "center"
-            }
+            },
+            width: '2%'
         };
         var _options = _.extend({}, defaultOptions, options);
         var utils = {
@@ -1753,7 +1765,7 @@ var ngReactGridCheckboxFactory = function($rootScope) {
                 });
             },
             render: function(row) {
-                var handleToggle = (function(e, checkedValue) {
+                var handleToggle = (function(e, checkedState) {
                     e.stopPropagation();
 
                     // Sends event to uncheck header 'batch toggle' checkbox
@@ -1761,16 +1773,16 @@ var ngReactGridCheckboxFactory = function($rootScope) {
 
                     var index = selectionTarget.indexOf(row);
                     if(index === -1) {
-                        if (checkedValue) {selectionTarget.push(row);}
+                        if (checkedState) {selectionTarget.push(row);}
                     } else {
-                        if (!checkedValue) {selectionTarget.splice(index, 1);}
+                        if (!checkedState) {selectionTarget.splice(index, 1);}
                     }
                 }).bind(this);
                 var ngReactGridCheckboxElement = React.createFactory(NgReactGridCheckboxComponent);
                 return ngReactGridCheckboxElement({selectionTarget: selectionTarget, handleToggle: handleToggle, row: row, utils: this.utils, options: this.options});;
             },
             sort: false,
-            width: 1
+            width: _options.width
         }
     };
 
